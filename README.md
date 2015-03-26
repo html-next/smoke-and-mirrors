@@ -1,25 +1,102 @@
-# Smoke-and-mirrors
+Smoke-and-mirrors
+=================
 
-This README outlines the details of collaborating on this Ember addon.
+Sometimes being "ambitious" gets you in trouble.  When it does, `Smoke-and-mirrors` is here
+to put out your `Ember` fire.
 
-## Installation
+`Smoke-and-mirrors` is an `ember-cli-addon` that brings performance minded `views`, `mixins`,
+and `components` together to help you deliver your ambitions.
 
-* `git clone` this repository
-* `npm install`
-* `bower install`
+##Core concepts
 
-## Running
+- View Caching
+- DOM Caching
+- DOM recycling
+- Occlusion culling (cloaking)
+- Dimension Caching
+- Pre-rendering
+- Parallelism
+- LocalStorage
 
-* `ember server`
-* Visit your app at http://localhost:4200.
+##Features
+Y - A smarter `infinite-scroll`
+~ - A routeable off-canvas component with `liquid-fire`-esque transitions
+N - A cacheable mixin for views and components
+N - A fastboot mixin for views and components
+~ - View and Component pre-rendering (including for routes)
+~ - A Magic Collection View
+- (planned) A LocalStorageDB and tools
+- (planned) A WebSocket interface and tools
+- (planned) A WebWorker interface and tools
 
-## Running Tests
+##Ember and Performance
 
-* `ember test`
-* `ember test --server`
+**Q: Aren't *Glimmer* and *Fastboot* coming?  Don't they solve all our performance problems?**
 
-## Building
+**A: No**
 
-* `ember build`
+Both of these enhancements push Ember into a new, performance rich future.  Sometimes though,
+this isn't enough.  This library is here for you when it's not, and honestly, many features
+here should only be utilized only *when* it's not, and no sooner.
 
-For more information on using ember-cli, visit [http://www.ember-cli.com/](http://www.ember-cli.com/).
+##Optimization Guide
+
+There is no substitute to a well implemented algorithm.
+
+If optimization is important to you, you should optimize your existing code base before using
+these features.  Making sure your code base is optimized in other critical ways will ensure you
+aren't optimizing something you don't need to be.
+
+### Use `Ember.run.schedule`
+
+Don't rely on `setTimeout` or `setInterval` anywhere.  Ember uses `backburner`, an amazing callback
+manager library they build just to ensure that asynchronous code is executed in an efficient and orderly
+manner.  Animations and rendering both suffer when asynchronous callbacks execute in the middle of
+their cycle.  If your animations are choppy, or if views render "in parts", you likely need to
+re-evaluate the order of operations of your asynchronous code.  The worst thing that can happen to
+you is for garbage collection to fire off mid-render, completely freezing your app for a lengthy and
+noticeable series of frames.
+
+`Ember.run.schedule` lets you specify exactly where in the order of operations your callback needs to be.
+If you can do it on a `schedule`, don't do it `later`.
+
+### Do not use jQuery animate.
+
+Use pure CSS Animations or `Velocity.js` backed Animations. Do not use jQuery to animate.  jQuery's animation
+mechanism is poorly optimized and will lead to scheduling conflicts.
+
+### Be cautious with GPU acceleration
+
+Acceleration is great for boosting the last little bit to get 60fps.  Accelerate everything though and you
+overload the GPU and end up using hard storage to finish off the process.  You would have been much better
+off using the CPU only.  Keeping your CSS orderly with clear notes of what/how/where acceleration is
+triggered is important for ensuring you don't bring your rendering and animation to a screaming halt.  This
+affects Android devices far worse and more often than iOS or desktop browsers.
+
+### `{{unbound my-prop}}`
+
+Unbind as much as you can.  Especially on complex views.
+
+### Cache Data
+
+Cache data to local storage.  `ember-orbit` is great.  If you are using `ember-data`, setup your adapter to
+look for a record in local storage before firing off that request.
+
+### Use WebWorkers
+
+You can get parallelism in your app using WebWorkers.  This library provides a few utilities for helping you
+get started using WebWorkers.  Best Places to consider using workers:
+
+- data munging, normalization, and serialization
+- WebSocket connections and XMLHttpRequests
+- Intensive computations
+
+You could even write most of your adapter to run in a web worker, from where it can access both localStorage
+and make requests as needed.
+
+### Background Load
+
+Instead of grabbing new data in a route's model hook, return `DS.Store.filter` or `DS.Store.all` and schedule
+a task in the background to load fresh data.  Combined with an adapter in web worker, this sort of background
+loading can really boost performance.
+
