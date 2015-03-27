@@ -37,15 +37,17 @@ N - A fastboot mixin for views and components
 
 Both of these enhancements push Ember into a new, performance rich future.  Sometimes though,
 this isn't enough.  This library is here for you when it's not, and honestly, many features
-here should only be utilized only *when* it's not, and no sooner.
+here should only be utilized *when* it's not, and no sooner.
 
 ##Optimization Guide
 
-There is no substitute to a well implemented algorithm.
+**The first rule of optimization:** There is no substitute to a well implemented algorithm.
 
-If optimization is important to you, you should optimize your existing code base before using
-these features.  Making sure your code base is optimized in other critical ways will ensure you
-aren't optimizing something you don't need to be.
+**The second rule of optimization:** Hit the low hanging fruit first.
+
+If performance matters to you, you should optimize your existing code before looking to these
+features as a magic fix.  Making sure your code base has been optimized in other critical but
+easily attainable ways will ensure you aren't using something you don't need to be.
 
 ### Use `Ember.run.schedule`
 
@@ -73,9 +75,24 @@ off using the CPU only.  Keeping your CSS orderly with clear notes of what/how/w
 triggered is important for ensuring you don't bring your rendering and animation to a screaming halt.  This
 affects Android devices far worse and more often than iOS or desktop browsers.
 
-### `{{unbound my-prop}}`
+### Careful how you update the underlying array passed to {{#each}}
+
+`{{#each}}` re-renders all of its content when the underlying array changes.  It re-renders only what's
+changed if the array's content changes.  Make sure you make changes to the array's content and don't
+just swap out the array.  If you've got a table of data that's updating quickly in real-time (perhaps like
+the table shown in fastboot), one solution is to reuse POJOs within that array instead of tearing them down.
+
+You'll find the `wrapForEach` helper is actually just converting objects to POJOs and reusing them as much
+as possible. (and `MagicCollectionView` may even do a better job of view and object reuse depending on scenario).
+
+
+### {{unbound my-prop}}
 
 Unbind as much as you can.  Especially on complex views.
+
+### Ember.computed.oneWay
+
+Unidirectional data flow doesn't just save you from yourself, in some situations it's much more performant.
 
 ### Cache Data
 
