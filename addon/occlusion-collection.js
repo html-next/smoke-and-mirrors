@@ -1,9 +1,10 @@
 import Ember from "ember";
+import MagicArrayMixin from "./magic-array-mixin";
 import OcclusionView from "./occlusion-view";
 import getTagDescendant from "./utils/get-tag-descendant";
 
 //TODO enable scroll position cacheing
-export default Ember.ContainerView.extend({
+export default Ember.ContainerView.extend(MagicArrayMixin, {
 
   /**!
    * The view to use for each item in the list
@@ -56,7 +57,7 @@ export default Ember.ContainerView.extend({
   _topVisible:    null,
   _bottomVisible: null,
 
-  containerSelector: null,
+  scrollSelector: null,
 
   /**!
    * Used when the bottom of infinite scroll is reached
@@ -73,8 +74,6 @@ export default Ember.ContainerView.extend({
   bottomReached: null,
   topReached: null,
 
-  childViews: [],
-
   init: function() {
 
     var itemViewClass = this.get('itemViewClass');
@@ -82,8 +81,8 @@ export default Ember.ContainerView.extend({
     var collectionTagName = (this.get('tagName') || '').toLowerCase();
     var itemTagName = this.get('itemTagName') || getTagDescendant(collectionTagName);
 
-    var keyForView = this.get('keyForView');
-    Ember.assert('You must supply a key for the view', keyForView);
+    var keyForId = this.get('keyForId');
+    Ember.assert('You must supply a key for the view', keyForId);
 
     this.set('itemViewClass', OcclusionView.extend({
 
@@ -92,7 +91,7 @@ export default Ember.ContainerView.extend({
       innerView: itemViewClass,
       defaultHeight: defaultHeight,
 
-      keyForView: keyForView,
+      keyForView: keyForId,
 
       context: this.get('context'),
 
@@ -106,8 +105,10 @@ export default Ember.ContainerView.extend({
   },
 
   _initViews: function() {
-    var content = this.get('content');
-    var childViews = this.get('childViews');
+
+    console.log('initializing views');
+
+    var content = this.get('magicArray');
     var viewClass = this.get('itemViewClass');
     var self = this;
     if (content) {
@@ -115,12 +116,20 @@ export default Ember.ContainerView.extend({
         self.pushObject(self.createChildView(viewClass, { content: item}));
       });
     }
+
+    console.log('content', this.get('content'));
+    console.log('magicArray', content);
+    console.log('childViews', this._childViews);
+
   },
 
   _window: null,
   _wrapper: null,
 
+  wrapperSelector: null,
   _initEdges: function () {
+
+    console.log('initializing edges');
 
     var wrapperSelector = this.get('wrapperSelector');
     var _wrapper = wrapperSelector ? Ember.$(wrapperSelector) : this.$().parent();
@@ -163,6 +172,8 @@ export default Ember.ContainerView.extend({
       cacheBottom: cacheBottom
     });
 
+    console.log('edges', this.get('_edges'));
+
   },
 
   /**
@@ -200,9 +211,6 @@ export default Ember.ContainerView.extend({
   },
 
 
-  // views which have
-  _content: [],
-
   // on scroll, determine view states
   _cycleViews: function () {
 
@@ -211,6 +219,13 @@ export default Ember.ContainerView.extend({
     var topViewIndex = this._findTopView(edges.cacheTop);
     var bottomViewIndex = topViewIndex;
     var lastIndex = childViews.length - 1;
+
+    console.log('topview index', topViewIndex);
+    if (!childViews[topViewIndex]) {
+      this._initViews();
+    }
+
+    console.log('childViews', childViews);
 
     // views to cull
     var toCull = [];
@@ -310,6 +325,8 @@ export default Ember.ContainerView.extend({
   _nextBatchUpdate: null,
   _updateViews: function (toShow) {
 
+    console.log('updating views', toShow);
+
     var updateBatchSize = this.get('updateBatchSize');
     var delay = this.get('cycleDelay');
     var processed = 0;
@@ -334,8 +351,9 @@ export default Ember.ContainerView.extend({
   },
 
 
-  setup: function() {
+  setup: Ember.on('didInsertElement', function() {
 
+    console.log('running setup');
     var id = this.get('elementId');
     var scrollDebounce = this.get('scrollDebounce');
     var scrollSelector = this.get('scrollSelector');
@@ -353,11 +371,10 @@ export default Ember.ContainerView.extend({
     $container.bind('scroll.occlusion-culling.' + id, onScrollMethod);
     $container.bind('touchmove.occlusion-culling.' + id, onScrollMethod);
     $container.bind('touchend.occlusion-culling.'+ id, onTouchEnd);
-    Ember.$(window).bind('resize.occlusion-culling.' + id, this._initEdges);
+    Ember.$(window).bind('resize.occlusion-culling.' + id, this._initEdges.bind(this));
 
     //schedule a rerender when the underlying content changes
-    //TODO smartly reshuffle content, dont teardown/rebuild
-    this.addObserver('content.@each', this, onScrollMethod);
+    this.addObserver('magicArray.@each', this, onScrollMethod);
 
     this._initEdges();
 
@@ -365,7 +382,7 @@ export default Ember.ContainerView.extend({
     //TODO does this using afterRender delay initial rendering too long?
     this._scheduleOcclusion();
 
-  }.on('didInsertElement'),
+  }),
 
 
   /**!
@@ -376,7 +393,7 @@ export default Ember.ContainerView.extend({
    * state in order to quickly reboot to the same
    * scroll position on relaunch.
    */
-  _cleanup: function() {
+  _cleanup: Ember.on('willDestroyElement', function() {
 
     //cleanup scroll
     var scrollSelector = this.get('scrollSelector');
@@ -410,7 +427,7 @@ export default Ember.ContainerView.extend({
     //tear down cached views and DOM
 
 
-  }.on('willDestroyElement')
+  })
 
 
 });

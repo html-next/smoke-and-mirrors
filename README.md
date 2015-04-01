@@ -13,29 +13,6 @@ to put out your `Ember` fire.
 `Smoke-and-mirrors` is an `ember-cli-addon` that brings performance minded `views`, `mixins`,
 and `components` together to help you deliver your ambitions.
 
-#### [Changelog](./CHANGELOG.md)
-
-#### [Roadmap](./ROADMAP.md)
-
-## Core concepts
-
-- View/DOM/attribute Caching
-- DOM recycling
-- Occlusion culling (cloaking)
-- Pre-rendering
-
-## Features
-
- - A smarter `infinite-scroll`
- - A routeable off-canvas component with `liquid-fire`-esque transitions
- - A cacheable mixin for views and components
- - A fastboot mixin for views and components
- - View and Component pre-rendering (including for routes)
- - A MagicArray proxy to make any collection re-render faster
- - A MagicCollectionMixin which reorganizes and recycles childViews created for the content of a MagicArray
-
-## Ember and Performance
-
 **Q: Aren't *Glimmer* and *Fastboot* coming?  Don't they solve all our performance problems?**
 
 **A: No**
@@ -48,10 +25,21 @@ The most common scenarios for needing to heavily optimize your components are ap
 for heavy long-life mobile use, infinite scrolling, and applications with routes that are entered
 and exited very often as part of a UX flow pattern.
 
-## Guides
+#### [Changelog](./CHANGELOG.md)
 
+#### [Roadmap](./ROADMAP.md)
+
+## Core concepts
+
+- View/DOM/attribute Caching
+- DOM recycling
+- Occlusion culling (cloaking)
+- Pre-rendering
+
+    
 - [Low hanging fruit: easy optimizations](./docs/optimization.md)
 - [Occlusion: what is it?](./docs/occlusion.md)
+- [Implementing Infinite Scroll](./docs/infinite-scroll.md)
 
 ## Documentation
 

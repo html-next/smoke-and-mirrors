@@ -44,8 +44,8 @@ The name of the view to use to render
 
 An array of content to render.  The array is proxied through `MagicArray` before being used on screen.
 If your content consists of Ember.Objects, the guid, is used to make `MagicArray` even faster. Alternatively,
-specify `keyForView`.  See the [docs for MagicArray](./magic-array.md) to learn more.  See below for more
-on `keyForView`.
+specify `keyForVId`.  See the [docs for MagicArray](./magic-array.md) to learn more.  See below for more
+on `keyForId`.
 
 This proxy behavior ensures that even should you do a full content swap, your performance doesn't suffer.
 Just how fast is this proxy?  I've implemented the [*Ryan Florence Performance Test*™](http://discuss.emberjs.com/t/ryan-florences-react-talk-does-not-make-ember-look-very-good/7223)
@@ -69,7 +69,7 @@ Just goes to show a good algorithm is always clutch ;)
 
 The `occlusion-collection` will [tag match](../addon/utils/get-tag-descendant.js) `occluded-view`.
 
-#### keyForView
+#### keyForId
 
 #### loadingView
 

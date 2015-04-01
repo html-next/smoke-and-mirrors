@@ -96,7 +96,9 @@ export default Ember.ContainerView.extend({
         if (this._bustcache) { return; }
         var element = this.element;
         if (element) {
-          element.parentNode.removeChild(element);
+          if (element.parentNode) {
+            element.parentNode.removeChild(element);
+          }
           this.__cachedElement = element;
           this.set('element', null);
         }

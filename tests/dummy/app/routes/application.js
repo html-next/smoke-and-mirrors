@@ -5,44 +5,20 @@ var TIMEOUT = 0;
 
 export default Ember.Route.extend({
   model: function() {
-    return {
-      databases: {}
-    };
+    return getData();
   },
 
   afterModel: function() {
-    this.loadSamples();
+    Ember.run.later(this.loadSamples.bind(this), TIMEOUT);
   },
 
   loadSamples: function() {
-    var model = this.modelFor('application');
-    var newData = getData();
-    var databaseArray = [];
 
-    Object.keys(newData.databases).forEach((dbname) => {
-      var sampleInfo = newData.databases[dbname];
-
-      if (!model.databases[dbname]) {
-        model.databases[dbname] = {
-          name: dbname,
-          samples: []
-        };
-      }
-
-      var samples = model.databases[dbname].samples;
-      samples.push({
-        time: newData.start_at,
-        queries: sampleInfo.queries
-      });
-      if (samples.length > 5) {
-        samples.splice(0, samples.length - 5);
-      }
-
-      databaseArray.push(model.databases[dbname]);
+    Ember.run.schedule('afterRender', this, function () {
+      this.controllerFor('application')
+        .set('model', getData());
     });
 
-    Ember.set(model, 'databaseArray', databaseArray);
-
-    setTimeout(this.loadSamples.bind(this), TIMEOUT);
+    Ember.run.later(this.loadSamples.bind(this), TIMEOUT);
   }
 });

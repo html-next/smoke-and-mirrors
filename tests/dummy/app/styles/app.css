@@ -11,7 +11,16 @@
 }
 
 .Query:hover .popover {
-  left: -100%;
-  width: 100%;
+  top: 10px;
+  left: -100px;
+  width: 200px;
   display: block;
+}
+
+.table-wrapper {
+  display: block;
+  height: 500px;
+  max-height: 500px;
+  overflow: scroll;
+  position: relative;
 }

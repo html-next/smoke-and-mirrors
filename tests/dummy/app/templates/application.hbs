@@ -1,10 +1,11 @@
 <h1>DBMON | Smoke And Mirrors</h1>
-<div>
-    <table class="table table-striped latest-data">
-        <tbody>
-        {{#each model.databaseArray key='name' as |db|}}
-          {{dbmon-database db=db}}
-        {{/each}}
-        </tbody>
-    </table>
-</div>
+
+<table class="table table-striped latest-data">
+  {{proxied-each
+    tagName="tbody"
+    itemViewClass="dbmon-database"
+    keyForId="id"
+    proxied=model.databases
+  }}
+</table>
+

@@ -1,0 +1,14 @@
+
+<td class="dbname">
+  {{view.content.id}}
+</td>
+<td class="query-count">
+  <span class="{{view.countClassName}}">
+    {{view.content.queries.length}}
+  </span>
+</td>
+
+{{proxied-each
+  proxied=view.topFiveQueries
+  itemViewClass="dbmon-row-cells"
+}}

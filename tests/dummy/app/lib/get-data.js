@@ -1,24 +1,28 @@
-var ROWS = 100;
+var ROWS = 10;
 
 export default function getData() {
+
   // generate some dummy data
   var data = {
     start_at: new Date().getTime() / 1000,
-    databases: {}
+    databases: []
   };
 
   for (var i = 1; i <= ROWS; i++) {
-    data.databases["cluster" + i] = {
-      queries: []
-    };
 
-    data.databases["cluster" + i + "slave"] = {
+    data.databases.push({
+      id: "cluster" + i,
       queries: []
-    };
+    });
+
+    data.databases.push({
+      id: "cluster" + i + "slave",
+      queries: []
+    });
+
   }
 
-  Object.keys(data.databases).forEach(function(dbname) {
-    var info = data.databases[dbname];
+  data.databases.forEach(function(info) {
 
     var r = Math.floor((Math.random() * 10) + 1);
     for (var i = 0; i < r; i++) {
