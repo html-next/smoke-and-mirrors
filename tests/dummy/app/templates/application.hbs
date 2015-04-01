@@ -1,3 +1,10 @@
-<h2 id="title">Welcome to Ember.js</h2>
-
-{{outlet}}
+<h1>DBMON | Smoke And Mirrors</h1>
+<div>
+    <table class="table table-striped latest-data">
+        <tbody>
+        {{#each model.databaseArray key='name' as |db|}}
+          {{dbmon-database db=db}}
+        {{/each}}
+        </tbody>
+    </table>
+</div>
