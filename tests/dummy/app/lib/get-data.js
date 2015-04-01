@@ -1,4 +1,4 @@
-var ROWS = 10;
+var ROWS = 100;
 
 export default function getData() {
 
