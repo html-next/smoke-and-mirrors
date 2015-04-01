@@ -1,33 +1,36 @@
 Smoke-and-mirrors
 =================
 
+[![npm version](https://badge.fury.io/js/smoke-and-mirrors.svg)](http://badge.fury.io/js/smoke-and-mirrors)
+[![Build Status](https://travis-ci.org/runspired/smoke-and-mirrors.svg?branch=master)](https://travis-ci.org/runspired/smoke-and-mirrors)
+[![Ember Observer Score](http://emberobserver.com/badges/smoke-and-mirrors.svg)](http://emberobserver.com/addons/smoke-and-mirrors)
+[![Circle CI](https://circleci.com/gh/runspired/smoke-and-mirrors/tree/master.svg?style=svg)](https://circleci.com/gh/runspired/smoke-and-mirrors/tree/master)
+
+
 Sometimes being "ambitious" gets you in trouble.  When it does, `Smoke-and-mirrors` is here
 to put out your `Ember` fire.
 
 `Smoke-and-mirrors` is an `ember-cli-addon` that brings performance minded `views`, `mixins`,
 and `components` together to help you deliver your ambitions.
 
+####[Changelog](./CHANGELOG.md)
+
+####[Roadmap](./ROADMAP.md)
+
 ##Core concepts
 
-- View Caching
-- DOM Caching
+- View/DOM/attribute Caching
 - DOM recycling
 - Occlusion culling (cloaking)
-- Dimension Caching
 - Pre-rendering
-- Parallelism
-- LocalStorage
 
 ##Features
-Y - A smarter `infinite-scroll`
-~ - A routeable off-canvas component with `liquid-fire`-esque transitions
-N - A cacheable mixin for views and components
-N - A fastboot mixin for views and components
-~ - View and Component pre-rendering (including for routes)
-~ - A Magic Collection View
-- (planned) A LocalStorageDB and tools
-- (planned) A WebSocket interface and tools
-- (planned) A WebWorker interface and tools
+ - A smarter `infinite-scroll`
+ - A routeable off-canvas component with `liquid-fire`-esque transitions
+ - A cacheable mixin for views and components
+ - A fastboot mixin for views and components
+ - View and Component pre-rendering (including for routes)
+ - A Magic Collection View
 
 ##Ember and Performance
 
