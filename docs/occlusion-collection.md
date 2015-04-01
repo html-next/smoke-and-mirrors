@@ -34,18 +34,13 @@ and how `smoke-and-mirrors` implements it.
 
 ## Options
 
-### (optional) tagName
+### Required
 
-`default: div`
-
-The `occlusion-collection` will [tag match](../addon/utils/get-tag-descendant.js) `occluded-view`.
-
-
-### itemViewClass
+#### itemViewClass
 
 The name of the view to use to render 
 
-### content
+#### content
 
 An array of content to render.  The array is proxied through `MagicArray` before being used on screen.
 If your content consists of Ember.Objects, the guid, is used to make `MagicArray` even faster. Alternatively,
@@ -59,11 +54,48 @@ Just how fast is this proxy?  I've implemented the [*Ryan Florence Performance T
 Is Ember fast yet? [It doesn't matter what this says](https://is-ember-fast-yet.firebaseapp.com/), the answer is YES.
 Just goes to show a good algorithm is always clutch ;)
 
-### keyForView
+#### defaultHeight
+
+#### containerSelector
 
 
+--------------------------------------------
 
-### (optional) useHiddenAttr
+### Optional
+
+#### tagName
+
+`default: div`
+
+The `occlusion-collection` will [tag match](../addon/utils/get-tag-descendant.js) `occluded-view`.
+
+#### keyForView
+
+#### loadingView
+
+#### fetchMore
+
+--------------------------------------------
+
+### Performance Tuning
+
+#### alwaysUseDefaultHeight
+
+#### scrollDebounce
+
+#### cycleDelay
+
+#### updateBatchSize
+
+#### visibleBuffer defauly 1
+
+#### invisibleBuffer default 1
+
+#### cacheBuffer default .5
+
+### Enabling CSS Animation
+
+#### useHiddenAttr
 
 `default: false`
 
@@ -73,3 +105,49 @@ attribute to the `occlusion-view`'s element when hiding or showing the element.
 Should you need access to a state for animations, setting `useHiddenAttr` to true
 will add the attribute `hidden` to the cloakedView when ever it's content is hidden, cached, or
 culled.
+
+--------------------------------------------
+
+### Initial State
+
+#### useLocalStorageCache
+
+#### _scrollPosition
+
+#### _topVisible
+
+#### _bottomVisible
+
+--------------------------------------------
+
+### Actions
+
+#### bottomVisibleChanged
+
+#### topVisibleChanged
+
+#### bottomReached
+
+#### topReached
+
+--------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
