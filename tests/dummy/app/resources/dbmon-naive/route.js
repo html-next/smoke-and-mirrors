@@ -5,7 +5,7 @@ var TIMEOUT = 0;
 
 export default Ember.Route.extend({
   model: function() {
-    var controller = this.controllerFor('dbmon-proxied-each');
+    var controller = this.controllerFor('dbmon-naive');
     return getData(controller.get('numRows'));
   },
 
@@ -16,7 +16,7 @@ export default Ember.Route.extend({
   loadSamples: function() {
 
     Ember.run.schedule('afterRender', this, function () {
-      var controller = this.controllerFor('dbmon-proxied-each');
+      var controller = this.controllerFor('dbmon-naive');
       controller
         .set('model', getData(controller.get('numRows')));
     });
