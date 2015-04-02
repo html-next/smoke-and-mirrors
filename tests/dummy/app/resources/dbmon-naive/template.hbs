@@ -1,0 +1,17 @@
+<h3>DBMon | Proxied Each</h3>
+<button {{action "addRow"}}>Add Row</button>
+<button {{action "removeRow"}}>Remove Row</button>
+<table class="table table-striped latest-data">
+  <tbody>
+    {{#each model.databases as |db|}}
+      {{view "dbmon-database-naive" content=db}}
+    {{/each}}
+  </tbody>
+  {{proxied-each
+    tagName="tbody"
+    itemViewClass="dbmon-database"
+    keyForId="id"
+    proxied=model.databases
+  }}
+</table>
+

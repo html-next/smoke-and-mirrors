@@ -6,6 +6,7 @@ var Router = Ember.Router.extend({
 });
 
 export default Router.map(function() {
+  this.route('dbmon-naive');
   this.route('dbmon-proxied-each');
   this.route('dbmon-occlusion-collection');
   this.route('infinite-scroll');
