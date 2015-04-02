@@ -6,7 +6,7 @@ module.exports = function(environment) {
     podModulePrefix: 'dummy/resources',
     environment: environment,
     baseURL: '/',
-    locationType: 'auto',
+    locationType: 'hash',
     EmberENV: {
       FEATURES: {},
       EXTEND_PROTOTYPES : true
