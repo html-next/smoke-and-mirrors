@@ -5,9 +5,19 @@
     a serious stress test.
 </p>
 <p>
-    All of the demos here are built using Ember 1.11.  There are NOT Glimmer'd.
+    All of the demos here are built using Ember 1.11.  These are NOT Glimmer'd.
 </p>
 <p>
-    Don't worry, the naive implementation will (probably) load.  It just might
-    take a long time.
+    The naive implementation uses nested "each" helpers. Don't worry, the naive
+    implementation will (probably) load.  It just might take a long time.
+</p>
+<p>
+    The proxied-each implementation uses the "proxied-each" component which prevents
+    views being needlessly torn down even when the underlying content array is
+    completely changed out.
+</p>
+<p>
+    The "occlusion-collection" implementation has the same underlying array behavior
+    as "proxied-each", but additionally intelligently hides, caches, or removes
+    rows depending upon how far off screen they are.
 </p>

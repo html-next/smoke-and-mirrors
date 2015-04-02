@@ -338,8 +338,25 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
   },
 
   //TODO add more code comments
+
+  _lastTopOffset: null,
   _scheduleOcclusion: function() {
+
     Ember.run.scheduleOnce('afterRender', this, this._cycleViews);
+
+    var scrollDebounce = this.get('scrollDebounce');
+    if (this.$()) {
+      this.set('_lastTopOffset', this.$().position().top);
+      Ember.run.debounce(this, this._detectMomentumScroll, scrollDebounce);
+    }
+  },
+
+  _detectMomentumScroll: function() {
+    var oldTop = this.get('_lastTopOffset');
+    var scrollDebounce = this.get('scrollDebounce');
+    if (oldTop !== this.$().position().top) {
+      Ember.run.throttle(this, this._scheduleOcclusion, scrollDebounce);
+    }
   },
 
 
@@ -351,17 +368,11 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
     var $container = scrollSelector ? Ember.$(scrollSelector) : this.$().parent();
 
     var onScrollMethod = function onScrollMethod () {
-      Ember.run.debounce(this, this._scheduleOcclusion, scrollDebounce);
-    }.bind(this);
-
-    //use to emit fake scroll events during momentum scrolling
-    var onTouchEnd = function onTouchEnd () {
-      //Ember.run.debounce(this, this._scheduleOcclusion, scrollDebounce);
+      Ember.run.throttle(this, this._scheduleOcclusion, scrollDebounce);
     }.bind(this);
 
     $container.bind('scroll.occlusion-culling.' + id, onScrollMethod);
     $container.bind('touchmove.occlusion-culling.' + id, onScrollMethod);
-    $container.bind('touchend.occlusion-culling.'+ id, onTouchEnd);
     Ember.$(window).bind('resize.occlusion-culling.' + id, this._initEdges.bind(this));
 
     //schedule a rerender when the underlying content changes
@@ -393,7 +404,6 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
 
     $container.unbind('scroll.occlusion-culling.' + id);
     $container.unbind('touchmove.occlusion-culling.' + id);
-    $container.unbind('touchend.occlusion-culling.'+ id);
     Ember.$(window).unbind('resize.occlusion-culling.' + id);
 
     //cache state
