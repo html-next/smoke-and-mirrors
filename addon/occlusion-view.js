@@ -81,13 +81,25 @@ export default Ember.ContainerView.extend({
       },
 
       __cacheHeight: function () {
+
         var parentView = this.get('parentView');
+
         if (!parentView.get('_height')) {
-          var height = this.$().height();
-          parentView.set('_height', height);
-          Ember.run.schedule('afterRender', parentView, function() {
-            this.element.style.height = height + 'px';
-          });
+
+          if (this.get('tagName') === '') {
+            var height = parentView.$().height();
+            parentView.set('_height', height);
+            Ember.run.schedule('afterRender', parentView, function() {
+              this.element.style.height = height + 'px';
+            });
+          } else {
+            var height = this.$().height();
+            parentView.set('_height', height);
+            Ember.run.schedule('afterRender', parentView, function() {
+              this.element.style.height = height + 'px';
+            });
+          }
+
         }
       }.on('didInsertElement'),
 
@@ -129,6 +141,8 @@ export default Ember.ContainerView.extend({
 
     //unhide
     instance.set('hidden', false);
+    var element = this.get('element');
+    element.style.visibility = 'visible';
 
   },
 
@@ -136,6 +150,8 @@ export default Ember.ContainerView.extend({
     var instance = this._childViews[0] || this.get('_cachedView');
     if (instance) {
       instance.set('hidden', true);
+      var element = this.get('element');
+      element.style.visibility = 'hidden';
     }
   },
 

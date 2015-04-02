@@ -24,3 +24,7 @@
   overflow: scroll;
   position: relative;
 }
+
+.table-wrapper table {
+  height: 500px;
+}

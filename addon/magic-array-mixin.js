@@ -6,69 +6,43 @@ import {
 
 export default Ember.Mixin.create({
 
-  content: null,
-
   keyForId: null,
-  __magicArray: null,
+  content: null,
+  proxied: null,
 
-  magicArray: Ember.computed('content', 'content.@each', function computeMagicArray() {
+  _updateProxy: Ember.observer('proxied', 'proxied.@each', function computeMagicArray() {
 
-    console.log('making magicArray');
-
-    var content = this.get('content');
+    var proxied = this.get('proxied');
     var key = this.get('keyForId');
-    var magicArray = this.get('__magicArray');
+    var content = this.get('content');
+
+    this.beginPropertyChanges();
 
     // create a new array object if we don't have one yet
-    if (!magicArray) {
+    if (proxied) {
 
-      console.log('initializing new magicarray');
-      var length = content ? content.length : 0;
-
-      magicArray = new Array(length);
-      this.set('__magicArray', magicArray);
-
-      if (content) {
-        content.forEach(function(item) {
-          magicArray.push(createProxiedItem(item, key));
-        });
-      }
-
-
-      // reuse the existing array of proxied items
-    } else {
-
-      console.log('reusing!');
-
-      if (content) {
-
-        content.forEach(function(item, index) {
-
-          var proxiedObject = magicArray[index];
-          if (proxiedObject) {
-            proxiedObject.set('content', item);
-            proxiedObject.__updateIndex();
-          } else {
-            magicArray.push(createProxiedItem(item, key));
-          }
-
-        });
-
-        while (content.length < magicArray.length) {
-          magicArray.pop();
+      proxied.forEach(function(item, index) {
+        var proxiedObject = content.objectAt(index);
+        if (proxiedObject) {
+          proxiedObject.set('content', item);
+          proxiedObject.__updateIndex();
+        } else {
+          content.addObject(createProxiedItem(item, key));
         }
 
-        //null the array
-      } else {
-        magicArray.length = 0;
-        //TODO probably need som GC here
-      }
+      });
 
     }
 
-    console.log('made magicArray', magicArray);
-    return magicArray;
-  }).readOnly()
+    var newLength = proxied ? proxied.length : 0;
+
+    while (newLength < content.length) {
+      content.removeAt(content.length - 1);
+    }
+
+    this.endPropertyChanges();
+
+  })
 
 
 });

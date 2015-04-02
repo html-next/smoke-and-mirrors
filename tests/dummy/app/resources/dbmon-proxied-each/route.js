@@ -1,11 +1,12 @@
 import Ember from 'ember';
-import getData from '../lib/get-data';
+import getData from '../../lib/get-data';
 
 var TIMEOUT = 0;
 
 export default Ember.Route.extend({
   model: function() {
-    return getData();
+    var controller = this.controllerFor('dbmon-proxied-each');
+    return getData(controller.get('numRows'));
   },
 
   afterModel: function() {
@@ -15,8 +16,9 @@ export default Ember.Route.extend({
   loadSamples: function() {
 
     Ember.run.schedule('afterRender', this, function () {
-      this.controllerFor('application')
-        .set('model', getData());
+      var controller = this.controllerFor('dbmon-proxied-each');
+      controller
+        .set('model', getData(controller.get('numRows')));
     });
 
     Ember.run.later(this.loadSamples.bind(this), TIMEOUT);

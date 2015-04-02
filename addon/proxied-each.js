@@ -1,5 +1,5 @@
 import Ember from "ember";
-import MagicArrayMixin from "./magic-array-mixin-reverse";
+import MagicArrayMixin from "./magic-array-mixin";
 
 export default Ember.CollectionView.extend(MagicArrayMixin, {
 

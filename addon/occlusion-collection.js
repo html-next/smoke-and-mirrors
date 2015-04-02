@@ -14,7 +14,8 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
    */
   itemViewClass: null,
   _occludedView: null,
-  content: null,
+  content: Ember.A(),
+  proxied: null,
 
   /**!
    * The amount of time to let pass before attempting to
@@ -73,6 +74,7 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
   topVisibleChanged: null,
   bottomReached: null,
   topReached: null,
+  itemTagName: '',
 
   init: function() {
 
@@ -80,6 +82,10 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
     var defaultHeight = parseInt(this.get('defaultHeight'), 10);
     var collectionTagName = (this.get('tagName') || '').toLowerCase();
     var itemTagName = this.get('itemTagName') || getTagDescendant(collectionTagName);
+
+    if (itemTagName === 'none') {
+      itemTagName = '';
+    }
 
     var keyForId = this.get('keyForId');
     Ember.assert('You must supply a key for the view', keyForId);
@@ -99,6 +105,7 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
 
     }));
 
+    this._updateProxy();
     this._super();
     this._initViews();
 
@@ -106,9 +113,7 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
 
   _initViews: function() {
 
-    console.log('initializing views');
-
-    var content = this.get('magicArray');
+    var content = this.get('content');
     var viewClass = this.get('itemViewClass');
     var self = this;
     if (content) {
@@ -117,10 +122,6 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
       });
     }
 
-    console.log('content', this.get('content'));
-    console.log('magicArray', content);
-    console.log('childViews', this._childViews);
-
   },
 
   _window: null,
@@ -128,8 +129,6 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
 
   wrapperSelector: null,
   _initEdges: function () {
-
-    console.log('initializing edges');
 
     var wrapperSelector = this.get('wrapperSelector');
     var _wrapper = wrapperSelector ? Ember.$(wrapperSelector) : this.$().parent();
@@ -171,8 +170,6 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
       invisibleBottom: invisibleBottom,
       cacheBottom: cacheBottom
     });
-
-    console.log('edges', this.get('_edges'));
 
   },
 
@@ -220,12 +217,9 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
     var bottomViewIndex = topViewIndex;
     var lastIndex = childViews.length - 1;
 
-    console.log('topview index', topViewIndex);
     if (!childViews[topViewIndex]) {
       this._initViews();
     }
-
-    console.log('childViews', childViews);
 
     // views to cull
     var toCull = [];
@@ -325,8 +319,6 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
   _nextBatchUpdate: null,
   _updateViews: function (toShow) {
 
-    console.log('updating views', toShow);
-
     var updateBatchSize = this.get('updateBatchSize');
     var delay = this.get('cycleDelay');
     var processed = 0;
@@ -353,7 +345,6 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
 
   setup: Ember.on('didInsertElement', function() {
 
-    console.log('running setup');
     var id = this.get('elementId');
     var scrollDebounce = this.get('scrollDebounce');
     var scrollSelector = this.get('scrollSelector');
@@ -374,7 +365,7 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
     Ember.$(window).bind('resize.occlusion-culling.' + id, this._initEdges.bind(this));
 
     //schedule a rerender when the underlying content changes
-    this.addObserver('magicArray.@each', this, onScrollMethod);
+    this.addObserver('content.@each', this, onScrollMethod);
 
     this._initEdges();
 

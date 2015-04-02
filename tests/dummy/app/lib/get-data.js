@@ -1,6 +1,8 @@
-var ROWS = 100;
+var DEFAULT_ROWS = 20;
 
-export default function getData() {
+export default function getData(ROWS) {
+
+  ROWS = ROWS || DEFAULT_ROWS;
 
   // generate some dummy data
   var data = {
