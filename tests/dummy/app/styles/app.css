@@ -28,3 +28,37 @@
 .table-wrapper table {
   height: 500px;
 }
+
+async-image {
+  display: inline-block;
+  margin: 0.5em;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #f0f0f0;
+}
+async-image > img {
+  display: none;
+  opacity: 0;
+  transition: 1s ease-in;
+  position: relative;
+  width: 96%;
+  height: 96%;
+  margin: 2%;
+}
+async-image.is-appending > img {
+  display: block;
+}
+async-image.is-loaded > img {
+  display: block;
+  opacity: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0%;
+}
+
+.image-slide {
+  width: 200px;
+  height: 200px;
+  position: relative;
+}

@@ -18,6 +18,17 @@ module.exports = function(environment) {
     }
   };
 
+  ENV.contentSecurityPolicy = {
+    'default-src': "'self'",
+    'script-src': "'self'",
+    'font-src': "'self'",
+    'connect-src': "'self'",
+    'img-src': "'self' http://lorempixel.com",
+    'style-src': "'self'",// 'unsafe-inline'
+    'media-src': "'self' http://lorempixel.com"
+  };
+
+
   if (environment === 'development') {
     // ENV.APP.LOG_RESOLVER = true;
     // ENV.APP.LOG_ACTIVE_GENERATION = true;

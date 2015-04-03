@@ -21,7 +21,7 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
    * The amount of time to let pass before attempting to
    * render again
    */
-  scrollDebounce: 10,
+  scrollDebounce: 16,
   cycleDelay: 25,
   updateBatchSize: 6,
 
@@ -170,6 +170,8 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
       invisibleBottom: invisibleBottom,
       cacheBottom: cacheBottom
     });
+
+    console.log('edges', this.get('_edges'));
 
   },
 

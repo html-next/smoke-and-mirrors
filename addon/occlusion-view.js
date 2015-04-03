@@ -6,7 +6,7 @@ var CachedViews = window.CachedViews;
 function teardownCachedView() {
 
   //allow view teardown
-  this._bustcache = true;
+  this.set('_bustcache', true);
 
   //remove from global cache
   delete CachedViews[this.elementId];
@@ -44,8 +44,18 @@ export default Ember.ContainerView.extend({
     var current = this._childViews[0];
     var cached = this.get('_cachedView');
 
-    if (current || cached) {
-      return current || cached;
+    // don't do anything, use the current view
+    if (current) { return current; }
+
+    // use the cached view if possible
+    if (cached) {
+      if (this._rehydrateFromView(cached)) {
+        return cached;
+      } else {
+        //TODO reuse view, and only rerender DOM
+        this.set('_cachedView', null);
+        teardownCachedView.call(cached);
+      }
     }
 
     var content = this.get('content');
@@ -67,20 +77,24 @@ export default Ember.ContainerView.extend({
       //rehydrate view
       createElement: function() {
 
-        if (this.element) { return this; }
+        console.log('Create Element', this.get('element'), this.get('__cachedElement'));
 
-        if (this.__cachedElement) {
-          this.element = this.__cachedElement;
+        if (this.get('element')) { return this; }
+
+        if (this.get('__cachedElement')) {
+          console.log('using cached element');
+          this.element = this.get('__cachedElement');
           return this;
         }
 
+        console.log('creating new element');
         this._didCreateElementWithoutMorph = true;
         this.constructor.renderer.renderTree(this);
 
         return this;
       },
 
-      __cacheHeight: function () {
+      __cacheHeight: Ember.on('didInsertElement', function () {
 
         var parentView = this.get('parentView');
 
@@ -101,20 +115,18 @@ export default Ember.ContainerView.extend({
           }
 
         }
-      }.on('didInsertElement'),
+      }),
 
       //prevent element teardown
-      __cacheElement: function () {
-        if (this._bustcache) { return; }
-        var element = this.element;
+      __cacheElement: Ember.on('willDestroyElement', function () {
+
+        if (this.get('_bustcache')) { return; }
+
+        var element = this.get('element');
         if (element) {
-          if (element.parentNode) {
-            element.parentNode.removeChild(element);
-          }
-          this.__cachedElement = element;
-          this.set('element', null);
+          this.set('__cachedElement', element);
         }
-      }.on('willDestroyElement'),
+      }),
 
 
       //prevent view destruction
@@ -129,49 +141,134 @@ export default Ember.ContainerView.extend({
     return view;
   },
 
+  _rehydrateFromView: function(view) {
+
+    var parentNode = this.get('element');
+    var child = view.get('__cachedElement');
+    if (!child) {
+      return false;
+    }
+    parentNode.appendChild(child);
+    return true;
+  },
+
+  viewState: 'unknown',
+
   show: function () {
+
+    //don't do unnecessary work
+    if (this.get('viewState') === 'visible') { return; }
 
     var instance = this._childViews[0];
 
     //ensure a view is constructed
-    if (!instance) {
-      instance = this.get('_cachedView') || this._prerender();
+    if (!instance && (instance = this._prerender())) {
       this.pushObject(instance);
     }
 
     //unhide
-    instance.set('hidden', false);
+    console.log('showing', instance);
+    instance.set('hidden', null);
     var element = this.get('element');
     element.style.visibility = 'visible';
+
+    this.set('viewState', 'visible');
 
   },
 
   hide: function () {
-    var instance = this._childViews[0] || this.get('_cachedView');
-    if (instance) {
+
+    //don't do unnecessary work
+    if (this.get('viewState') === 'hidden') { return; }
+
+    var instance = this._childViews[0];
+    var element = this.get('element');
+
+    // insert a cached instance
+    if (!instance && (instance = this._prerender())) {
+
+      // ensure we're hidden before insertion
+      console.log('inserting hidden cached view');
       instance.set('hidden', true);
-      var element = this.get('element');
       element.style.visibility = 'hidden';
+      this.set('viewState', 'hidden');
+
+      // insert
+      this.pushObject(instance);
+
+
+    // ensure we're hidden if we have an instance
+    } else if (instance && !instance.get('hidden')) {
+      console.log('hiding', instance);
+      instance.set('hidden', true);
+      element.style.visibility = 'hidden';
+      this.set('viewState', 'hidden');
     }
+
   },
 
   cache: function () {
+
+    //don't do unnecessary work
+    if (this.get('viewState') === 'cached') { return; }
+
     var instance = this._childViews[0];
+    var element = this.get('element');
+
+    // cache the existing instance as it leaves the viewable area
     if (instance) {
+      console.log('caching', instance);
       this.set('_cachedView', instance);
       this.removeObject(instance);
-    } else if (!this.get('_cachedView')) {
-      this.set('_cachedView', this._prerender());
+
+    // generate a new view instance to use next time
+    } else {
+
+      instance = this._prerender();
+      console.log('pre-caching', instance);
+      this.set('_cachedView', instance);
+
     }
+
+    // ensure we're hidden too
+    if (instance && !instance.get('hidden')) {
+      instance.set('hidden', true);
+      element.style.visibility = 'hidden';
+      this.set('viewState', 'cached');
+    }
+
   },
 
   cull: function () {
-    var instance = this._childViews[0] || this.get('_cachedView');
+
+    // don't do unnecessary work
+    if (this.get('viewState') === 'culled') { return; }
+
+    var instance = this._childViews[0];// || this.get('_cachedView');
+    var element = this.get('element');
+
+    // ensure hidden before teardown
+    element.style.visibility = 'hidden';
+
+    // remove instance from dom
     if (instance) {
-      this.set('_cachedView', null);
+
+      console.log('culling existing instance');
+
       this.removeObject(instance);
       teardownCachedView.call(instance);
+
+    // remove cached instance if applicable
+    } else if ((instance = this.get('_cachedView'))) {
+        console.log('culling cached instance');
+        teardownCachedView.call(instance);
     }
+
+
+    // null out
+    this.set('_cachedView', null);
+    this.set('viewState', 'culled');
+
   },
 
   willDestroy : function () {
