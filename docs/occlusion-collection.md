@@ -38,13 +38,15 @@ and how `smoke-and-mirrors` implements it.
 
 #### itemViewClass
 
-The name of the view to use to render 
+The view to use for each item in the `contentToProxy` array. 
+If you need dynamic item types, you can use a wrapper view to
+swap out the view based on the model.
 
-#### content
+#### contentToProxy
 
 An array of content to render.  The array is proxied through `MagicArray` before being used on screen.
 If your content consists of Ember.Objects, the guid, is used to make `MagicArray` even faster. Alternatively,
-specify `keyForVId`.  See the [docs for MagicArray](./magic-array.md) to learn more.  See below for more
+specify `keyForId`.  See the [docs for MagicArray](./magic-array.md) to learn more.  See below for more
 on `keyForId`.
 
 This proxy behavior ensures that even should you do a full content swap, your performance doesn't suffer.
@@ -56,7 +58,21 @@ Just goes to show a good algorithm is always clutch ;)
 
 #### defaultHeight
 
+`default: 75`
+
+This height is used to give the `OcclusionView`s height prior to their content being rendered.
+This height is replaced with the actual rendered height once content is rendered for the first time.
+
+If your content will always have the height specified by `defaultHeight`, you can improve performance
+by specifying `alwaysUseDefaultHeight: true`.
+
 #### containerSelector
+
+``
+
+#### scrollSelector
+
+#### containerHeight
 
 
 --------------------------------------------
@@ -67,19 +83,30 @@ Just goes to show a good algorithm is always clutch ;)
 
 `default: div`
 
-The `occlusion-collection` will [tag match](../addon/utils/get-tag-descendant.js) `occluded-view`.
+The `occlusion-collection` will [tag match](../addon/utils/get-tag-descendant.js) the `occluded-view`.
 
 #### keyForId
 
-#### loadingView
+The `keyForId` property improves performance when the underlying array is changed but most
+of the items remain the same.  It is used by the [MagicArrayMixin](./magic-array.md).
 
-#### fetchMore
+If `cacheListState` is true, it is also used to cache the rendered heights of content in the list.
+
+#### loadingViewClass
+
+
+
 
 --------------------------------------------
 
 ### Performance Tuning
 
 #### alwaysUseDefaultHeight
+
+`default: false`
+
+If `defaultHeight` will always be the actual height of a rendered view, set this to `true`
+to improve performance by avoiding unnecessary height getting/setting.
 
 #### scrollDebounce
 

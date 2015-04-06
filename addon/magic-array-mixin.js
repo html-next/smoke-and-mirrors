@@ -7,16 +7,23 @@ import {
 export default Ember.Mixin.create({
 
   keyForId: null,
-  content: null,
-  proxied: null,
+  contentToProxy: null,
+  __proxyContentTo: 'content',
 
-  _updateProxy: Ember.observer('proxied', 'proxied.@each', function computeMagicArray() {
+  _updateProxy: Ember.observer('proxied', 'proxied.@each', function computeProxiedArray() {
 
     console.log('updating proxy');
 
     var proxied = this.get('proxied');
     var key = this.get('keyForId');
-    var content = this.get('content');
+    var prop = this.get('__proxyContentTo');
+    var content;
+    if (!this.get(prop)) {
+      content = Ember.A();
+      this.set(prop, content);
+    } else {
+      content = this.get(prop);
+    }
 
     this.beginPropertyChanges();
 

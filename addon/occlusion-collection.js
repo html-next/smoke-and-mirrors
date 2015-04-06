@@ -6,6 +6,8 @@ import getTagDescendant from "./utils/get-tag-descendant";
 //TODO enable scroll position cacheing
 export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayMixin, {
 
+  //–––––––––––––– Required Settings
+
   /**!
    * The view to use for each item in the list
    * If you need dynamic item types, you can use
@@ -13,28 +15,118 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    * the model.
    */
   itemViewClass: null,
-  _occludedView: null,
-  content: Ember.A(),
-  proxied: null,
 
   /**!
-   * The amount of time to let pass before attempting to
-   * render again
+   * An array of content to render.  The array is proxied via the `MagicArrayMixin` before being used on screen.
+   * If your content consists of Ember.Objects, the guid, is used to make this proxying even faster. Alternatively,
+   * specify `keyForId`.  See the [docs for MagicArrayMixin](./magic-array.md) to learn more.  See below for more
+   * on `keyForId`.
+   *
+   * This proxy behavior ensures that even should you do a full content swap, your performance doesn't suffer.
+   * Just how fast is this proxy?  I've implemented the [*Ryan Florence Performance Test*™](http://discuss.emberjs.com/t/ryan-florences-react-talk-does-not-make-ember-look-very-good/7223)
+   * (aka [Glimmer Demo](https://dbmonster.firebaseapp.com/)) using [Ember 1.11.0 and `smoke-and-mirrors`](http://runspired.github.io/smoke-and-mirrors/#/dbmon-occlusion-collection).
+   *
+   * Is Ember fast yet? [It doesn't matter what this says](https://is-ember-fast-yet.firebaseapp.com/), the answer is YES.
+   * Just goes to show a good algorithm is always clutch ;)
    */
-  scrollDebounce: 16,
-  cycleDelay: 25,
-  updateBatchSize: 6,
-
-  _scrollPosition: 0,
+  contentToProxy: null,
 
   /**!
-   * caches the height of each item in the list
+   * This height is used to give the `OcclusionView`s height prior to their content being rendered.
+   * This height is replaced with the actual rendered height once content is rendered for the first time.
+   *
+   * If your content will always have the height specified by `defaultHeight`, you can improve performance
+   * by specifying `alwaysUseDefaultHeight: true`.
    */
-  _heightCache: {},
   defaultHeight: 75,
-  startItem: null,
 
-  viewportHeight: 0,
+
+  //–––––––––––––– Optional Settings
+
+  /**!
+   * A jQuery selector string that will select the element from
+   * which to calculate the viewable height and needed offsets.
+   *
+   * This element will also have `scroll`, and `touchmove`
+   * events added to it while the `occlusion-collection` component
+   * is `inDOM`.
+   *
+   * Usually this element will be the component's immediate parent element,
+   * if so, you can leave this null.
+   *
+   * The container height is calculated from this selector once.
+   * If you expect height to change, `containerHeight` is observed
+   * and triggers new view boundary calculations.
+   *
+   */
+  containerSelector: null,
+
+  /**!
+   * Set this if you need to dynamically change the height of the container
+   * (useful for viewport resizing on mobile apps when the keyboard is open).
+   *
+   * Changes to this property's value are observed and trigger new view boundary
+   * calculations.
+   */
+  containerHeight: null,
+
+  /**!
+   * Defaults to `div`.
+   *
+   * If itemTagName is blank or null, the `occlusion-collection` will [tag match](../addon/utils/get-tag-descendant.js)
+   * with the `occluded-view`.
+   */
+  tagName: 'div',
+
+  /**!
+   * Used if you want to explicitly set the tagName of `OccludedView`s
+   */
+  itemTagName: '',
+
+  /**!
+   * The `keyForId` property improves performance when the underlying array is changed but most
+   * of the items remain the same.  It is used by the [MagicArrayMixin](./magic-array.md).
+   *
+   * If `cacheListState` is true, it is also used to cache the rendered heights of content in the list
+   */
+  keyForId: null,
+
+  /**!
+   * The name of the view to render either above or below the existing content when
+   * more items are being loaded.  For more information about how and when this is
+   * used, see the `Actions` section below.
+   */
+  loadingViewClass: null,
+
+  //–––––––––––––– Performance Tuning
+
+  /**!
+   * If true, dynamic height calculations are skipped and
+   * `defaultHeight` is always used as the height of each
+   * `OccludedView`.
+   */
+  alwaysUseDefaultHeight: false,
+
+  /**!
+   * Time (in ms) between attempts at re-rendering during
+   * scrolling.  A new render every ~16ms preserves 60fps.
+   * Most re-renders with occlusion-culling have clocked well
+   * below 1ms.
+   */
+  scrollThrottle: 16,
+
+  /**!
+   * When scrolling, new on screen items are immediately handled.
+   * `cycleDelay` sets the amount of time to debounce before updating
+   * off screen items.
+   */
+  cycleDelay: 25,
+
+  /**!
+   * Sets how many items to update view state for at a time when updating
+   * offscreen items.
+   */
+  updateBatchSize: 6,
 
   /**!
    * how much extra room to keep visible on
@@ -55,78 +147,151 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    */
   cacheBuffer: .5,
 
-  _topVisible:    null,
-  _bottomVisible: null,
+  //–––––––––––––– Animations
+  /**!
+   * For performance reasons, by default the `occlusion-collection` does not add an extra class or
+   * attribute to the `OccludedView`'s element when hiding or showing the element.
+   *
+   * Should you need access to a state for using CSS animations, setting `useHiddenAttr` to true
+   * will add the attribute `hidden` to the cloakedView when ever it's content is hidden, cached, or
+   * culled.
+   */
+  useHiddenAttr: false,
 
-  scrollSelector: null,
+
+  //–––––––––––––– Initial State
 
   /**!
-   * Used when the bottom of infinite scroll is reached
-   * and more records will be loaded.
-   *
-   * This view is only utilized if the bottom or top is reached
-   * and willLoadRecords is true.
    *
    */
-  loadingView: null,
+  _scrollPosition: '',
 
-  bottomVisibleChanged: null,
-  topVisibleChanged: null,
+  /**!
+   *
+   */
+  _topVisible: '',
+
+  /**!
+   *
+   */
+  useLocalStorageCache: false,
+
+  //–––––––––––––– Actions
+
+  /**!
+   * Specify an action to fire when the bottom is reached.
+   *
+   * This action will only fire once per unique bottom, and
+   * is fired the moment the bottom-most element is visible, it does
+   * not need to be on screen yet.
+   *
+   * It will include the index and content of the item at the bottom,
+   * as well as a promise.
+   *
+   * ```
+   * {
+   *  index: 0,
+   *  item : {},
+   *  promise: fn
+   * }
+   * ```
+   *
+   * The promise should be resolved once any loading is complete, or
+   * rejected if loading has failed.
+   *
+   * Rejecting the promise leaves the loadingView in place for 5s and set's
+   * it's `loadingFailed` property to true.
+   *
+   */
   bottomReached: null,
+
+  /**!
+   * Specify an action to fire when the top is reached.
+   *
+   * This action will only fire once per unique top, and
+   * is fired the moment the top-most element is visible, it does
+   * not need to be on screen yet.
+   *
+   * It will include the index and content of the item at the top
+   * as well as a promise.
+   *
+   * ```
+   * {
+   *  index: 0,
+   *  item : {},
+   *  promise: fn
+   * }
+   * ```
+   *
+   * The promise should be resolved once any loading is complete, or
+   * rejected if loading has failed.
+   *
+   * Rejecting the promise leaves the loadingView in place for 5s and set's
+   * it's `loadingFailed` property to true.
+   *
+   */
   topReached: null,
-  itemTagName: '',
 
-  init: function() {
+  /**!
+   * Specify an action to fire when the top on-screen item
+   * changes.
+   *
+   * It will include the index and content of the item now visible.
+   */
+  topVisibleChanged: null,
 
-    var itemViewClass = this.get('itemViewClass');
-    var defaultHeight = parseInt(this.get('defaultHeight'), 10);
-    var collectionTagName = (this.get('tagName') || '').toLowerCase();
-    var itemTagName = this.get('itemTagName') || getTagDescendant(collectionTagName);
 
-    if (itemTagName === 'none') {
-      itemTagName = '';
-    }
+  //–––––––––––––– Private Internals
 
-    var keyForId = this.get('keyForId');
-    Ember.assert('You must supply a key for the view', keyForId);
 
-    this.set('itemViewClass', OcclusionView.extend({
+  /**!
+   * The content array of proxied content.
+   */
+  __content: Ember.A(),
 
-      classNames: [itemViewClass + '-occlusion', 'occluded-view'],
-      tagName : itemTagName,
-      innerView: itemViewClass,
-      defaultHeight: defaultHeight,
+  /**!
+   * The property to proxy `contentToProxy` to.
+   */
+  __proxyContentTo: '__content',
 
-      keyForView: keyForId,
+  /**!
+   * a cached jQuery reference to the container element
+   */
+  _container: null,
 
-      context: this.get('context'),
+  /**!
+   * caches the height of each item in the list
+   */
+  _heightCache: {},
 
-      itemController: this.get('itemController')
+  /**!
+   * cached Scheduled Task reference for cancelling
+   * and replacing the task.
+   */
+  _nextBatchUpdate: null,
 
-    }));
+  /**!
+   * Cached reference to the last bottom item used
+   * to notify `bottomReached` to prevent resending.
+   */
+  _lastBottomSent: null,
 
-    this._updateProxy();
-    this._super();
-    this._initViews();
+  /**!
+   * Cached reference to the last top item used
+   * to notify `topReached` to prevent resending.
+   */
+  _lastTopSent: null,
 
-  },
+  /**!
+   * Cached reference to the lastTopOffset used
+   * to detact scrolling and enable re-rendering
+   * during momentum scrolling
+   */
+  _lastTopOffset: null,
 
-  _initViews: function() {
 
-    // TODO detect if the array has been prepended
+  //–––––––––––––– Helper Functions
 
-    // TODO teardown unneeded views
-
-    var content = this.get('content');
-    var viewClass = this.get('itemViewClass');
-    var self = this;
-    if (content) {
-      content.forEach(function (item) {
-        self.pushObject(self.createChildView(viewClass, { content: item}));
-      });
-    }
-
-  },
 
   sendAction: function(name, context) {
     console.log('sendAction', name, context);
@@ -140,8 +305,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
     }
   },
 
-  _lastBottomSent: null,
-  _lastTopSent: null,
+
   sendActionOnce: function(name, context) {
     if (name === 'bottomReached' && this.get('_lastBottomSent') === context.item) {
       return;
@@ -158,54 +322,6 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
     this.sendAction(name, context);
   },
 
-  _window: null,
-  _wrapper: null,
-
-  wrapperSelector: null,
-  _initEdges: function () {
-
-    var wrapperSelector = this.get('wrapperSelector');
-    var _wrapper = wrapperSelector ? Ember.$(wrapperSelector) : this.$().parent();
-    var _window = Ember.$(window);
-    this.set('_wrapper', _wrapper);
-    this.set('_window', _window);
-
-    // segment heights
-    var viewportHeight = parseInt(this.get('viewportHeight'), 10) || _wrapper.height();
-    var _visibleBufferHeight = Math.round(viewportHeight * this.get('visibleBuffer'));
-    var _invisibleBufferHeight = Math.round(viewportHeight * this.get('invisibleBuffer'));
-    var _cacheBufferHeight = Math.round(viewportHeight * this.get('cacheBuffer'));
-
-    var _maxHeight = this.get('viewportHeight') ? this.$().height() : Ember.$('body').height();
-
-    // segment top break points
-    var viewportTop =_wrapper.position().top;
-    var visibleTop = viewportTop - _visibleBufferHeight;
-    var invisibleTop = visibleTop - _invisibleBufferHeight;
-    var cacheTop = invisibleTop - _cacheBufferHeight;
-
-    // segment bottom break points
-    var viewportBottom = viewportTop + viewportHeight;
-
-    // cap this break points to bottom
-    if (viewportBottom > _maxHeight) { viewportBottom = _maxHeight; }
-
-    var visibleBottom = viewportBottom + _visibleBufferHeight;
-    var invisibleBottom = visibleBottom + _invisibleBufferHeight;
-    var cacheBottom = invisibleBottom + _cacheBufferHeight;
-
-    this.set('_edges', {
-      cacheTop: cacheTop,
-      invisibleTop: invisibleTop,
-      visibleTop: visibleTop,
-      viewportTop: viewportTop,
-      viewportBottom: viewportBottom,
-      visibleBottom: visibleBottom,
-      invisibleBottom: invisibleBottom,
-      cacheBottom: cacheBottom
-    });
-
-  },
 
   /**
    Binary search for finding the topmost view on screen.
@@ -383,7 +499,6 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   },
 
   // update view states
-  _nextBatchUpdate: null,
   _updateViews: function (toShow) {
 
     var updateBatchSize = this.get('updateBatchSize');
@@ -404,47 +519,54 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
 
   },
 
-  //TODO add more code comments
-
-  _lastTopOffset: null,
   _scheduleOcclusion: function() {
 
     Ember.run.scheduleOnce('afterRender', this, this._cycleViews);
 
-    var scrollDebounce = this.get('scrollDebounce');
+    var scrollThrottle = this.get('scrollThrottle');
     if (this.$()) {
       this.set('_lastTopOffset', this.$().position().top);
-      Ember.run.debounce(this, this._detectMomentumScroll, scrollDebounce);
+      Ember.run.debounce(this, this._detectMomentumScroll, scrollThrottle);
     }
   },
 
   _detectMomentumScroll: function() {
     var oldTop = this.get('_lastTopOffset');
-    var scrollDebounce = this.get('scrollDebounce');
+    var scrollThrottle = this.get('scrollThrottle');
     if (oldTop !== this.$().position().top) {
-      Ember.run.throttle(this, this._scheduleOcclusion, scrollDebounce);
+      Ember.run.throttle(this, this._scheduleOcclusion, scrollThrottle);
     }
   },
 
 
+
+
+
+  //–––––––––––––– Setup/Teardown
+
   setup: Ember.on('didInsertElement', function() {
 
     var id = this.get('elementId');
-    var scrollDebounce = this.get('scrollDebounce');
-    var scrollSelector = this.get('scrollSelector');
-    var $container = scrollSelector ? Ember.$(scrollSelector) : this.$().parent();
+    var scrollThrottle = this.get('scrollThrottle');
+    var containerSelector = this.get('containerSelector');
+    var _container = containerSelector ? Ember.$(containerSelector) : this.$().parent();
+    this.set('_container', _container);
 
     var onScrollMethod = function onScrollMethod () {
-      Ember.run.throttle(this, this._scheduleOcclusion, scrollDebounce);
+      Ember.run.throttle(this, this._scheduleOcclusion, scrollThrottle);
     }.bind(this);
 
-    $container.bind('scroll.occlusion-culling.' + id, onScrollMethod);
-    $container.bind('touchmove.occlusion-culling.' + id, onScrollMethod);
+    _container.bind('scroll.occlusion-culling.' + id, onScrollMethod);
+    _container.bind('touchmove.occlusion-culling.' + id, onScrollMethod);
     Ember.$(window).bind('resize.occlusion-culling.' + id, this._initEdges.bind(this));
 
     //schedule a rerender when the underlying content changes
     this.addObserver('content.@each', this, this._initViews);
 
+    //redraw boundaries when containerHeight changes
+    this.addObserver('containerHeight', this, this._initEdges);
+
+    //draw initial boundaries
     this._initEdges();
 
     //schedule the initial render
@@ -465,12 +587,11 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   _cleanup: Ember.on('willDestroyElement', function() {
 
     //cleanup scroll
-    var scrollSelector = this.get('scrollSelector');
     var id = this.get('elementId');
-    var $container = scrollSelector ? Ember.$(scrollSelector) : this.$();
+    var _container = this.get('_container');
 
-    $container.unbind('scroll.occlusion-culling.' + id);
-    $container.unbind('touchmove.occlusion-culling.' + id);
+    _container.unbind('scroll.occlusion-culling.' + id);
+    _container.unbind('touchmove.occlusion-culling.' + id);
     Ember.$(window).unbind('resize.occlusion-culling.' + id);
 
     //cache state
@@ -495,7 +616,104 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
     //tear down cached views and DOM
 
 
-  })
+  }),
+
+
+  _initViews: function() {
+
+    // TODO detect if the array has been prepended
+
+    // TODO teardown unneeded views
+
+    var content = this.get('content');
+    var viewClass = this.get('itemViewClass');
+    var self = this;
+    if (content) {
+      content.forEach(function (item) {
+        self.pushObject(self.createChildView(viewClass, { content: item}));
+      });
+    }
+
+  },
+
+  _initEdges: function () {
+
+    var _container = this.get('_container');
+
+    // segment heights
+    var viewportHeight = parseInt(this.get('containerHeight'), 10) || _container.height();
+    var _visibleBufferHeight = Math.round(viewportHeight * this.get('visibleBuffer'));
+    var _invisibleBufferHeight = Math.round(viewportHeight * this.get('invisibleBuffer'));
+    var _cacheBufferHeight = Math.round(viewportHeight * this.get('cacheBuffer'));
+
+    var _maxHeight = this.get('containerHeight') ? this.$().height() : Ember.$('body').height();
+
+    // segment top break points
+    var viewportTop =_container.position().top;
+    var visibleTop = viewportTop - _visibleBufferHeight;
+    var invisibleTop = visibleTop - _invisibleBufferHeight;
+    var cacheTop = invisibleTop - _cacheBufferHeight;
+
+    // segment bottom break points
+    var viewportBottom = viewportTop + viewportHeight;
+
+    // cap this break points to bottom
+    if (viewportBottom > _maxHeight) { viewportBottom = _maxHeight; }
+
+    var visibleBottom = viewportBottom + _visibleBufferHeight;
+    var invisibleBottom = visibleBottom + _invisibleBufferHeight;
+    var cacheBottom = invisibleBottom + _cacheBufferHeight;
+
+    this.set('_edges', {
+      cacheTop: cacheTop,
+      invisibleTop: invisibleTop,
+      visibleTop: visibleTop,
+      viewportTop: viewportTop,
+      viewportBottom: viewportBottom,
+      visibleBottom: visibleBottom,
+      invisibleBottom: invisibleBottom,
+      cacheBottom: cacheBottom
+    });
+
+  },
+
+  /**!
+   *
+   */
+  init: function() {
+
+    var itemViewClass = this.get('itemViewClass');
+    var defaultHeight = parseInt(this.get('defaultHeight'), 10);
+    var collectionTagName = (this.get('tagName') || '').toLowerCase();
+    var itemTagName = this.get('itemTagName') || getTagDescendant(collectionTagName);
+
+    if (itemTagName === 'none') {
+      itemTagName = '';
+    }
+
+    var keyForId = this.get('keyForId');
+    Ember.assert('You must supply a key for the view', keyForId);
+
+    this.set('itemViewClass', OcclusionView.extend({
+
+      classNames: [itemViewClass + '-occlusion', 'occluded-view'],
+      tagName : itemTagName,
+      innerView: itemViewClass,
+      defaultHeight: defaultHeight,
+
+      keyForView: keyForId,
+
+      context: this.get('context'),
+
+      itemController: this.get('itemController')
+
+    }));
+
+    this._updateProxy();
+    this._super();
+    this._initViews();
+
+  }
 
 
 });
