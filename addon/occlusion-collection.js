@@ -4,7 +4,7 @@ import OcclusionView from "./occlusion-view";
 import getTagDescendant from "./utils/get-tag-descendant";
 
 //TODO enable scroll position cacheing
-export default Ember.ContainerView.extend(MagicArrayMixin, {
+export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayMixin, {
 
   /**!
    * The view to use for each item in the list
@@ -40,13 +40,13 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
    * how much extra room to keep visible on
    * either side of the visible area
    */
-  visibleBuffer: 1,
+  visibleBuffer: .5,
 
   /**!
    * how much extra room to keep in DOM but
    * with `visible:false` set.
    */
-  invisibleBuffer: 1,
+  invisibleBuffer: 1.5,
 
   /**!
    * sets how many views to cache in buffer
@@ -113,6 +113,10 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
 
   _initViews: function() {
 
+    // TODO detect if the array has been prepended
+
+    // TODO teardown unneeded views
+
     var content = this.get('content');
     var viewClass = this.get('itemViewClass');
     var self = this;
@@ -122,6 +126,36 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
       });
     }
 
+  },
+
+  sendAction: function(name, context) {
+    console.log('sendAction', name, context);
+    var action = this.get(name);
+    if (action) {
+      this.triggerAction({
+        action: action,
+        actionContext: context,
+        target: this.get('controller')
+      });
+    }
+  },
+
+  _lastBottomSent: null,
+  _lastTopSent: null,
+  sendActionOnce: function(name, context) {
+    if (name === 'bottomReached' && this.get('_lastBottomSent') === context.item) {
+      return;
+    }
+    if (name === 'topReached' && this.get('_lastTopSent') === context.item) {
+      return;
+    }
+    if (name === 'bottomReached') {
+      this.set('_lastBottomSent', context.item);
+    }
+    if (name === 'topReached') {
+      this.set('_lastTopSent', context.item);
+    }
+    this.sendAction(name, context);
   },
 
   _window: null,
@@ -171,8 +205,6 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
       cacheBottom: cacheBottom
     });
 
-    console.log('edges', this.get('_edges'));
-
   },
 
   /**
@@ -182,7 +214,7 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
    @param {Number} viewportTop The top of the viewport to search against
    @returns {Number} the index into childViews of the topmost view
    **/
-  _findTopView: function(viewportTop) {
+  _findTopView: function(viewportTop, adj) {
 
     var childViews = this._childViews;
     var maxIndex = childViews.length - 1;
@@ -197,7 +229,7 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
 
       // in case of not full-window scrolling
       var view = childViews[midIndex];
-      var viewBottom = view.$().position().top + view.get('_height');
+      var viewBottom = view.$().position().top + view.get('_height') + adj;
 
       if (viewBottom > viewportTop) {
         maxIndex = midIndex - 1;
@@ -215,7 +247,16 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
 
     var edges = this.get('_edges');
     var childViews = this._childViews;
-    var topViewIndex = this._findTopView(edges.cacheTop);
+
+    var currentViewportBound = edges.viewportTop + this.$().position().top;
+    var currentUpperBound = edges.cacheTop;
+
+    if (currentUpperBound < currentViewportBound) {
+      currentUpperBound = currentViewportBound;
+    }
+
+
+    var topViewIndex = this._findTopView(currentUpperBound, edges.viewportTop);
     var bottomViewIndex = topViewIndex;
     var lastIndex = childViews.length - 1;
 
@@ -266,15 +307,39 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
         //above the upper screen boundary
       } else if (viewBottom < edges.viewportTop) {
         toShow.push(view);
+        if (bottomViewIndex === 0) {
+          this.sendActionOnce('topReached', {
+            item: view.get('content'),
+            index: lastIndex
+          });
+        }
 
         //above the lower screen boundary
       } else if(viewTop < edges.viewportBottom) {
         toScreen.push(view);
         onscreen.push(view.get('content'));
+        if (bottomViewIndex === 0) {
+          this.sendActionOnce('topReached', {
+            item: view.get('content'),
+            index: lastIndex
+          });
+        }
+        if (bottomViewIndex === lastIndex) {
+          this.sendActionOnce('bottomReached', {
+            item: view.get('content'),
+            index: lastIndex
+          });
+        }
 
         //above the lower reveal boundary
       } else if (viewTop < edges.visibleBottom) {
         toShow.push(view);
+        if (bottomViewIndex === lastIndex) {
+          this.sendActionOnce('bottomReached', {
+            item: view.get('content'),
+            index: lastIndex
+          });
+        }
 
         //above the lower invisible boundary
       } else if (viewTop < edges.invisibleBottom) {
@@ -289,7 +354,7 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
       bottomViewIndex++;
     }
 
-    toCull = toCull.concat(childViews.slice(0, topViewIndex)).concat(childViews.slice(bottomViewIndex + 1));
+    toCull = toCull.concat(childViews.slice(0, topViewIndex)).concat(childViews.slice(bottomViewIndex));
 
     // cancel any previous update
     //TODO possibly redundant?
@@ -378,7 +443,7 @@ export default Ember.ContainerView.extend(MagicArrayMixin, {
     Ember.$(window).bind('resize.occlusion-culling.' + id, this._initEdges.bind(this));
 
     //schedule a rerender when the underlying content changes
-    this.addObserver('content.@each', this, onScrollMethod);
+    this.addObserver('content.@each', this, this._initViews);
 
     this._initEdges();
 

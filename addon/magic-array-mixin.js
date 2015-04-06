@@ -12,6 +12,8 @@ export default Ember.Mixin.create({
 
   _updateProxy: Ember.observer('proxied', 'proxied.@each', function computeMagicArray() {
 
+    console.log('updating proxy');
+
     var proxied = this.get('proxied');
     var key = this.get('keyForId');
     var content = this.get('content');

@@ -1,33 +1,20 @@
 import Ember from "ember";
-window.CachedViews = window.CachedViews || {};
-var CachedViews = window.CachedViews;
 
+var STATE_LIST = ['culled', 'cached', 'hidden', 'visible'];
 
-function teardownCachedView() {
+var STATE_TRANSITIONS_UP = [
+  { state: 'culled', method: '' },
+  { state: 'cached', method: '_ov_prepare' },
+  { state: 'hidden', method: '_ov_insert' },
+  { state: 'visible', method: '_ov_reveal' }
+];
 
-  //allow view teardown
-  this.set('_bustcache', true);
-
-  //remove from global cache
-  delete CachedViews[this.elementId];
-
-  //remove reference from controller
-  if (this.__keyForView) {
-    var viewCache = this.get('controller.__view');
-    if (viewCache && viewCache.hasOwnProperty(this.__keyForView)) {
-      delete viewCache[this.__keyForView];
-    }
-  } else {
-    this.set('controller.__view', null);
-  }
-
-  //teardown the view
-  this.destroy();
-
-}
-
-
-
+var STATE_TRANSITIONS_DOWN = [
+  { state: 'visible', method: '' },
+  { state: 'hidden', method: '_ov_obscure' },
+  { state: 'cached', method: '_ov_remove' },
+  { state: 'culled', method: '_ov_teardown' }
+];
 
 /**
  An occlusion view is one that intelligently removes
@@ -39,23 +26,77 @@ function teardownCachedView() {
  **/
 export default Ember.ContainerView.extend({
 
-  _prerender: function () {
+  classNameBindings: ['viewStateClass'],
+  viewState: 'culled',
 
-    var current = this._childViews[0];
-    var cached = this.get('_cachedView');
+  viewStateClass: function() {
+    return 'state-' + this.get('viewState');
+  }.property('viewState'),
 
-    // don't do anything, use the current view
-    if (current) { return current; }
+  show: function () {
+    this._setState('visible');
+  },
 
-    // use the cached view if possible
-    if (cached) {
-      if (this._rehydrateFromView(cached)) {
-        return cached;
-      } else {
-        //TODO reuse view, and only rerender DOM
-        this.set('_cachedView', null);
-        teardownCachedView.call(cached);
+  hide: function () {
+    this._setState('hidden');
+  },
+
+  cache: function () {
+    this._setState('cached');
+  },
+
+  cull: function () {
+    this._setState('culled');
+  },
+
+  willDestroy : function () {
+    this._ov_teardown();
+    this.set('viewState', 'culled');
+  },
+
+  _setState: function (toState) {
+
+    var fromState = this.get('viewState');
+    var currentState = fromState;
+
+    if (fromState === toState) {
+      return;
+    }
+
+    var transitionMap = STATE_LIST.indexOf(fromState) < STATE_LIST.indexOf(toState) ? STATE_TRANSITIONS_UP : STATE_TRANSITIONS_DOWN;
+    var i;
+
+    for (i = 0; i < transitionMap.length; i++) {
+      if (transitionMap[i].state === fromState) {
+        break;
       }
+    }
+    i++;
+
+    while (transitionMap[i] && currentState !== toState) {
+      if (transitionMap[i].method) {
+        this[transitionMap[i].method]();
+        currentState = transitionMap[i].state;
+      }
+      i++;
+    }
+
+    this.set('viewState', toState);
+  },
+
+  /**!
+   * Stage the View/Element for use
+   *
+   * @private
+   */
+  _ov_prepare: function() {
+
+    if (this._childViews[0]) {
+      throw "Attempted to prepare a View when one already existed.";
+    }
+
+    if (this._cachedView) {
+      throw "Attempted to prepare a View when a cached one already existed.";
     }
 
     var content = this.get('content');
@@ -65,7 +106,7 @@ export default Ember.ContainerView.extend({
     var viewFactory = container.lookupFactory(viewFullName);
     var keyForView = this.get('keyForView');
 
-    var view = viewFactory.extend({
+    this._cachedView = viewFactory.extend({
       content: content,
       controller: controller,
 
@@ -77,17 +118,13 @@ export default Ember.ContainerView.extend({
       //rehydrate view
       createElement: function() {
 
-        console.log('Create Element', this.get('element'), this.get('__cachedElement'));
-
         if (this.get('element')) { return this; }
 
         if (this.get('__cachedElement')) {
-          console.log('using cached element');
           this.element = this.get('__cachedElement');
           return this;
         }
 
-        console.log('creating new element');
         this._didCreateElementWithoutMorph = true;
         this.constructor.renderer.renderTree(this);
 
@@ -137,143 +174,108 @@ export default Ember.ContainerView.extend({
           this._super();
         }
       }
-    }).create();
-    return view;
-  },
-
-  _rehydrateFromView: function(view) {
-
-    var parentNode = this.get('element');
-    var child = view.get('__cachedElement');
-    if (!child) {
-      return false;
-    }
-    parentNode.appendChild(child);
-    return true;
-  },
-
-  viewState: 'unknown',
-
-  show: function () {
-
-    //don't do unnecessary work
-    if (this.get('viewState') === 'visible') { return; }
-
-    var instance = this._childViews[0];
-
-    //ensure a view is constructed
-    if (!instance && (instance = this._prerender())) {
-      this.pushObject(instance);
-    }
-
-    //unhide
-    console.log('showing', instance);
-    instance.set('hidden', null);
-    var element = this.get('element');
-    element.style.visibility = 'visible';
-
-    this.set('viewState', 'visible');
+    }).create({});
 
   },
 
-  hide: function () {
 
-    //don't do unnecessary work
-    if (this.get('viewState') === 'hidden') { return; }
+  /**!
+   * Destroy the View/Element
+   *
+   * Unlike the other methods, this method
+   * can be called from any state. It is stil not valid
+   * to transition to it directly, but willDestroy uses it
+   * to teardown the instance.
+   *
+   * @private
+   */
+  _ov_teardown: function() {
 
-    var instance = this._childViews[0];
-    var element = this.get('element');
-
-    // insert a cached instance
-    if (!instance && (instance = this._prerender())) {
-
-      // ensure we're hidden before insertion
-      console.log('inserting hidden cached view');
-      instance.set('hidden', true);
-      element.style.visibility = 'hidden';
-      this.set('viewState', 'hidden');
-
-      // insert
-      this.pushObject(instance);
-
-
-    // ensure we're hidden if we have an instance
-    } else if (instance && !instance.get('hidden')) {
-      console.log('hiding', instance);
-      instance.set('hidden', true);
-      element.style.visibility = 'hidden';
-      this.set('viewState', 'hidden');
-    }
-
-  },
-
-  cache: function () {
-
-    //don't do unnecessary work
-    if (this.get('viewState') === 'cached') { return; }
-
-    var instance = this._childViews[0];
-    var element = this.get('element');
-
-    // cache the existing instance as it leaves the viewable area
-    if (instance) {
-      console.log('caching', instance);
-      this.set('_cachedView', instance);
-      this.removeObject(instance);
-
-    // generate a new view instance to use next time
-    } else {
-
-      instance = this._prerender();
-      console.log('pre-caching', instance);
-      this.set('_cachedView', instance);
-
-    }
-
-    // ensure we're hidden too
-    if (instance && !instance.get('hidden')) {
-      instance.set('hidden', true);
-      element.style.visibility = 'hidden';
-      this.set('viewState', 'cached');
-    }
-
-  },
-
-  cull: function () {
-
-    // don't do unnecessary work
-    if (this.get('viewState') === 'culled') { return; }
-
-    var instance = this._childViews[0];// || this.get('_cachedView');
-    var element = this.get('element');
-
-    // ensure hidden before teardown
-    element.style.visibility = 'hidden';
+    var View = this._childViews[0];
 
     // remove instance from dom
-    if (instance) {
-
-      console.log('culling existing instance');
-
-      this.removeObject(instance);
-      teardownCachedView.call(instance);
-
-    // remove cached instance if applicable
-    } else if ((instance = this.get('_cachedView'))) {
-        console.log('culling cached instance');
-        teardownCachedView.call(instance);
+    if (View) {
+      this.removeObject(View);
     }
 
+    if (View || (View = this._cachedView)) {
+      // Teardown the child view
+      View.set('_bustCache', true);
+      View.destroy();
+    }
 
     // null out
-    this.set('_cachedView', null);
-    this.set('viewState', 'culled');
+    this._cachedView = null;
 
   },
 
-  willDestroy : function () {
-    this.cull();
+
+  /**!
+   * Remove the Element from the DOM
+   *
+   * @private
+   */
+  _ov_remove: function() {
+
+    var View = this._childViews[0];
+    this._cachedView = View;
+    this.removeObject(View);
+
   },
+
+
+  /**!
+   * Insert the Element into the DOM in a hidden state.
+   *
+   * @private
+   */
+  _ov_insert: function() {
+
+    var View = this._cachedView;
+    var parentNode = this.get('element');
+    var child = View.get('__cachedElement');
+
+    Ember.assert("A Cached View Exists", View);
+    //Ember.assert("The View Has A Cached Element", child);
+
+    if (child) {
+      parentNode.appendChild(child);
+    }
+    this.pushObject(View);
+    this._cachedView = null;
+
+  },
+
+
+  /**!
+   * Reveal the Element
+   *
+   * @private
+   */
+  _ov_reveal: function() {
+
+    var instance = this._childViews[0];
+    var element = this.element;
+    instance.set('hidden', false);
+    element.style.visibility = 'visible';
+
+  },
+
+
+  /**!
+   * Hide the Element
+   *
+   * @private
+   */
+  _ov_obscure: function() {
+
+    var instance = this._childViews[0];
+    var element = this.get('element');
+    instance.set('hidden', true);
+    element.style.visibility = 'hidden';
+
+  },
+
 
   innerView: '', //passed in
   defaultHeight: 75,
@@ -324,7 +326,8 @@ export default Ember.ContainerView.extend({
   },
 
   willInsertElement: function() {
-    this.get('element').style.height = (this.get('_height') || this.get('defaultHeight')) + 'px';
+    this.element.style.visibility = 'hidden';
+    this.element.style.height = (this.get('_height') || this.get('defaultHeight')) + 'px';
   }
 
 });
