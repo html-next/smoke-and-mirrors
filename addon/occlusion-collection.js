@@ -3,7 +3,6 @@ import MagicArrayMixin from "./magic-array-mixin";
 import OcclusionView from "./occlusion-view";
 import getTagDescendant from "./utils/get-tag-descendant";
 
-//TODO enable scroll position cacheing
 export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayMixin, {
 
   //–––––––––––––– Required Settings
@@ -156,6 +155,8 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    * will add the attribute `hidden` to the cloakedView when ever it's content is hidden, cached, or
    * culled.
    */
+
+  //TODO enable this feature.
   useHiddenAttr: false,
 
 
@@ -164,16 +165,19 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   /**!
    *
    */
+  //TODO enable this feature.
   _scrollPosition: '',
 
   /**!
    *
    */
+  //TODO enable this feature.
   _topVisible: '',
 
   /**!
    *
    */
+  //TODO enable this feature.
   useLocalStorageCache: false,
 
   //–––––––––––––– Actions
@@ -199,10 +203,13 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    * The promise should be resolved once any loading is complete, or
    * rejected if loading has failed.
    *
+   * If `loadingViewClass` is defined, it will be inserted above existing content.
+   *
    * Rejecting the promise leaves the loadingView in place for 5s and set's
    * it's `loadingFailed` property to true.
    *
    */
+  //TODO this feature needs the `Promise` portion done.
   bottomReached: null,
 
   /**!
@@ -226,10 +233,13 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    * The promise should be resolved once any loading is complete, or
    * rejected if loading has failed.
    *
+   * If `loadingViewClass` is defined, it will be inserted above existing content.
+   *
    * Rejecting the promise leaves the loadingView in place for 5s and set's
    * it's `loadingFailed` property to true.
    *
    */
+  //TODO this feature needs the `Promise` portion done.
   topReached: null,
 
   /**!
@@ -238,6 +248,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    *
    * It will include the index and content of the item now visible.
    */
+  //TODO enable this feature.
   topVisibleChanged: null,
 
 
@@ -262,6 +273,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   /**!
    * caches the height of each item in the list
    */
+  //TODO enable this feature.
   _heightCache: {},
 
   /**!
