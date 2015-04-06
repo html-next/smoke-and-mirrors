@@ -4,11 +4,11 @@
       {{occlusion-collection
         tagName="tbody"
         itemViewClass="dbmon-database-tagless"
-        defaultHeight=25
-        wrapperSelector=".table-wrapper"
-        scrollSelector=".table-wrapper"
+        defaultHeight=37
+        alwaysUseDefaultHeight=true
+        containerSelector=".table-wrapper"
         keyForId="id"
-        proxied=model.databases
+        contentToProxy=model.databases
       }}
     </table>
 </div>

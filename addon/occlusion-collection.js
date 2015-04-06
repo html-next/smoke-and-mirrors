@@ -138,7 +138,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    * how much extra room to keep in DOM but
    * with `visible:false` set.
    */
-  invisibleBuffer: 1.5,
+  invisibleBuffer: .5,
 
   /**!
    * sets how many views to cache in buffer
@@ -561,7 +561,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
     Ember.$(window).bind('resize.occlusion-culling.' + id, this._initEdges.bind(this));
 
     //schedule a rerender when the underlying content changes
-    this.addObserver('content.@each', this, this._initViews);
+    this.addObserver('__content.@each', this, this._initViews);
 
     //redraw boundaries when containerHeight changes
     this.addObserver('containerHeight', this, this._initEdges);
@@ -625,7 +625,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
 
     // TODO teardown unneeded views
 
-    var content = this.get('content');
+    var content = this.get('__content');
     var viewClass = this.get('itemViewClass');
     var self = this;
     if (content) {
@@ -700,6 +700,8 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
       tagName : itemTagName,
       innerView: itemViewClass,
       defaultHeight: defaultHeight,
+
+      _height:  this.get('alwaysUseDefaultHeight') ? defaultHeight : null,
 
       keyForView: keyForId,
 

@@ -1,15 +1,14 @@
 <h3>DBMon | Occlusion Collection</h3>
 <div class="table-wrapper">
     {{occlusion-collection
-      tagName="div"
       itemViewClass="image-slide"
       defaultHeight=200
-      wrapperSelector=".table-wrapper"
-      scrollSelector=".table-wrapper"
+      alwaysUseDefaultHeight=true
+      containerSelector=".table-wrapper"
       bottomReached="loadBelow"
       topReached="loadAbove"
       keyForId="small"
-      proxied=model.images
+      contentToProxy=model.images
     }}
 </div>
 
