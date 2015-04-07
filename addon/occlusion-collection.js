@@ -112,7 +112,8 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    * Most re-renders with occlusion-culling have clocked well
    * below 1ms.
    */
-  scrollThrottle: 16,
+  scrollThrottle: 32,
+  momentumScrollThrottle: 64,
 
   /**!
    * When scrolling, new on screen items are immediately handled.
@@ -544,7 +545,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
 
   _detectMomentumScroll: function() {
     var oldTop = this.get('_lastTopOffset');
-    var scrollThrottle = this.get('scrollThrottle');
+    var scrollThrottle = this.get('momentumScrollThrottle');
     if (oldTop !== this.$().position().top) {
       Ember.run.throttle(this, this._scheduleOcclusion, scrollThrottle);
     }
@@ -557,6 +558,15 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   //–––––––––––––– Setup/Teardown
 
   setup: Ember.on('didInsertElement', function() {
+
+    // This may need vendor prefix detection
+    this.$().css({
+      '-webkit-transform' : 'translate3d(0,0,0);',
+      '-moz-transform'    : 'translate3d(0,0,0);',
+      '-ms-transform'     : 'translate3d(0,0,0);',
+      '-o-transform'      : 'translate3d(0,0,0);',
+      'transform'         : 'translate3d(0,0,0);'
+    });
 
     var id = this.get('elementId');
     var scrollThrottle = this.get('scrollThrottle');
@@ -571,12 +581,6 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
     _container.bind('scroll.occlusion-culling.' + id, onScrollMethod);
     _container.bind('touchmove.occlusion-culling.' + id, onScrollMethod);
     Ember.$(window).bind('resize.occlusion-culling.' + id, this._initEdges.bind(this));
-
-    //schedule a rerender when the underlying content changes
-    this.addObserver('__content.@each', this, this._initViews);
-
-    //redraw boundaries when containerHeight changes
-    this.addObserver('containerHeight', this, this._initEdges);
 
     //draw initial boundaries
     this._initEdges();
@@ -631,24 +635,78 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   }),
 
 
-  _initViews: function() {
+  /**!
+   * Initialize views for the proxied content. This method
+   * is also called when the proxied content updates. It
+   * uses the same diffing behavior as the proxy itself
+   * to adjust it's length;
+   *
+   * @private
+   */
+  _initViews: Ember.observer('__content', '__content.@each', function initializeViewWrappers() {
 
     // TODO detect if the array has been prepended
-
     // TODO teardown unneeded views
 
+    var proxiedViews = this._childViews;
     var content = this.get('__content');
     var viewClass = this.get('itemViewClass');
     var self = this;
+    var newLength;
+
+    this.beginPropertyChanges();
+
     if (content) {
+
+      // handle additions to the beginning of the array
+      if (this._changeIsPrepend(proxiedViews, content, '__key')) {
+
+        // insert new values
+        newLength = content.length;
+        var i = 0;
+        while (newLength > proxiedViews.length) {
+          self.pushObject(self.createChildView(viewClass, { content: content[i]}));
+          i++;
+        }
+
+        // update any existing values as needed
+
+
+      // handle additions and inline changes
+      } else {
+
+
+
+      }
+
+
+
       content.forEach(function (item) {
         self.pushObject(self.createChildView(viewClass, { content: item}));
       });
     }
 
+    this.endPropertyChanges();
+
+  }),
+
+  _changeIsPrepend: function(proxiedArray, newArray, key) {
+
+    var lengthDifference = proxiedArray.length - newArray.length;
+
+    // if either array is empty or the new array is not longer, do not treat as prepend
+    if (!proxiedArray.length || !newArray.length || lengthDifference >= 0) {
+      return false;
+    }
+
+    // if the object at the right key is the same, this is a prepend
+    var oldInitialItem = proxiedArray[0].get('__key');
+    var newInitialItem = Ember.get(newArray[-lengthDifference], key);
+    return oldInitialItem === newInitialItem;
+
   },
 
-  _initEdges: function () {
+  _initEdges: Ember.observer('containerHeight', function calculateViewStateBoundaries() {
 
     var _container = this.get('_container');
 
@@ -687,7 +745,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
       cacheBottom: cacheBottom
     });
 
-  },
+  }),
 
   /**!
    *
