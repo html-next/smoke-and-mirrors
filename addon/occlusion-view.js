@@ -107,6 +107,7 @@ export default Ember.ContainerView.extend({
     var keyForView = this.get('keyForView');
 
     this._cachedView = viewFactory.extend({
+
       content: content,
       controller: controller,
 
@@ -115,23 +116,28 @@ export default Ember.ContainerView.extend({
 
       __keyForView : keyForView,
 
-      //rehydrate view
-      createElement: function() {
+      __watchEvent: Ember.on('init', function() {
 
-        if (this.get('element')) { return this; }
+        var renderer = this.renderer;
+        var createElementSuper = renderer.createElement;
 
-        if (this.get('__cachedElement')) {
-          this.element = this.get('__cachedElement');
-          return this;
+        renderer.createElement = function attemptCreateFromExisting(view, contextualElement) {
+
+          var element = view ? view.__cachedElement : null;
+
+          if (element) {
+            return element;
+          } else {
+            return createElementSuper.call(renderer, view, contextualElement);
+          }
+
+
         }
 
-        this._didCreateElementWithoutMorph = true;
-        this.constructor.renderer.renderTree(this);
 
-        return this;
-      },
+      }),
 
-      __cacheHeight: Ember.on('didInsertElement', function () {
+      __cacheHeight: Ember.on('didInsertElement', function() {
 
         var parentView = this.get('parentView');
 
@@ -157,14 +163,17 @@ export default Ember.ContainerView.extend({
       //prevent element teardown
       __cacheElement: Ember.on('willDestroyElement', function () {
 
-        if (this.get('_bustcache')) { return; }
+        if (this.get('_bustcache')) {
+          this.set('__cachedElement', null);
+          return;
+        }
 
         var element = this.get('element');
         if (element) {
           this.set('__cachedElement', element);
         }
-      }),
 
+      }),
 
       //prevent view destruction
       _bustcache: false,

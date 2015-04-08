@@ -48,13 +48,21 @@ export default Ember.Component.extend({
       var $image = Ember.$('<img src="' + Image.src + '">');
       this.set('_image', $image);
       $image.on('load', function () {
-        $view.html($image);
         self.set('isLoaded', true);
       });
     }
   },
 
   _loadImage : function () {
+
+    // reset if component's image has been changed
+    this.setProperties({
+      isAppending : false,
+      isLoaded : false,
+      isLoading : false,
+      isFailed : false,
+      isEmpty : true
+    });
 
     var src = this.get('src');
     var Img;

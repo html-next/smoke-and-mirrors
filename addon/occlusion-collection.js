@@ -561,11 +561,11 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
 
     // This may need vendor prefix detection
     this.$().css({
-      '-webkit-transform' : 'translate3d(0,0,0);',
-      '-moz-transform'    : 'translate3d(0,0,0);',
-      '-ms-transform'     : 'translate3d(0,0,0);',
-      '-o-transform'      : 'translate3d(0,0,0);',
-      'transform'         : 'translate3d(0,0,0);'
+      '-webkit-transform' : 'translate3d(0,0,0)',
+      '-moz-transform'    : 'translate3d(0,0,0)',
+      '-ms-transform'     : 'translate3d(0,0,0)',
+      '-o-transform'      : 'translate3d(0,0,0)',
+      'transform'         : 'translate3d(0,0,0)'
     });
 
     var id = this.get('elementId');
