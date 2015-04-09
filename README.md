@@ -63,7 +63,9 @@ Contributions and bug reports are very appreciated!
 ## Documentation
 
 - [Occlusion Collection](./docs/occlusion-collection.md)
-- [Occlusion View](./docs/occlusion-view.md)
+- [Proxied Each](./docs/proxied-each.md)
+- [Async Image](./docs/async-image.md)
+- [Cache Container](./docs/cache-container.md)
 - [Magic Array](./docs/magic-array.md)
 - [Default CSS](./docs/css.md)
 
