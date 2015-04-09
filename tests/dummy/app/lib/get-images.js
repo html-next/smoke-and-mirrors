@@ -48,7 +48,7 @@ function generateImageSrc() {
   var width = getWidth();
   parts.push(width);
   parts.push(width);
-  var small = Math.round(width / 3);
+  var small = 350;
   preview.push(small);
   preview.push(small);
   var cat = CATEGORIES[getCategoryIndex()];

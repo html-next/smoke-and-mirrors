@@ -172,8 +172,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   /**!
    *
    */
-  //TODO enable this feature.
-  _topVisible: '',
+  _topVisible: null,
 
   /**!
    *
@@ -259,7 +258,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   /**!
    * The content array of proxied content.
    */
-  __content: Ember.A(),
+  __content: null,
 
   /**!
    * The property to proxy `contentToProxy` to.
@@ -302,15 +301,26 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    */
   _lastTopOffset: null,
 
+  /**!
+   * If true, views are currently being added above the visible portion of
+   * the screen and scroll/cycle callbacks should be ignored.
+   */
+  __isPrepending: false,
+
+  /**!
+   * If a prepend will occur, this stores the data that the callback
+   * provided to requestAnimationFrame will use.
+   */
+  __prependViewParams: null,
+
 
   //–––––––––––––– Helper Functions
 
 
   sendAction: function(name, context) {
-    console.log('sendAction', name, context);
     var action = this.get(name);
     if (action) {
-      this.triggerAction({
+      Ember.run.next(this, this.triggerAction, {
         action: action,
         actionContext: context,
         target: this.get('controller')
@@ -320,6 +330,12 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
 
 
   sendActionOnce: function(name, context) {
+
+    // don't trigger during a prepend
+    if (this.get('__isPrepending')) {
+      return;
+    }
+
     if (name === 'bottomReached' && this.get('_lastBottomSent') === context.item) {
       return;
     }
@@ -374,6 +390,9 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   // on scroll, determine view states
   _cycleViews: function () {
 
+    if (this.get('__isPrepending')) {
+      return false;
+    }
     var edges = this.get('_edges');
     var childViews = this._childViews;
 
@@ -384,14 +403,14 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
       currentUpperBound = currentViewportBound;
     }
 
-
     var topViewIndex = this._findTopView(currentUpperBound, edges.viewportTop);
     var bottomViewIndex = topViewIndex;
     var lastIndex = childViews.length - 1;
 
-    if (!childViews[topViewIndex]) {
-      this._initViews();
-    }
+// TODO, confirm that removing this is now 100% ok
+//    if (!childViews[topViewIndex]) {
+//    this._initViews();
+//  }
 
     // views to cull
     var toCull = [];
@@ -411,7 +430,6 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
     // onscreen content
     var onscreen = [];
 
-    // Find the bottom view and cycle what's between
     while (bottomViewIndex <= lastIndex) {
 
       var view = childViews[bottomViewIndex];
@@ -438,9 +456,10 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
         toShow.push(view);
         if (bottomViewIndex === 0) {
           this.sendActionOnce('topReached', {
-            item: view.get('content'),
+            item: view.get('content.content'),
             index: lastIndex
           });
+          this.set('_topVisible', view);
         }
 
         //above the lower screen boundary
@@ -449,13 +468,14 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
         onscreen.push(view.get('content'));
         if (bottomViewIndex === 0) {
           this.sendActionOnce('topReached', {
-            item: view.get('content'),
+            item: view.get('content.content'),
             index: lastIndex
           });
+          this.set('_topVisible', view);
         }
         if (bottomViewIndex === lastIndex) {
           this.sendActionOnce('bottomReached', {
-            item: view.get('content'),
+            item: view.get('content.content'),
             index: lastIndex
           });
         }
@@ -465,7 +485,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
         toShow.push(view);
         if (bottomViewIndex === lastIndex) {
           this.sendActionOnce('bottomReached', {
-            item: view.get('content'),
+            item: view.get('content.content'),
             index: lastIndex
           });
         }
@@ -575,6 +595,9 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
     this.set('_container', _container);
 
     var onScrollMethod = function onScrollMethod () {
+      if (this.get('__isPrepending')) {
+        return false;
+      }
       Ember.run.throttle(this, this._scheduleOcclusion, scrollThrottle);
     }.bind(this);
 
@@ -635,76 +658,90 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   }),
 
 
+  __performViewPrepention: function() {
+
+    this.set('__isPrepending', true);
+
+    var params = this.__prependViewParams;
+    var container = this.get('_container').get(0);
+    var added = params.addCount * this.get('defaultHeight');
+
+    this.replace(params.offset, 0, params.affectedViews);
+    container.scrollTop += added;
+
+    this.__prependViewParams = null;
+
+    Ember.run.next(this, function() {
+      this.set('__isPrepending', false);
+    });
+  },
+
+  _reflectContentChanges: function() {
+    var content = this.get('__content');
+    var self = this;
+    var viewClass = this.get('itemViewClass');
+    if (!content) {
+      throw "Content not available to observe!";
+    }
+
+    content.contentArrayDidChange = function handleArrayChange(items, offset, removeCount, addCount) {
+      var affectedViews = [], i;
+      if (removeCount) {
+        self.replace(offset, removeCount, []);
+
+      } else if (addCount) {
+
+        for (i = offset; i < offset + addCount; i++) {
+          affectedViews.push(self.createChildView(viewClass, { content: items[i]}));
+        }
+
+        if (offset <= self.indexOf(self.get('_topVisible'))) {
+          self.__prependViewParams = {
+            offset: offset,
+            addCount: addCount,
+            affectedViews: affectedViews
+          };
+          window.requestAnimationFrame(self.__performViewPrepention);
+        } else {
+          self.replace(offset, 0, affectedViews);
+        }
+
+      }
+    };
+
+  },
+
   /**!
    * Initialize views for the proxied content. This method
    * is also called when the proxied content updates. It
    * uses the same diffing behavior as the proxy itself
    * to adjust it's length;
    *
+   * It should only be called once.
+   *
    * @private
    */
-  _initViews: Ember.observer('__content', '__content.@each', function initializeViewWrappers() {
+  _initViews: function() {
 
-    // TODO detect if the array has been prepended
-    // TODO teardown unneeded views
-
-    var proxiedViews = this._childViews;
     var content = this.get('__content');
     var viewClass = this.get('itemViewClass');
     var self = this;
-    var newLength;
 
+    if (!content) {
+      throw "Content not available to _initViews!";
+    }
     this.beginPropertyChanges();
 
-    if (content) {
-
-      // handle additions to the beginning of the array
-      if (this._changeIsPrepend(proxiedViews, content, '__key')) {
-
-        // insert new values
-        newLength = content.length;
-        var i = 0;
-        while (newLength > proxiedViews.length) {
-          self.pushObject(self.createChildView(viewClass, { content: content[i]}));
-          i++;
-        }
-
-        // update any existing values as needed
-
-
-      // handle additions and inline changes
-      } else {
-
-
-
-      }
-
-
-
-      content.forEach(function (item) {
-        self.pushObject(self.createChildView(viewClass, { content: item}));
-      });
-    }
+    content.forEach(function (item) {
+      self.pushObject(self.createChildView(viewClass, { content: item}));
+    });
 
     this.endPropertyChanges();
 
-  }),
-
-  _changeIsPrepend: function(proxiedArray, newArray, key) {
-
-    var lengthDifference = proxiedArray.length - newArray.length;
-
-    // if either array is empty or the new array is not longer, do not treat as prepend
-    if (!proxiedArray.length || !newArray.length || lengthDifference >= 0) {
-      return false;
-    }
-
-    // if the object at the right key is the same, this is a prepend
-    var oldInitialItem = proxiedArray[0].get('__key');
-    var newInitialItem = Ember.get(newArray[-lengthDifference], key);
-    return oldInitialItem === newInitialItem;
+    this._reflectContentChanges();
 
   },
+
 
   _initEdges: Ember.observer('containerHeight', function calculateViewStateBoundaries() {
 
@@ -752,10 +789,15 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    */
   init: function() {
 
+    var prependFn = this.__performViewPrepention.bind(this);
+    this.set('__performViewPrepention', prependFn);
+
     var itemViewClass = this.get('itemViewClass');
     var defaultHeight = parseInt(this.get('defaultHeight'), 10);
     var collectionTagName = (this.get('tagName') || '').toLowerCase();
     var itemTagName = this.get('itemTagName') || getTagDescendant(collectionTagName);
+
+    this.set('defaultHeight', defaultHeight);
 
     if (itemTagName === 'none') {
       itemTagName = '';

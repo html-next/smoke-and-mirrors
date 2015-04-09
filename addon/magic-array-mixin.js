@@ -17,9 +17,10 @@ var Mixin = Ember.Mixin.create({
     var prop = this.get('__proxyContentTo');
     var content;
     var newLength;
+    var newObjects = [];
 
     if (!this.get(prop)) {
-      content = Ember.A();
+      content = Ember.ArrayProxy.create({ content: Ember.A() });
       this.set(prop, content);
     } else {
       content = this.get(prop);
@@ -35,9 +36,12 @@ var Mixin = Ember.Mixin.create({
 
         newLength = proxied.length;
         var i = 0;
-        while (newLength > content.length) {
-          content.insertAt(createProxiedItem(proxied[i], key), i);
-          i++;
+        var diff = newLength - content.get('length');
+        for (i = 0; i < diff; i++) {
+          newObjects.push(createProxiedItem(proxied[i], key));
+        }
+        if (newObjects.length) {
+          content.replace(0, 0, newObjects);
         }
 
       // handle additions and inline changes
@@ -49,10 +53,13 @@ var Mixin = Ember.Mixin.create({
             proxiedObject.set('content', item);
             proxiedObject.__updateIndex();
           } else {
-            content.addObject(createProxiedItem(item, key));
+            newObjects.push(createProxiedItem(item, key));
           }
-
         });
+
+        if (newObjects.length) {
+          content.pushObjects(newObjects);
+        }
 
       }
 
@@ -60,32 +67,31 @@ var Mixin = Ember.Mixin.create({
 
     newLength = proxied ? proxied.length : 0;
 
-    while (newLength < content.length) {
-      content.removeAt(content.length - 1);
+    if (newLength < content.get('length')) {
+      var diff = content.get('length') - newLength;
+      content.removeAt(newLength, diff);
     }
 
     this.endPropertyChanges();
 
   }).on('init'),
 
-  _changeIsPrepend: function(proxiedArray, newArray, key) {
+  _changeIsPrepend: function(newArray, proxiedArray, key) {
 
-    var lengthDifference = proxiedArray.length - newArray.length;
+    var lengthDifference = proxiedArray.get('length') - newArray.length;
 
     // if either array is empty or the new array is not longer, do not treat as prepend
-    if (!proxiedArray.length || !newArray.length || lengthDifference >= 0) {
+    if (!proxiedArray.get('length') || !newArray.length || lengthDifference >= 0) {
       return false;
     }
 
     // if the object at the right key is the same, this is a prepend
-    var oldInitialItem = proxiedArray[0].get('__key');
+    var oldInitialItem = proxiedArray.objectAt(0).get('__key');
     var newInitialItem = Ember.get(newArray[-lengthDifference], key);
     return oldInitialItem === newInitialItem;
 
   }
 
 });
-
-window.MagicArrayMixin = Mixin;
 
 export default Mixin;

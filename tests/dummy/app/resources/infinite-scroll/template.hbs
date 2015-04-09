@@ -1,17 +1,37 @@
-<h3>DBMon | Occlusion Collection</h3>
-<div class="table-wrapper">
-    {{occlusion-collection
-      itemViewClass="image-slide"
-      defaultHeight=500
-      visibleBuffer=2
-      invisibleBuffer=3
-      cacheBuffer=2
-      alwaysUseDefaultHeight=true
-      containerSelector=".table-wrapper"
-      bottomReached="loadBelow"
-      topReached="loadAbove"
-      keyForId="small"
-      contentToProxy=model.images
-    }}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-7">
+            <div class="table-wrapper">
+              {{occlusion-collection
+              itemViewClass="image-slide"
+              defaultHeight=350
+              visibleBuffer=2
+              invisibleBuffer=3
+              cacheBuffer=2
+              alwaysUseDefaultHeight=true
+              containerSelector=".table-wrapper"
+              bottomReached="loadBelow"
+              topReached="loadAbove"
+              keyForId="small"
+              contentToProxy=model.images
+              }}
+            </div>
+        </div>
+        <div class="col-sm-5">
+            <h3>Infinite Scroll</h3>
+            <p>
+                The Occlusion Collection can be used to quickly build a robust infinite scroll.
+                You do not need to worry too hard about how you manipulate the underlying array,
+                both the array and it's content are proxied so views will be reused as much as
+                possible.
+            </p>
+            <p>
+                Prepending to the array is made more efficient via a quick length + same object at offset
+                comparison.  If it looks like you simply added 10 items to the beginning of an array,
+                10 new views are created and prepended without affecting the old views.  Any other
+                data changes further in the array will still be updated.
+            </p>
+        </div>
+    </div>
 </div>
 
