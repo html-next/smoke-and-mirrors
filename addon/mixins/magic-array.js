@@ -2,7 +2,7 @@ import Ember from "ember";
 import {
   SmartObjectProxy,
   createProxiedItem
-  } from "./smart-object-proxy";
+  } from "../utils/smart-object-proxy";
 
 var Mixin = Ember.Mixin.create({
 

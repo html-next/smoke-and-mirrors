@@ -1,7 +1,7 @@
 import Ember from "ember";
-import MagicArrayMixin from "./magic-array-mixin";
-import OcclusionView from "./occlusion-view";
-import getTagDescendant from "./utils/get-tag-descendant";
+import MagicArrayMixin from "../../mixins/magic-array";
+import OcclusionView from "./occlusion-item.view";
+import getTagDescendant from "../../utils/get-tag-descendant";
 
 export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayMixin, {
 
@@ -637,7 +637,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
     var storageKey = this.get('storageKey');
     if (storageKey) {
 
-      var keyForView = this.get('keyForView');
+      var keyForId = this.get('keyForId');
       var cacheAttrs = this.getProperties(
         '_scrollPosition',
         '_heights',
@@ -646,8 +646,8 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
         '_visibleCount'
       );
 
-      cacheAttrs._topVisible = cacheAttrs._topVisible.get(keyForView);
-      cacheAttrs._bottomVisible = cacheAttrs._bottomVisible.get(keyForView);
+      cacheAttrs._topVisible = cacheAttrs._topVisible.get(keyForId);
+      cacheAttrs._bottomVisible = cacheAttrs._bottomVisible.get(keyForId);
 
       localStorage.setItem(storageKey, JSON.stringify(cacheAttrs));
     }
@@ -815,7 +815,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
 
       _height:  this.get('alwaysUseDefaultHeight') ? defaultHeight : null,
 
-      keyForView: keyForId,
+      keyForId: keyForId,
 
       context: this.get('context'),
 

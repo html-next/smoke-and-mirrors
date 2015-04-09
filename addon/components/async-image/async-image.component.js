@@ -24,25 +24,55 @@ export default Ember.Component.extend({
   isFailed : false,
   isEmpty : true,
 
+  _image: null,
+
+  _onInsert: Ember.on('didInsertElement', function() {
+    if (this.get('isLoaded')) {
+      var $image = Ember.$('<img src="' + Image.src + '">');
+      this.$().html($image);
+    }
+  }),
+
+  _onRemove: Ember.on('willDestroyElement', function() {
+    var $image = this.get('_image');
+    if ($image) {
+      $image.off('load');
+    }
+  }),
+
   _onload : function (Image) {
-    this.set('isAppending', true);
-    var self = this;
-    var $view = this.$();
-    var $image = Ember.$('<img src="' + Image.src + '">');
-    $image.on('load', function () {
-      $view.html($image);
-      self.set('isLoaded', true);
-    });
+    if (!(this.get('isDestroyed') || this.get('isDestroying'))) {
+      this.set('isAppending', true);
+      var self = this;
+      var $view = this.$();
+      var $image = Ember.$('<img src="' + Image.src + '">');
+      this.set('_image', $image);
+      $image.on('load', function () {
+        self.set('isLoaded', true);
+        $view.append($image);
+      });
+    }
   },
 
   _loadImage : function () {
+
+    // reset if component's image has been changed
+    this.setProperties({
+      isAppending : false,
+      isLoaded : false,
+      isLoading : false,
+      isFailed : false,
+      isEmpty : true
+    });
 
     var src = this.get('src');
     var Img;
 
     //debounce the load callback to ensure it only fires once
     var loaded = function loaded() {
-      Ember.run.debounce(this, this._onload, Img, 10);
+      if (!(this.get('isDestroyed') || this.get('isDestroying'))) {
+        Ember.run.debounce(this, this._onload, Img, 10);
+      }
     }.bind(this);
 
     if (src) {

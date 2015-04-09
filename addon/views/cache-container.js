@@ -1,7 +1,12 @@
 import Ember from "ember";
+import CacheableMixin from "../mixins/cacheable";
+
 window.CachedViews = window.CachedViews || {};
 var CachedViews = window.CachedViews;
 
+/**!
+ * Destroy the View/Element
+ */
 function teardownCachedView() {
 
   //allow view teardown
@@ -11,10 +16,10 @@ function teardownCachedView() {
   delete CachedViews[this.elementId];
 
   //remove reference from controller
-  if (this.__keyForView) {
+  if (this.__keyForId) {
     var viewCache = this.get('controller.__view');
-    if (viewCache && viewCache.hasOwnProperty(this.__keyForView)) {
-      delete viewCache[this.__keyForView];
+    if (viewCache && viewCache.hasOwnProperty(this.__keyForId)) {
+      delete viewCache[this.__keyForId];
     }
   } else {
     this.set('controller.__view', null);

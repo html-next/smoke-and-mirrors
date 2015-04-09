@@ -1,4 +1,5 @@
 import Ember from "ember";
+import CacheableMixin from "../../mixins/cacheable";
 
 var STATE_LIST = ['culled', 'cached', 'hidden', 'visible'];
 
@@ -104,38 +105,15 @@ export default Ember.ContainerView.extend({
     var container = this.get('container');
     var viewFullName = 'view:' + this.get('innerView');
     var viewFactory = container.lookupFactory(viewFullName);
-    var keyForView = this.get('keyForView');
+    var keyForId = this.get('keyForId');
 
-    this._cachedView = viewFactory.extend({
+    this._cachedView = viewFactory.extend(CacheableMixin, {
 
       content: content,
       controller: controller,
 
       attributeBindings: ['hidden'],
       hidden: true,
-
-      __keyForView : keyForView,
-
-      __watchEvent: Ember.on('init', function() {
-
-        var renderer = this.renderer;
-        var createElementSuper = renderer.createElement;
-
-        renderer.createElement = function attemptCreateFromExisting(view, contextualElement) {
-
-          var element = view ? view.__cachedElement : null;
-
-          if (element) {
-            return element;
-          } else {
-            return createElementSuper.call(renderer, view, contextualElement);
-          }
-
-
-        }
-
-
-      }),
 
       __cacheHeight: Ember.on('didInsertElement', function() {
 
@@ -158,31 +136,7 @@ export default Ember.ContainerView.extend({
           }
 
         }
-      }),
-
-      //prevent element teardown
-      __cacheElement: Ember.on('willDestroyElement', function () {
-
-        if (this.get('_bustcache')) {
-          this.set('__cachedElement', null);
-          return;
-        }
-
-        var element = this.get('element');
-        if (element) {
-          this.set('__cachedElement', element);
-        }
-
-      }),
-
-      //prevent view destruction
-      _bustcache: false,
-
-      destroy: function () {
-        if (this.get('_bustcache')) {
-          this._super();
-        }
-      }
+      })
     }).create({});
 
   },
@@ -288,7 +242,7 @@ export default Ember.ContainerView.extend({
 
   innerView: '', //passed in
   defaultHeight: 75,
-  keyForView: null, //keyForView
+  keyForId: null, //keyForId
   itemController: null,
 
   _cachedView: null,
