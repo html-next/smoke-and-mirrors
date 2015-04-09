@@ -24,6 +24,20 @@ The most common scenarios for needing to heavily optimize your components are ap
 for heavy long-life mobile use, infinite scrolling, and applications with routes that are entered
 and exited very often as part of a UX flow pattern.
 
+## Browser Support
+
+Currently this repo tracks changes in Ember and will likely 1.0 with a feature set tied to Ember 2.0.
+Whatever browser support Ember states, this addon will attempt to likewise support, with the addition
+of `iOS` `uiWebView` based browsers.  If you can use `wkWebView`, it will improve your scroll experience
+a lot :)  If not, checkout `iScroll`, it will be exposed by this addon in the near future.
+
+Currently, IE10+ / Chrome
+
+This repo uses `window.requestAnimationFrame` without shimming or vendor prefixes.  This will be rectified
+by 0.2.0.  Once this is done, IE8/9 will experience a flicker when prepending to an array during infinite
+scroll.  This is because they do not support `window.requestAnimationFrame` which is being used to reset
+the `scrollTop` during the prepend.
+
 #### [Changelog](./CHANGELOG.md)
 
 #### [Roadmap](./ROADMAP.md)
