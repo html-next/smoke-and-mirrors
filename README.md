@@ -6,14 +6,6 @@ Smoke-and-mirrors
 [![Ember Observer Score](http://emberobserver.com/badges/smoke-and-mirrors.svg)](http://emberobserver.com/addons/smoke-and-mirrors)
 [![Circle CI](https://circleci.com/gh/runspired/smoke-and-mirrors/tree/master.svg?style=svg)](https://circleci.com/gh/runspired/smoke-and-mirrors/tree/master)
 
-## Unpublished
-
-This addon is approaching but has not reached it's first version: 0.1.0, to use it
-you will have to npm install the master branch and live on the edge.  I'd only
-recommend doing so if you'd like to contribute back fixes/bug reports as found.
-
------------------------
-
 Sometimes being "ambitious" gets you in trouble.  When it does, `Smoke-and-mirrors` is here
 to put out your `Ember` fire.
 
@@ -35,6 +27,12 @@ and exited very often as part of a UX flow pattern.
 #### [Changelog](./CHANGELOG.md)
 
 #### [Roadmap](./ROADMAP.md)
+
+## WIP (pre 1.0.0)
+
+This addon is approaching but has not reached it's first version: 1.0.0,
+so using it means you take the risk of living a little bit on the edge.
+Contributions and bug reports are very appreciated!
 
 ## Core concepts
 
