@@ -36,7 +36,7 @@ export default Ember.ContainerView.extend({
 
   cacheExpires : 900000, //15min
 
-  keyForView : null,
+  keyForId : null,
 
   willDestroy : function () {
     var instance = this.get('currentView');
@@ -53,12 +53,12 @@ export default Ember.ContainerView.extend({
 
   init : function () {
 
-    var keyForView = this.keyForView;
+    var keyForId = this.keyForId;
 
     //get cached view
     var CachedView = this.get('controller.__view');
-    if (keyForView && CachedView) {
-      CachedView = CachedView[keyForView];
+    if (keyForId && CachedView) {
+      CachedView = CachedView[keyForId];
     }
 
     if (CachedView) {
@@ -70,48 +70,20 @@ export default Ember.ContainerView.extend({
 
       //create normal view
     } else {
+
       var instance = this.get('view')
-        .extend({
-
-          __keyForView : keyForView,
-
-          //rehydrate view
-          createElement: function() {
-            if (this.__cachedElement) {
-              this.element = this.__cachedElement;
-              return this;
-            }
-            return this._super();
-          },
-
-          //prevent element teardown
-          __cacheElement : function () {
-            if (this._bustcache) { return; }
-            var element = this.element;
-            if (element) {
-              element.parentNode.removeChild(element);
-              this.__cachedElement = element;
-              this.set('element', null);
-            }
-          }.on('willDestroyElement'),
-
-          //prevent view destruction
-          _bustcache : false,
-          willDestroy : function () { if (this._bustcache) { this._super(); }},
-          destroy : function () { if (this._bustcache) { this._super(); }}
-
-        })
+        .extend(CacheableMixin)
         .create({
           controller : this.get('controller')
         });
 
-      if (this.keyForView) {
+      if (this.keyForId) {
         var cache = this.get('controller.__view');
         if (!cache) {
           cache = {};
           this.set('controller.__view', cache);
         }
-        cache[this.get(this.keyForView)] = instance;
+        cache[this.get(this.keyForId)] = instance;
       } else {
         this.set('controller.__view', instance);
       }
