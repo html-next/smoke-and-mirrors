@@ -557,20 +557,22 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
 
   setup: Ember.on('didInsertElement', function() {
 
-    // This may need vendor prefix detection
-    this.$().css({
-      '-webkit-transform' : 'translate3d(0,0,0)',
-      '-moz-transform'    : 'translate3d(0,0,0)',
-      '-ms-transform'     : 'translate3d(0,0,0)',
-      '-o-transform'      : 'translate3d(0,0,0)',
-      'transform'         : 'translate3d(0,0,0)'
-    });
-
     var id = this.get('elementId');
     var scrollThrottle = this.get('scrollThrottle');
     var containerSelector = this.get('containerSelector');
     var _container = containerSelector ? Ember.$(containerSelector) : this.$().parent();
     this.set('_container', _container);
+
+    // This may need vendor prefix detection
+    _container.css({
+      '-webkit-transform' : 'translate3d(0,0,0)',
+      '-moz-transform'    : 'translate3d(0,0,0)',
+      '-ms-transform'     : 'translate3d(0,0,0)',
+      '-o-transform'      : 'translate3d(0,0,0)',
+      'transform'         : 'translate3d(0,0,0)',
+      '-webkit-overflow-scrolling': 'touch',
+      'overflow-scrolling': 'touch'
+    });
 
     var onScrollMethod = function onScrollMethod () {
       if (this.get('__isPrepending')) {
