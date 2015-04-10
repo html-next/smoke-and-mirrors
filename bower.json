@@ -1,6 +1,6 @@
 {
   "name": "smoke-and-mirrors",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "dependencies": {
     "jquery": "^1.11.1",
     "ember": "1.11.0",
