@@ -2,6 +2,7 @@
 
 ### 0.2.0
 
+- fix cache-container lookup and model reactivation
 - expose {{#proxied-each}} with same semantics / usability as {{#each}}
 - expose {{#occlusion-collection}} with same semantics / usability as {{#each}}
 - iScroll mixin

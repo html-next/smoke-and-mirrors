@@ -67,6 +67,7 @@ export default Ember.ContainerView.extend({
         Ember.run.cancel(CachedView.get('__cacheTimeout'));
       }
       this.set('currentView', CachedView);
+      CachedView.set('model', this.get('model'));
 
       //create normal view
     } else {
@@ -74,7 +75,8 @@ export default Ember.ContainerView.extend({
       var instance = this.get('view')
         .extend(CacheableMixin)
         .create({
-          controller : this.get('controller')
+          controller: this.get('controller'),
+          model: this.get('model')
         });
 
       if (this.keyForId) {

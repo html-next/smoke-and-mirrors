@@ -22,7 +22,6 @@ in the `/docs` directory at the time of release.  I hope to rectify this shortly
 - `components/proxied-each`
 - `components/occlusion-collection`
 - `components/async-image`
-- `views/cache-container`
 
 None of these exposes `{{yield}}`, so for now you must pass an item view name directly.
 A PR to add support for normal `{{#each}}` semantics would be appreciated, it's scheduled

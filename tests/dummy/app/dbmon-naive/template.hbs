@@ -11,11 +11,5 @@
       {{view "dbmon-database-naive" content=db}}
     {{/each}}
   </tbody>
-  {{proxied-each
-    tagName="tbody"
-    itemViewClass="dbmon-database"
-    keyForId="id"
-    proxied=model.databases
-  }}
 </table>
 
