@@ -113,7 +113,6 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    * below 1ms.
    */
   scrollThrottle: 32,
-  momentumScrollThrottle: 64,
 
   /**!
    * When scrolling, new on screen items are immediately handled.
@@ -294,12 +293,6 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    */
   _lastTopSent: null,
 
-  /**!
-   * Cached reference to the lastTopOffset used
-   * to detact scrolling and enable re-rendering
-   * during momentum scrolling
-   */
-  _lastTopOffset: null,
 
   /**!
    * If true, views are currently being added above the visible portion of
@@ -553,22 +546,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   },
 
   _scheduleOcclusion: function() {
-
     Ember.run.scheduleOnce('afterRender', this, this._cycleViews);
-
-    var scrollThrottle = this.get('scrollThrottle');
-    if (this.$()) {
-      this.set('_lastTopOffset', this.$().position().top);
-      Ember.run.debounce(this, this._detectMomentumScroll, scrollThrottle);
-    }
-  },
-
-  _detectMomentumScroll: function() {
-    var oldTop = this.get('_lastTopOffset');
-    var scrollThrottle = this.get('momentumScrollThrottle');
-    if (oldTop !== this.$().position().top) {
-      Ember.run.throttle(this, this._scheduleOcclusion, scrollThrottle);
-    }
   },
 
 
