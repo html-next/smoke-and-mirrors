@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import getData from '../../lib/get-data';
+import getData from '../lib/get-data';
 
 var TIMEOUT = 0;
 
