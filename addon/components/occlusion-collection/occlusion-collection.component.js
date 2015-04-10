@@ -8,7 +8,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   //–––––––––––––– Required Settings
 
   /**!
-   * The view to use for each item in the list
+   * The view to use for each item in `contentToProxy`
    * If you need dynamic item types, you can use
    * a wrapper view to swap out the view based on
    * the model.
@@ -31,7 +31,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   contentToProxy: null,
 
   /**!
-   * This height is used to give the `OcclusionView`s height prior to their content being rendered.
+   * This height is used to give the `OcclusionItem`s height prior to their content being rendered.
    * This height is replaced with the actual rendered height once content is rendered for the first time.
    *
    * If your content will always have the height specified by `defaultHeight`, you can improve performance
@@ -73,12 +73,12 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    * Defaults to `div`.
    *
    * If itemTagName is blank or null, the `occlusion-collection` will [tag match](../addon/utils/get-tag-descendant.js)
-   * with the `occluded-view`.
+   * with the `OcclusionItem`.
    */
   tagName: 'div',
 
   /**!
-   * Used if you want to explicitly set the tagName of `OccludedView`s
+   * Used if you want to explicitly set the tagName of `OcclusionItem`s
    */
   itemTagName: '',
 
@@ -86,7 +86,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    * The `keyForId` property improves performance when the underlying array is changed but most
    * of the items remain the same.  It is used by the [MagicArrayMixin](./magic-array.md).
    *
-   * If `cacheListState` is true, it is also used to cache the rendered heights of content in the list
+   * If `useLocalStorageCache` is true, it is also used to cache the rendered heights of content in the list
    */
   keyForId: null,
 
