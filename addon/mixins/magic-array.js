@@ -19,6 +19,10 @@ var Mixin = Ember.Mixin.create({
     var newLength;
     var newObjects = [];
 
+    if (proxied.get('content')) {
+      proxied = proxied.get('content');
+    }
+
     if (!this.get(prop)) {
       content = Ember.ArrayProxy.create({ content: Ember.A() });
       this.set(prop, content);
@@ -34,7 +38,7 @@ var Mixin = Ember.Mixin.create({
       // handle additions to the beginning of the array
       if (this._changeIsPrepend(proxied, content, key)) {
 
-        newLength = proxied.length;
+        newLength = Ember.get(proxied, 'length');
         var i = 0;
         var diff = newLength - content.get('length');
         for (i = 0; i < diff; i++) {
@@ -65,7 +69,7 @@ var Mixin = Ember.Mixin.create({
 
     }
 
-    newLength = proxied ? proxied.length : 0;
+    newLength = proxied ? Ember.get(proxied, 'length') : 0;
 
     if (newLength < content.get('length')) {
       var diff = content.get('length') - newLength;
@@ -78,15 +82,16 @@ var Mixin = Ember.Mixin.create({
 
   _changeIsPrepend: function(newArray, proxiedArray, key) {
 
-    var lengthDifference = proxiedArray.get('length') - newArray.length;
+    var lengthDifference = proxiedArray.get('length') - Ember.get(newArray, 'length');
 
     // if either array is empty or the new array is not longer, do not treat as prepend
-    if (!proxiedArray.get('length') || !newArray.length || lengthDifference >= 0) {
+    if (!proxiedArray.get('length') || !Ember.get(newArray, 'length') || lengthDifference >= 0) {
       return false;
     }
 
     // if the object at the right key is the same, this is a prepend
     var oldInitialItem = proxiedArray.objectAt(0).get('__key');
+
     var newInitialItem = Ember.get(newArray[-lengthDifference], key);
     return oldInitialItem === newInitialItem;
 
