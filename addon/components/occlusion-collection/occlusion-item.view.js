@@ -107,10 +107,19 @@ export default Ember.ContainerView.extend({
     var viewFactory = container.lookupFactory(viewFullName);
     var keyForId = this.get('keyForId');
 
-    this._cachedView = viewFactory.extend(CacheableMixin, {
+    var createArgs = {};
 
-      content: content,
-      controller: controller,
+    if (this.get('preserveContext')) {
+      createArgs.context = controller || content;
+    } else {
+      createArgs.content = controller || content;
+    }
+
+    if (controller) {
+      createArgs.controller = controller;
+    }
+
+    this._cachedView = viewFactory.extend(CacheableMixin, {
 
       attributeBindings: ['hidden'],
       hidden: true,
@@ -137,7 +146,7 @@ export default Ember.ContainerView.extend({
 
         }
       })
-    }).create({});
+    }).create(createArgs);
 
   },
 
@@ -245,6 +254,8 @@ export default Ember.ContainerView.extend({
   keyForId: null, //keyForId
   itemController: null,
 
+  preserveContext: false,
+
   _cachedView: null,
 
   //TODO alwaysUseDefaultHeight for performance gain when using regular lists
@@ -276,8 +287,8 @@ export default Ember.ContainerView.extend({
       factory = Ember.generateControllerFactory(container, itemController, model);
 
       // inform developer about typo
-      Ember.Logger.warn('ember-cloaking: can\'t lookup controller by name "' + controllerFullName + '".');
-      Ember.Logger.warn('ember-cloaking: using ' + factory.toString() + '.');
+      Ember.Logger.warn('occlusion-collection: can\'t lookup controller by name "' + controllerFullName + '".');
+      Ember.Logger.warn('occlusion-collection: using ' + factory.toString() + '.');
     }
 
     return factory.create({
