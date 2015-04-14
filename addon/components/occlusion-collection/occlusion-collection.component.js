@@ -725,6 +725,8 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
 
   _initEdges: Ember.observer('containerHeight', function calculateViewStateBoundaries() {
 
+    console.log('initializing edges');
+
     var _container = this.get('_container');
 
     // segment heights
@@ -761,6 +763,8 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
       invisibleBottom: invisibleBottom,
       cacheBottom: cacheBottom
     });
+
+    console.log('edges', this.get('_edges'));
 
   }),
 

@@ -266,7 +266,7 @@ export default Ember.ContainerView.extend({
     var itemController = this.get('itemController');
 
     if (!itemController) {
-      return this.get('parentView.controller');
+      return false;
     }
 
     if (typeof itemController !==  'string') {
