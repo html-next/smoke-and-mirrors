@@ -503,7 +503,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
     Ember.run.cancel(this._nextBatchUpdate);
 
     // update view states
-    Ember.run.schedule('afterRender', this, function (toCull, toCache, toHide, toShow, toScreen) {
+    Ember.run.schedule('afterRender', this, function updateViewStates(toCull, toCache, toHide, toShow, toScreen) {
 
       //reveal on screen views
       toScreen.forEach(function (v) { v.show(); });
@@ -525,7 +525,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   },
 
   // update view states
-  _updateViews: function (toShow) {
+  _updateViews: function(toShow) {
 
     var updateBatchSize = this.get('updateBatchSize');
     var delay = this.get('cycleDelay');
@@ -725,8 +725,6 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
 
   _initEdges: Ember.observer('containerHeight', function calculateViewStateBoundaries() {
 
-    console.log('initializing edges');
-
     var _container = this.get('_container');
 
     // segment heights
@@ -763,8 +761,6 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
       invisibleBottom: invisibleBottom,
       cacheBottom: cacheBottom
     });
-
-    console.log('edges', this.get('_edges'));
 
   }),
 
