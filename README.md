@@ -48,24 +48,30 @@ This addon is approaching but has not reached it's first version: 1.0.0,
 so using it means you take the risk of living a little bit on the edge.
 Contributions and bug reports are very appreciated!
 
-## Core concepts
+## Guides
 
-- View/DOM/attribute Caching
-- DOM recycling
-- Occlusion culling (cloaking)
-- Pre-rendering
+This addon provides out-of-the-box support for high quality performant
+tables, selects, lists, each, and bi-directional infinite scrolling.
 
-    
 - [Low hanging fruit: easy optimizations](./docs/optimization.md)
 - [Occlusion: what is it?](./docs/occlusion.md)
-- [Implementing Infinite Scroll](./docs/infinite-scroll.md)
+- [Implementing Infinite Scroll](./docs/examples/infinite-scroll.md)
+- [Implementing Tables](./docs/examples/tables.md)
+- [Rearranging On Screen Data](./docs/examples/rearranging.md)
+- [Drag & Drop](./docs/examples/drag&drop.md)
 
 ## Documentation
 
-- [Occlusion Collection](./docs/occlusion-collection.md)
-- [Proxied Each](./docs/proxied-each.md)
-- [Async Image](./docs/async-image.md)
-- [Cache Container](./docs/cache-container.md)
-- [Magic Array](./docs/magic-array.md)
-- [Default CSS](./docs/css.md)
+- [Occlusion Collection](./docs/api/occlusion-collection.md)
+- [Proxied Each](./docs/api/proxied-each.md)
+- [Async Image](./docs/api/async-image.md)
+- [Cache Container](./docs/capi/ache-container.md)
+- [Magic Array](./docs/api/magic-array.md)
+- [Default CSS](./docs/api/css.md)
+- [Select](./docs/api/select.md)
+- [Select Multiple](./docs/api/multi-select.md)
+- [Autocomplete](./docs/api/autocomplete.md)
+- [Autocomplete Multiple](./docs/api/multi-autocomplete.md)
+- [Off Canvas](./docs/api/off-canvas.md)
+- [Occluder](./docs/api/occluder)
 
