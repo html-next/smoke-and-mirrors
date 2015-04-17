@@ -2,8 +2,30 @@ import Ember from "ember";
 import MagicArrayMixin from "../../mixins/magic-array";
 import OcclusionView from "./occlusion-item.view";
 import getTagDescendant from "../../utils/get-tag-descendant";
+import nextFrame from "../../utils/next-frame";
 
-export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayMixin, {
+const {
+  ContainerView,
+  TargetActionSupport,
+  run,
+  assert,
+  on,
+  observer
+} = Ember;
+
+const {
+  debounce,
+  schedule,
+  scheduleOnce,
+  throttle,
+  next,
+  later,
+  cancel
+} = run;
+
+const jQuery = Ember.$;
+
+export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
   //–––––––––––––– Required Settings
 
@@ -313,7 +335,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   sendAction: function(name, context) {
     var action = this.get(name);
     if (action) {
-      Ember.run.next(this, this.triggerAction, {
+      next(this, this.triggerAction, {
         action: action,
         actionContext: context,
         target: this.get('controller')
@@ -399,11 +421,6 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
     var topViewIndex = this._findTopView(currentUpperBound, edges.viewportTop);
     var bottomViewIndex = topViewIndex;
     var lastIndex = childViews.length - 1;
-
-// TODO, confirm that removing this is now 100% ok
-//    if (!childViews[topViewIndex]) {
-//    this._initViews();
-//  }
 
     // views to cull
     var toCull = [];
@@ -500,10 +517,10 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
 
     // cancel any previous update
     //TODO possibly redundant?
-    Ember.run.cancel(this._nextBatchUpdate);
+    cancel(this._nextBatchUpdate);
 
     // update view states
-    Ember.run.schedule('afterRender', this, function updateViewStates(toCull, toCache, toHide, toShow, toScreen) {
+    schedule('afterRender', this, function updateViewStates(toCull, toCache, toHide, toShow, toScreen) {
 
       //reveal on screen views
       toScreen.forEach(function (v) { v.show(); });
@@ -517,8 +534,8 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
       //cull views
       toCull.forEach(function (v) { v.cull(); });
 
-      Ember.run.cancel(this._nextBatchUpdate);
-      this._nextBatchUpdate = Ember.run.later(this, this._updateViews, toShow, this.get('cycleDelay'));
+      cancel(this._nextBatchUpdate);
+      this._nextBatchUpdate = later(this, this._updateViews, toShow, this.get('cycleDelay'));
 
     }, toCull, toCache, toHide, toShow, toScreen);
 
@@ -535,18 +552,18 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
     // reveal batch
     while (processed++ < updateBatchSize && toShow.length > 0) {
       view = toShow.shift();
-      Ember.run.schedule('afterRender', view, view.show);
+      schedule('afterRender', view, view.show);
     }
 
     //schedule next batch
     if (toShow.length !== 0) {
-      this._nextBatchUpdate = Ember.run.later(this, this._updateViews, toShow, delay);
+      this._nextBatchUpdate = later(this, this._updateViews, toShow, delay);
     }
 
   },
 
   _scheduleOcclusion: function() {
-    Ember.run.scheduleOnce('afterRender', this, this._cycleViews);
+    scheduleOnce('afterRender', this, this._cycleViews);
   },
 
 
@@ -555,12 +572,12 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
 
   //–––––––––––––– Setup/Teardown
 
-  setup: Ember.on('didInsertElement', function() {
+  setup: on('didInsertElement', function() {
 
     var id = this.get('elementId');
     var scrollThrottle = this.get('scrollThrottle');
     var containerSelector = this.get('containerSelector');
-    var _container = containerSelector ? Ember.$(containerSelector) : this.$().parent();
+    var _container = containerSelector ? jQuery(containerSelector) : this.$().parent();
     this.set('_container', _container);
 
     // This may need vendor prefix detection
@@ -578,12 +595,12 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
       if (this.get('__isPrepending')) {
         return false;
       }
-      Ember.run.throttle(this, this._scheduleOcclusion, scrollThrottle);
+      throttle(this, this._scheduleOcclusion, scrollThrottle);
     }.bind(this);
 
     _container.bind('scroll.occlusion-culling.' + id, onScrollMethod);
     _container.bind('touchmove.occlusion-culling.' + id, onScrollMethod);
-    Ember.$(window).bind('resize.occlusion-culling.' + id, this._initEdges.bind(this));
+    jQuery(window).bind('resize.occlusion-culling.' + id, this._initEdges.bind(this));
 
     //draw initial boundaries
     this._initEdges();
@@ -603,7 +620,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
    * state in order to quickly reboot to the same
    * scroll position on relaunch.
    */
-  _cleanup: Ember.on('willDestroyElement', function() {
+  _cleanup: on('willDestroyElement', function() {
 
     //cleanup scroll
     var id = this.get('elementId');
@@ -611,7 +628,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
 
     _container.unbind('scroll.occlusion-culling.' + id);
     _container.unbind('touchmove.occlusion-culling.' + id);
-    Ember.$(window).unbind('resize.occlusion-culling.' + id);
+    jQuery(window).unbind('resize.occlusion-culling.' + id);
 
     //cache state
     var storageKey = this.get('storageKey');
@@ -651,8 +668,11 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
 
     this.__prependViewParams = null;
 
-    Ember.run.next(this, function() {
+    next(this, function() {
       this.set('__isPrepending', false);
+
+      // ensure that visible views are recalculated following an array length change
+      nextFrame(this, this._cycleViews);
     });
   },
 
@@ -681,9 +701,12 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
             addCount: addCount,
             affectedViews: affectedViews
           };
-          window.requestAnimationFrame(self.__performViewPrepention);
+          nextFrame(self, self.__performViewPrepention);
         } else {
           self.replace(offset, 0, affectedViews);
+
+          // ensure that visible views are recalculated following an array length change
+          nextFrame(self, self._cycleViews);
         }
 
       }
@@ -692,10 +715,9 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   },
 
   /**!
-   * Initialize views for the proxied content. This method
-   * is also called when the proxied content updates. It
-   * uses the same diffing behavior as the proxy itself
-   * to adjust it's length;
+   * Initialize views for the proxied content.  It
+   * uses the same diffing behavior as the proxy
+   * itself to adjust it's length;
    *
    * It should only be called once.
    *
@@ -723,7 +745,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
   },
 
 
-  _initEdges: Ember.observer('containerHeight', function calculateViewStateBoundaries() {
+  _initEdges: observer('containerHeight', function calculateViewStateBoundaries() {
 
     var _container = this.get('_container');
 
@@ -733,7 +755,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
     var _invisibleBufferHeight = Math.round(viewportHeight * this.get('invisibleBuffer'));
     var _cacheBufferHeight = Math.round(viewportHeight * this.get('cacheBuffer'));
 
-    var _maxHeight = this.get('containerHeight') ? this.$().height() : Ember.$('body').height();
+    var _maxHeight = this.get('containerHeight') ? this.$().height() : jQuery('body').height();
 
     // segment top break points
     var viewportTop =_container.position().top;
@@ -762,6 +784,9 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
       cacheBottom: cacheBottom
     });
 
+    // ensure that visible views are recalculated following a resize
+    debounce(this, this._cycleViews, this.get('scrollThrottle'));
+
   }),
 
   /**!
@@ -784,7 +809,7 @@ export default Ember.ContainerView.extend(Ember.TargetActionSupport, MagicArrayM
     }
 
     var keyForId = this.get('keyForId');
-    Ember.assert('You must supply a key for the view', keyForId);
+    assert('You must supply a key for the view', keyForId);
 
     this.set('itemViewClass', OcclusionView.extend({
 

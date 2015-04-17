@@ -1,7 +1,5 @@
 import Ember from "ember";
 
-const rAF = window.animationFrame;
-
 const {
   assert
 } = Ember;
@@ -22,11 +20,11 @@ export default function scheduleIntoNextAmimationFrame(context, method) {
   assert("The second param provided to scheduleIntoNextAnimationFrame must be a function.", typeof method === 'function');
 
   // make requestAnimationFrame support contexts and params
-  var frameCallback = function scheduledFrameTask(method, args, granularity) {
-    args.unshift(granularity);
-    return method.apply(this, args);
-  }.bind(context, restArgs);
+  var frameCallback = function scheduledFrameTask(method, orgRestArgs, granularity) {
+    orgRestArgs.unshift(granularity);
+    return method.apply(this, orgRestArgs);
+  }.bind(context, method, restArgs);
 
-  return rAF(frameCallback);
+  return window.requestAnimationFrame(frameCallback);
 
 }
