@@ -1,6 +1,11 @@
 import Ember from "ember";
 
-var SmartObjectProxy = Ember.ObjectProxy.extend({
+const {
+  get: get,
+  guidFor
+  } = Ember;
+
+export default Ember.ObjectProxy.extend({
 
   __key: null,
   __indexPath: null,
@@ -13,19 +18,19 @@ var SmartObjectProxy = Ember.ObjectProxy.extend({
     var isIndexable = true;
 
     if (key) {
-      index = Ember.get(content, key);
+      index = get(content, key);
     } else {
 
       if (!index) {
-        index = Ember.guidFor(content);
+        index = guidFor(content);
       }
 
       if (!index) {
-        index = Ember.get(content, 'id');
+        index = get(content, 'id');
       }
 
       if (!index) {
-        index = Ember.guidFor(this);
+        index = guidFor(this);
         isIndexable = false;
       }
 
@@ -36,26 +41,11 @@ var SmartObjectProxy = Ember.ObjectProxy.extend({
       __isIndexable: isIndexable
     });
 
+  },
+
+  init: function() {
+    this._super();
+    this.__updateIndex();
   }
 
 });
-
-var createProxiedItem = function createProxiedItem(content, key) {
-
-  var obj = SmartObjectProxy.create({
-    content: content,
-    __indexPath: key
-  });
-
-  obj.__updateIndex();
-
-  return obj;
-
-};
-
-export {
-  SmartObjectProxy,
-  createProxiedItem
-};
-
-export default SmartObjectProxy;
