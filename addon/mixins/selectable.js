@@ -12,32 +12,22 @@ const isString = function isString(str) {
 
 const {
   get: get,
-  Component,
   computed,
-  on,
+  copy,
   run,
+  A,
   isArray,
   assert,
   $
   } = Ember;
 
 const {
-  indexOf,
-  filter,
-  forEach
-  } = Ember.EnumerableUtils;
-
-const {
-  scheduleOnce,
-  debounce,
-  bind,
   next
-  } = run;
+} = run;
 
 
 export default Mixin.extend(MagicArrayMixin, {
 
-  tagName: 'x-select',
   attributeBindings: ['disabled'],
 
   /**!
@@ -81,6 +71,11 @@ export default Mixin.extend(MagicArrayMixin, {
    * @default null
    */
   selected: null,
+  _selected: null,
+
+  /**!
+   * If true, updates to selected will not be propagated back.
+   */
 
   /**!
    * Action to trigger when the selection's value changes.
@@ -101,14 +96,14 @@ export default Mixin.extend(MagicArrayMixin, {
 
     // bail if empty
     if (!content) {
-      return Ember.A();
+      return A();
     }
 
     // assert we have an array
     assert("Supplied `content` for 'x-select' must be an array.", isArray(content));
 
     // wrap the array with NativeArray extensions
-    _controlled = Ember.A(content);
+    _controlled = A(content);
 
     // filter the array if desired
     if (filterMethod) {
@@ -129,12 +124,12 @@ export default Mixin.extend(MagicArrayMixin, {
 
       // hash of values grouped by label
       var groupHash = {};
-      var groups = Ember.A();
+      var groups = A();
 
       _controlled.forEach(function (item) {
         var label = get(item, groupPath);
         if (!groupHash.hasOwnProperty(label)) {
-          groupHash[label] = ProxiedGroup.create({ label: label, content: Ember.A() });
+          groupHash[label] = { label: label, contentToProxy: A() };
           groups.addObject(groupHash[label]);
         }
         groupHash[label].content.addObject(item);
@@ -147,13 +142,63 @@ export default Mixin.extend(MagicArrayMixin, {
 
   }),
 
+  /**!
+   * If true the last remaining value cannot be toggled off.
+   */
   enforceOne: null,
-  optionLabelPath: 'content',
-  optionValuePath: 'content',
-  optionSecondaryLabelPath: false,
+
+  /**!
+   * Property accessor to sort the array by before grouping
+   * Multiple selectors can be used separated by spaces.
+   */
   sortBy: null,
-  optionGroupPath: null,
+
+  /**!
+   * A function with which to filter the array. The function
+   * will receive an item from the array and should return a
+   * boolean value indicating whether the item should be included.
+   */
   filter: null,
+
+  /**!
+   * The path to the label for an item
+   * (must start with content)
+   */
+  optionLabelPath: 'content',
+  _labelPath: '',
+
+  /**!
+   * The path to the value for an item
+   * (must start with content)
+   */
+  optionValuePath: 'content',
+  _valuePath: '',
+
+  /**!
+   * The path to a secondary label for an item
+   * (must start with content)
+   */
+  optionSecondaryLabelPath: false,
+
+  /**!
+   * The path to a property that serves as both a label
+   * and a grouping mechanism to group the items in the array.
+   *
+   * The array will be filtered and sorted before it is grouped,
+   * group labels will appear in the order that they occur in the
+   * sorted content.
+   */
+  optionGroupPath: null,
+
+  /**!
+   * (optional) The name of a view class to use for the group.
+   * This is optional even when using groups.  The default class
+   * will tag match it's parent.
+   *
+   * If overridden, the view should expect to receive an object
+   * containing `label` and `content`.  `content` is the outcome
+   * of a MagicArray proxy.
+   */
   groupViewClass: null,
   optionViewClass: null,
 
@@ -164,7 +209,7 @@ export default Mixin.extend(MagicArrayMixin, {
       // toggle presence in selected array
       if (this.get('multiple')) {
 
-        var selected = this.get('selected');
+        var selected = this.get('_selected');
         if (selected.indexOf(object)) {
           selected.removeObject(object);
         } else {
@@ -173,8 +218,8 @@ export default Mixin.extend(MagicArrayMixin, {
 
         // toggle selection
       } else {
-        if (this.get('selected') !== object || this.get('enforceOne')) {
-          this.set('selected', object);
+        if (this.get('_selected') !== object || this.get('enforceOne')) {
+          this.set('_selected', object);
         }
       }
       return false;
@@ -184,10 +229,41 @@ export default Mixin.extend(MagicArrayMixin, {
 
 
   init: function() {
-    // ensure `selected` is a `NativeArray` if `multiple=true`
-    // ensure `selected` is not an array if `multiple=false`
+
+    this._super();
+
+    var isMultiple = this.get('multiple');
+    var selected = this.get('selected');
+    var unidirectional = this.get('unidirectional');
+    var valuePath = this.get('optionValuePath').replace(/^content\.?/, '');
+    var labelPath = this.get('optionLabelPath').replace(/^content\.?/, '');
+
     // set _labelPath and _valuePath
-    // _super
+    this.set('_labelPath', labelPath);
+    this.set('_valuePath', valuePath);
+
+    // ensure `selected` is a `NativeArray` if `multiple=true`
+    if (isMultiple) {
+      if (!isArray(selected)) {
+        if (selected) {
+          this.set('selected', A([selected]));
+        } else {
+          this.set('selected', A());
+        }
+      }
+
+      // ensure `selected` is not an array if `multiple=false`
+    } else {
+      assert("`selected` should not be an array if `multiple=false`.", !isArray(selected));
+    }
+
+    // setup unidirection flow if desired
+    if (!unidirectional) {
+      this.set('_selected', computed.alias('selected'));
+    } else {
+      this.set('_selected', copy(selected, true));
+    }
+
   }
 
 });

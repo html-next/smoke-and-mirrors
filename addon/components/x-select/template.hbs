@@ -1,0 +1,9 @@
+{{#if optionGroupPath}}
+  {{#each preparedContent as |group|}}
+      {{view groupView content=group selected=_selected}}
+  {{/each}}
+{{else}}
+  {{#each preparedContent as |option|}}
+    {{view optionView content=item}}
+  {{/each}}
+{{/if}}
