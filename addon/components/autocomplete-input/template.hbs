@@ -1,0 +1,30 @@
+<div class="row autocompleteForm">
+   <ul class="col-xs-12">
+       {{#if view.multiple}}
+           {{#each tag in view.controlledSelection}}
+               {{view view.Tag content=tag}}
+           {{/each}}
+       {{/if}}
+       <li class="autocompleteTag selectableTag autocompleteInput">
+           <i class="searchBarIcon glyphicon glyphicon-search"></i>
+           {{view view.textInput value=context._searchValue}}
+           <div class="container-fluid autocompleteOptions selectableOptions">
+           {{#if view.optionGroupPath}}
+             {{#each group in context.groupedContent}}
+             <div class="row selectableGroup">
+                 <div class="col-xs-12 selectableGroupLabel">
+                       {{group.label}}
+                </div>
+                 {{view view.groupView content=group.content label=group.label}}
+            </div>
+             {{/each}}
+           {{else}}
+            {{#each item in view.filteredContent}}
+               {{view view.optionView content=item}}
+            {{/each}}
+           {{/if}}
+           </div>
+       </li>
+   </ul>
+</div>
+{{yield}}

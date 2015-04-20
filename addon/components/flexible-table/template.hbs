@@ -1,0 +1,16 @@
+<thead>
+  <tr>
+      {{#each _headers as |header|}}
+        <th>{{header}}</th>
+      {{/each}}
+  </tr>
+</thead>
+<tbody>
+  {{#each _data as |row|}}
+    <tr>
+        {{#each row as |cell|}}
+          <td>{{cell}}</td>
+        {{/each}}
+    </tr>
+  {{/each}}
+</tbody>
