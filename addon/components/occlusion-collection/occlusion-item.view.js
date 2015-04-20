@@ -1,16 +1,16 @@
 import Ember from "ember";
 import CacheableMixin from "../../mixins/cacheable";
 
-var STATE_LIST = ['culled', 'cached', 'hidden', 'visible'];
+const STATE_LIST = ['culled', 'cached', 'hidden', 'visible'];
 
-var STATE_TRANSITIONS_UP = [
+const STATE_TRANSITIONS_UP = [
   { state: 'culled', method: '' },
   { state: 'cached', method: '_ov_prepare' },
   { state: 'hidden', method: '_ov_insert' },
   { state: 'visible', method: '_ov_reveal' }
 ];
 
-var STATE_TRANSITIONS_DOWN = [
+const STATE_TRANSITIONS_DOWN = [
   { state: 'visible', method: '' },
   { state: 'hidden', method: '_ov_obscure' },
   { state: 'cached', method: '_ov_remove' },

@@ -1,8 +1,5 @@
 import Ember from "ember";
-import {
-  SmartObjectProxy,
-  createProxiedItem
-  } from "../utils/smart-object-proxy";
+import SmartObjectProxy from "../utils/smart-object-proxy";
 
 var Mixin = Ember.Mixin.create({
 
@@ -42,7 +39,7 @@ var Mixin = Ember.Mixin.create({
         var i = 0;
         var diff = newLength - content.get('length');
         for (i = 0; i < diff; i++) {
-          newObjects.push(createProxiedItem(proxied[i], key));
+          newObjects.push(SmartObjectProxy.create({content: proxied[i], __indexPath: key}));
         }
         if (newObjects.length) {
           content.replace(0, 0, newObjects);
@@ -57,7 +54,7 @@ var Mixin = Ember.Mixin.create({
             proxiedObject.set('content', item);
             proxiedObject.__updateIndex();
           } else {
-            newObjects.push(createProxiedItem(item, key));
+            newObjects.push(SmartObjectProxy.create({content: item, __indexPath: key}));
           }
         });
 
