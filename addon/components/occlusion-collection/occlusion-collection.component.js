@@ -677,8 +677,10 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     }
 
     var fontSize = window.getComputedStyle(element).getPropertyValue('fontSize');
-    return parseInt(defaultHeight, 10) * parseInt(fontSize, 10);
+    var height = parseFloat(defaultHeight, 10) * parseFloat(fontSize, 10);
 
+    Ember.Logger.debug('Calculated Default Height',  height, defaultHeight, fontSize);
+    return height;
   },
 
   __performViewPrepention: function() {
@@ -688,6 +690,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     var params = this.__prependViewParams;
     var container = this.get('_container').get(0);
     var added = params.addCount * this._getTrueDefaultHeight();
+    Ember.Logger.debug('true default height', this._getTrueDefaultHeight());
 
     this.replace(params.offset, 0, params.affectedViews);
     container.scrollTop += added;
@@ -826,7 +829,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     this.set('__performViewPrepention', prependFn);
 
     var itemViewClass = this.get('itemViewClass');
-    var defaultHeight = this.get('defaultHeight');
+    var defaultHeight = this._getTrueDefaultHeight();
     var collectionTagName = (this.get('tagName') || '').toLowerCase();
     var itemTagName = this.get('itemTagName') || getTagDescendant(collectionTagName);
 
@@ -843,7 +846,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       classNames: [itemViewClass + '-occlusion', 'occluded-view'],
       tagName : itemTagName,
       innerView: itemViewClass,
-      defaultHeight: defaultHeight,
+      defaultHeight: this.get('defaultHeight'),
 
       _height:  this.get('alwaysUseDefaultHeight') ? defaultHeight : null,
 

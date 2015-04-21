@@ -131,19 +131,19 @@ export default Ember.ContainerView.extend({
         if (!parentView.get('_height')) {
 
           if (this.get('tagName') === '') {
-            var height = parentView.$().height() + 'px';
+            var height = parentView.$().height();
             parentView.set('_height', height);
             Ember.run.schedule('render', parentView, function() {
               if (this.element) {
-                this.element.style.height = height;
+                this.element.style.height = height + 'px';
               }
             });
           } else {
-            var height = this.$().height() + 'px';
+            var height = this.$().height();
             parentView.set('_height', height);
             Ember.run.schedule('render', parentView, function() {
               if (this.element) {
-                this.element.style.height = height;
+                this.element.style.height = height + 'px';
               }
             });
           }
@@ -305,7 +305,7 @@ export default Ember.ContainerView.extend({
 
   willInsertElement: function() {
     this.element.style.visibility = 'hidden';
-    this.element.style.height = (this.get('_height') || this.get('defaultHeight')) + 'px';
+    this.element.style.height = this.get('_height') ? this.get('_height') + 'px' : this.get('defaultHeight');
   }
 
 });
