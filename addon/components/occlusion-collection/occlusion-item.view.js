@@ -131,16 +131,20 @@ export default Ember.ContainerView.extend({
         if (!parentView.get('_height')) {
 
           if (this.get('tagName') === '') {
-            var height = parentView.$().height();
+            var height = parentView.$().height() + 'px';
             parentView.set('_height', height);
-            Ember.run.schedule('afterRender', parentView, function() {
-              this.element.style.height = height + 'px';
+            Ember.run.schedule('render', parentView, function() {
+              if (this.element) {
+                this.element.style.height = height;
+              }
             });
           } else {
-            var height = this.$().height();
+            var height = this.$().height() + 'px';
             parentView.set('_height', height);
-            Ember.run.schedule('afterRender', parentView, function() {
-              this.element.style.height = height + 'px';
+            Ember.run.schedule('render', parentView, function() {
+              if (this.element) {
+                this.element.style.height = height;
+              }
             });
           }
 

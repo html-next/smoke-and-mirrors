@@ -59,7 +59,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
    * If your content will always have the height specified by `defaultHeight`, you can improve performance
    * by specifying `alwaysUseDefaultHeight: true`.
    */
-  defaultHeight: 75,
+  defaultHeight: "75px",
 
 
   //–––––––––––––– Optional Settings
@@ -654,6 +654,32 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
   }),
 
+  _getTrueDefaultHeight: function() {
+    var defaultHeight = '' + this.get('defaultHeight');
+    if (defaultHeight.indexOf('em') === -1) {
+      return parseInt(defaultHeight, 10);
+    }
+    var element;
+
+    // use body if rem
+    if (defaultHeight.indexOf('rem')) {
+      element = window.document.body;
+    } else {
+
+      // use an actual child if we have one
+      if (this._topVisible && this._topVisible.get('element')) {
+        element = this._childViews[0].get('element');
+
+      // use the occlusion component
+      } else {
+        element = this.get('element');
+      }
+    }
+
+    var fontSize = window.getComputedStyle(element).getPropertyValue('fontSize');
+    return parseInt(defaultHeight, 10) * parseInt(fontSize, 10);
+
+  },
 
   __performViewPrepention: function() {
 
@@ -661,7 +687,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
     var params = this.__prependViewParams;
     var container = this.get('_container').get(0);
-    var added = params.addCount * this.get('defaultHeight');
+    var added = params.addCount * this._getTrueDefaultHeight();
 
     this.replace(params.offset, 0, params.affectedViews);
     container.scrollTop += added;
@@ -784,6 +810,8 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       cacheBottom: cacheBottom
     });
 
+    Ember.Logger.debug('Edges', this.get('_edges'));
+
     // ensure that visible views are recalculated following a resize
     debounce(this, this._cycleViews, this.get('scrollThrottle'));
 
@@ -798,11 +826,10 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     this.set('__performViewPrepention', prependFn);
 
     var itemViewClass = this.get('itemViewClass');
-    var defaultHeight = parseInt(this.get('defaultHeight'), 10);
+    var defaultHeight = this.get('defaultHeight');
     var collectionTagName = (this.get('tagName') || '').toLowerCase();
     var itemTagName = this.get('itemTagName') || getTagDescendant(collectionTagName);
 
-    this.set('defaultHeight', defaultHeight);
 
     if (itemTagName === 'none') {
       itemTagName = '';
