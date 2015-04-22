@@ -124,11 +124,35 @@ export default Ember.ContainerView.extend({
       attributeBindings: ['hidden'],
       hidden: true,
 
+      __getTrueDefaultHeight: function() {
+        var defaultHeight = '' + this.get('defaultHeight');
+        if (defaultHeight.indexOf('em') === -1) {
+          return parseInt(defaultHeight, 10);
+        }
+        var element;
+
+        // use body if rem
+        if (defaultHeight.indexOf('rem') !== -1) {
+          element = window.document.body;
+        } else {
+          element = this.get('element') || window.document.body;
+        }
+
+        var fontSize = window.getComputedStyle(element).getPropertyValue('font-size');
+        return parseFloat(defaultHeight) * parseFloat(fontSize);
+
+      },
+
       __cacheHeight: Ember.on('didInsertElement', function() {
 
         var parentView = this.get('parentView');
 
         if (!parentView.get('_height')) {
+
+          if (parentView.get('alwaysUseDefaultHeight')) {
+            parentView.set('_height', this.__getTrueDefaultHeight());
+            return;
+          }
 
           if (this.get('tagName') === '') {
             var height = parentView.$().height();
@@ -262,9 +286,8 @@ export default Ember.ContainerView.extend({
 
   _cachedView: null,
 
-  //TODO alwaysUseDefaultHeight for performance gain when using regular lists
-  //TODO enable height cacheing
   _height: 0,
+
 
   getControllerFor: function () {
     var itemController = this.get('itemController');
@@ -282,9 +305,9 @@ export default Ember.ContainerView.extend({
     var controller = null;
     var container = this.get('container');
 
-    var controllerFullName = 'controller:' + itemController,
-      factory = container.lookupFactory(controllerFullName),
-      parentController = this.get('controller');
+    var controllerFullName = 'controller:' + itemController;
+    var factory = container.lookupFactory(controllerFullName);
+    var parentController = this.get('controller');
 
     // let ember generate controller if needed
     if (factory === undefined) {
