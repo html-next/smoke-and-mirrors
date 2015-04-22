@@ -676,10 +676,9 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       }
     }
 
-    var fontSize = window.getComputedStyle(element).getPropertyValue('fontSize');
+    var fontSize = window.getComputedStyle(element).getPropertyValue('font-size');
     var height = parseFloat(defaultHeight, 10) * parseFloat(fontSize, 10);
 
-    Ember.Logger.debug('Calculated Default Height',  height, defaultHeight, fontSize);
     return height;
   },
 
@@ -690,7 +689,6 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     var params = this.__prependViewParams;
     var container = this.get('_container').get(0);
     var added = params.addCount * this._getTrueDefaultHeight();
-    Ember.Logger.debug('true default height', this._getTrueDefaultHeight());
 
     this.replace(params.offset, 0, params.affectedViews);
     container.scrollTop += added;
@@ -812,8 +810,6 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       invisibleBottom: invisibleBottom,
       cacheBottom: cacheBottom
     });
-
-    Ember.Logger.debug('Edges', this.get('_edges'));
 
     // ensure that visible views are recalculated following a resize
     debounce(this, this._cycleViews, this.get('scrollThrottle'));
