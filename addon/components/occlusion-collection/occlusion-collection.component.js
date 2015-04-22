@@ -662,7 +662,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     var element;
 
     // use body if rem
-    if (defaultHeight.indexOf('rem')) {
+    if (defaultHeight.indexOf('rem') !== -1) {
       element = window.document.body;
     } else {
 
