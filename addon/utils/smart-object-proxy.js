@@ -10,9 +10,15 @@ export default Ember.ObjectProxy.extend({
   __key: null,
   __indexPath: null,
   __isIndexable: true,
-  __updateIndex: function () {
+  __update: function (content) {
 
-    var content = this.get('content');
+    if (content) {
+      this.set('content', content);
+      this.notifyPropertyChange('content');
+    } else {
+      content = this.get('content');
+    }
+
     var key = this.get('__indexPath');
     var index;
     var isIndexable = true;
@@ -45,7 +51,7 @@ export default Ember.ObjectProxy.extend({
 
   init: function() {
     this._super();
-    this.__updateIndex();
+    this.__update();
   }
 
 });

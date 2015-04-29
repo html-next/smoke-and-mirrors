@@ -16,6 +16,7 @@ var Mixin = Ember.Mixin.create({
     var newLength;
     var newObjects = [];
 
+    // play nice with arrays that are already proxied
     if (proxied.get('content')) {
       proxied = proxied.get('content');
     }
@@ -51,8 +52,7 @@ var Mixin = Ember.Mixin.create({
         proxied.forEach(function(item, index) {
           var proxiedObject = content.objectAt(index);
           if (proxiedObject) {
-            proxiedObject.set('content', item);
-            proxiedObject.__updateIndex();
+            proxiedObject.__update(item);
           } else {
             newObjects.push(SmartObjectProxy.create({content: item, __indexPath: key}));
           }
@@ -75,7 +75,7 @@ var Mixin = Ember.Mixin.create({
 
     this.endPropertyChanges();
 
-  }).on('init'),
+  }),
 
   _changeIsPrepend: function(newArray, proxiedArray, key) {
 
@@ -92,6 +92,11 @@ var Mixin = Ember.Mixin.create({
     var newInitialItem = Ember.get(newArray[-lengthDifference], key);
     return oldInitialItem === newInitialItem;
 
+  },
+
+  init: function() {
+    this._super.apply(this, arguments);
+    this._updateProxy();
   }
 
 });

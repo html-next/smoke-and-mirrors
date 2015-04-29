@@ -75,3 +75,21 @@ tables, selects, lists, each, and bi-directional infinite scrolling.
 - [Off Canvas](./docs/api/off-canvas.md)
 - [Occluder](./docs/api/occluder)
 
+## Animation
+
+We aren't trying to re-invent the wheel.  Currently this library very liberally
+steals from liquid-fire.  Before you raise your pitchforks, here's how, why, and
+the plan.
+
+### What's Borrowed
+
+### What's Unique
+
+Liquid-fire's transition maps are amazing, but they are only useful for stateful
+transitions.  Some transitions aren't stateful, this library has primitives to help
+with that.
+
+### What's the Plan.
+
+Animations are defined in `animations.js` the same way that animations are defined
+in `transitions.js`.  The similarity is for more than 

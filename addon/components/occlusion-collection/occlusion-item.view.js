@@ -124,39 +124,16 @@ export default Ember.ContainerView.extend({
       attributeBindings: ['hidden'],
       hidden: true,
 
-      __getTrueDefaultHeight: function() {
-        var defaultHeight = '' + this.get('defaultHeight');
-        if (defaultHeight.indexOf('em') === -1) {
-          return parseInt(defaultHeight, 10);
-        }
-        var element;
-
-        // use body if rem
-        if (defaultHeight.indexOf('rem') !== -1) {
-          element = window.document.body;
-        } else {
-          element = this.get('element') || window.document.body;
-        }
-
-        var fontSize = window.getComputedStyle(element).getPropertyValue('font-size');
-        return parseFloat(defaultHeight) * parseFloat(fontSize);
-
-      },
-
       __cacheHeight: Ember.on('didInsertElement', function() {
 
         var parentView = this.get('parentView');
 
-        if (!parentView.get('_height')) {
-
-          if (parentView.get('alwaysUseDefaultHeight')) {
-            parentView.set('_height', this.__getTrueDefaultHeight());
-            return;
-          }
+        if (!parentView.get('hasTrueHeight')) {
 
           if (this.get('tagName') === '') {
             var height = parentView.$().height();
             parentView.set('_height', height);
+            parentView.set('hasTrueHeight', true);
             Ember.run.schedule('render', parentView, function() {
               if (this.element) {
                 this.element.style.height = height + 'px';
@@ -165,6 +142,7 @@ export default Ember.ContainerView.extend({
           } else {
             var height = this.$().height();
             parentView.set('_height', height);
+            parentView.set('hasTrueHeight', true);
             Ember.run.schedule('render', parentView, function() {
               if (this.element) {
                 this.element.style.height = height + 'px';
@@ -287,7 +265,31 @@ export default Ember.ContainerView.extend({
   _cachedView: null,
 
   _height: 0,
+  hasTrueHeight: false,
 
+  __getTrueDefaultHeight: function() {
+    var defaultHeight = '' + this.get('defaultHeight');
+    if (defaultHeight.indexOf('em') === -1) {
+      return parseInt(defaultHeight, 10);
+    }
+    var element;
+
+    // use body if rem
+    if (defaultHeight.indexOf('rem') !== -1) {
+      element = window.document.body;
+    } else {
+      element = this.get('element');
+      if (!element || !element.parentNode) {
+        element = window.document.body;
+      }
+    }
+
+    var fontSize = window.getComputedStyle(element).getPropertyValue('font-size');
+    var height = parseFloat(defaultHeight) * parseFloat(fontSize);
+
+    return height;
+
+  },
 
   getControllerFor: function () {
     var itemController = this.get('itemController');
@@ -327,8 +329,37 @@ export default Ember.ContainerView.extend({
   },
 
   willInsertElement: function() {
+
+    var _height = this.get('_height');
+    var defaultHeight = this.get('defaultHeight');
+
     this.element.style.visibility = 'hidden';
-    this.element.style.height = this.get('_height') ? this.get('_height') + 'px' : this.get('defaultHeight');
-  }
+    this.element.style.height = _height ? _height + 'px' : defaultHeight;
+
+    if (!_height) {
+      this.set('_height', this.__getTrueDefaultHeight());
+    }
+
+  },
+
+  updateHeightCache: Ember.on('didInsertElement', function updateHeightCache() {
+
+    var _height = this.get('_height');
+    var hasTrueHeight = this.get('hasTrueHeight');
+    var alwaysUseDefaultHeight = this.get('alwaysUseDefaultHeight');
+    var defaultHeight = this.get('defaultHeight');
+
+    if (!hasTrueHeight) {
+      _height = this.__getTrueDefaultHeight();
+
+      if (alwaysUseDefaultHeight) {
+        this.set('hasTrueHeight', true);
+      }
+      this.set('_height', _height);
+
+      this.element.style.height = this.get('defaultHeight');
+    }
+
+  })
 
 });

@@ -185,10 +185,18 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
   //–––––––––––––– Initial State
 
   /**!
-   *
+   *  If set, this will be used to set
+   *  the scroll position at which the
+   *  component initially renders.
    */
-  //TODO enable this feature.
-  _scrollPosition: '',
+  _scrollPosition: 0,
+
+  /**!
+   * If set, if _scrollPosition is empty
+   * at initialization, the component will
+   * render starting at the bottom.
+   */
+  startFromBottom: false,
 
   /**!
    *
@@ -605,12 +613,33 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     //draw initial boundaries
     this._initEdges();
 
+    this._initializeScrollState();
+
     //schedule the initial render
     //TODO does this using afterRender delay initial rendering too long?
     this._scheduleOcclusion();
 
   }),
 
+
+  _initializeScrollState: function() {
+
+    this.set('__isPrepending', true);
+
+    var height = this.$().height(); //__getEstimatedDefaultHeight();
+    if (!this.get('_scrollPosition')) {
+      this.set('_scrollPosition', height * content.get('length') + 'px');
+    }
+
+    var container = this.get('_container').get(0);
+    var scollPosition = this.get('_scrollPosition');
+    container.scrollTop = scrollPosition;
+
+    next(this, function() {
+      this.set('__isPrepending', false);
+    });
+
+  },
 
   /**!
    * Remove the event handlers for this instance
@@ -660,7 +689,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
     var params = this.__prependViewParams;
     var container = this.get('_container').get(0);
-    var added = params.addCount * this._getTrueDefaultHeight();
+    var added = params.addCount * this.__getEstimatedDefaultHeight();
 
     this.replace(params.offset, 0, params.affectedViews);
     container.scrollTop += added;
@@ -684,8 +713,6 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     }
 
     content.contentArrayDidChange = function handleArrayChange(items, offset, removeCount, addCount) {
-
-      Ember.Logger.debug('content array did change', items, offset, removeCount, addCount);
 
       var affectedViews = [], i;
       if (removeCount) {
@@ -746,6 +773,28 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
   },
 
+  __getEstimatedDefaultHeight: function() {
+    var defaultHeight = '' + this.get('defaultHeight');
+    if (defaultHeight.indexOf('em') === -1) {
+      return parseInt(defaultHeight, 10);
+    }
+    var element;
+
+    // use body if rem
+    if (defaultHeight.indexOf('rem') !== -1) {
+      element = window.document.body;
+    } else {
+      element = this.get('element');
+      if (!element || !element.parentNode) {
+        element = window.document.body;
+      }
+    }
+
+    var fontSize = window.getComputedStyle(element).getPropertyValue('font-size');
+    return parseFloat(defaultHeight) * parseFloat(fontSize);
+
+  },
+
 
   _initEdges: observer('containerHeight', function calculateViewStateBoundaries() {
 
@@ -785,8 +834,6 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       invisibleBottom: invisibleBottom,
       cacheBottom: cacheBottom
     });
-
-    Ember.Logger.debug('edges', this.get('_edges'));
 
     // ensure that visible views are recalculated following a resize
     debounce(this, this._cycleViews, this.get('scrollThrottle'));
