@@ -61,6 +61,12 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
    */
   defaultHeight: "75px",
 
+  /**!
+   * Cached value used once default height is
+   * calculated firmly
+   */
+  _defaultHeight: null,
+
 
   //–––––––––––––– Optional Settings
 
@@ -133,6 +139,10 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
    * scrolling.  A new render every ~16ms preserves 60fps.
    * Most re-renders with occlusion-culling have clocked well
    * below 1ms.
+   *
+   * Given that in a given scroll most of the movement stays within the
+   * visible area, it doesn't make sense to set the throttle
+   * to 16ms my default.
    */
   scrollThrottle: 32,
 
@@ -141,7 +151,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
    * `cycleDelay` sets the amount of time to debounce before updating
    * off screen items.
    */
-  cycleDelay: 25,
+  cycleDelay: 32,
 
   /**!
    * Sets how many items to update view state for at a time when updating
@@ -331,6 +341,11 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
   __isPrepending: false,
 
   /**!
+   * false until the first full setup has completed
+   */
+  __isInitialized: false,
+
+  /**!
    * If a prepend will occur, this stores the data that the callback
    * provided to requestAnimationFrame will use.
    */
@@ -416,6 +431,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     if (this.get('__isPrepending')) {
       return false;
     }
+
     var edges = this.get('_edges');
     var childViews = this._childViews;
 
@@ -528,7 +544,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     cancel(this._nextBatchUpdate);
 
     // update view states
-    schedule('afterRender', this, function updateViewStates(toCull, toCache, toHide, toShow, toScreen) {
+    schedule('render', this, function updateViewStates(toCull, toCache, toHide, toShow, toScreen) {
 
       //reveal on screen views
       toScreen.forEach(function (v) { v.show(); });
@@ -560,7 +576,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     // reveal batch
     while (processed++ < updateBatchSize && toShow.length > 0) {
       view = toShow.shift();
-      schedule('afterRender', view, view.show);
+      schedule('render', view, view.show);
     }
 
     //schedule next batch
@@ -571,7 +587,18 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
   },
 
   _scheduleOcclusion: function() {
-    scheduleOnce('afterRender', this, this._cycleViews);
+
+    // cache the scroll offset, and discard the cycle if
+    // movement is within (x) threshold
+    var scrollTop = this.get('_container').get(0).scrollTop;
+    var _scrollTop = this.get('_scrollPosition');
+    var defaultHeight = this.__getEstimatedDefaultHeight();
+
+    if (Math.abs(scrollTop - _scrollTop) >= defaultHeight / 2) {
+      this.set('_scrollPosition', scrollTop);
+      scheduleOnce('render', this, this._cycleViews);
+    }
+
   },
 
 
@@ -588,7 +615,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     var _container = containerSelector ? jQuery(containerSelector) : this.$().parent();
     this.set('_container', _container);
 
-    // This may need vendor prefix detection
+    // TODO This may need vendor prefix detection
     _container.css({
       '-webkit-transform' : 'translate3d(0,0,0)',
       '-moz-transform'    : 'translate3d(0,0,0)',
@@ -599,25 +626,24 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       'overflow-scrolling': 'touch'
     });
 
-    var onScrollMethod = function onScrollMethod () {
-      if (this.get('__isPrepending')) {
+    var onScrollMethod = function onScrollMethod() {
+      if (this.get('__isPrepending') || !this.get('__isInitialized')) {
         return false;
       }
       throttle(this, this._scheduleOcclusion, scrollThrottle);
     }.bind(this);
 
+    var onResizeMethod = function onResizeMethod() {
+      debounce(this, this._initEdges, scrollThrottle);
+    }.bind(this);
+
     _container.bind('scroll.occlusion-culling.' + id, onScrollMethod);
     _container.bind('touchmove.occlusion-culling.' + id, onScrollMethod);
-    jQuery(window).bind('resize.occlusion-culling.' + id, this._initEdges.bind(this));
+    jQuery(window).bind('resize.occlusion-culling.' + id, onResizeMethod);
 
     //draw initial boundaries
     this._initEdges();
-
     this._initializeScrollState();
-
-    //schedule the initial render
-    //TODO does this using afterRender delay initial rendering too long?
-    this._scheduleOcclusion();
 
   }),
 
@@ -626,18 +652,21 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
     this.set('__isPrepending', true);
 
-    var scrollPosition = this.get('_scrollPosition');
+    schedule('afterRender', this, function() {
+      var scrollPosition = this.get('_scrollPosition');
 
-    if (!scrollPosition && this.get('startFromBottom')) {
-      scrollPosition = this.$().height(); // /* * content.get('length') */ __getEstimatedDefaultHeight();
-      this.set('_scrollPosition', scrollPosition);
-    }
+      if (scrollPosition) {
+        this.get('_container').get(0).scrollTop = scrollPosition;
+      } else if (this.get('startFromBottom')) {
+        this.$().get(0).lastElementChild.scrollIntoView(false);
+      }
 
-    var container = this.get('_container').get(0);
-    container.scrollTop = scrollPosition;
+      next(this, function() {
+        this.set('__isPrepending', false);
+        this.set('__isInitialized', true);
+        this._cycleViews();
+      });
 
-    next(this, function() {
-      this.set('__isPrepending', false);
     });
 
   },
@@ -759,45 +788,63 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     var viewClass = this.get('itemViewClass');
     var self = this;
 
-    if (!content) {
-      throw "Content not available to _initViews!";
-    }
-    this.beginPropertyChanges();
-
     content.forEach(function (item) {
       self.pushObject(self.createChildView(viewClass, { content: item}));
     });
-
-    this.endPropertyChanges();
 
     this._reflectContentChanges();
 
   },
 
   __getEstimatedDefaultHeight: function() {
+
+    var _defaultHeight = this.get('_defaultHeight');
+
+    if (_defaultHeight) {
+      return _defaultHeight;
+    }
+
     var defaultHeight = '' + this.get('defaultHeight');
+
     if (defaultHeight.indexOf('em') === -1) {
-      return parseInt(defaultHeight, 10);
+      _defaultHeight = parseInt(defaultHeight, 10);
+      this.set('_defaultHeight', _defaultHeight);
+      return _defaultHeight;
     }
     var element;
 
     // use body if rem
     if (defaultHeight.indexOf('rem') !== -1) {
       element = window.document.body;
+      _defaultHeight = 1;
     } else {
       element = this.get('element');
       if (!element || !element.parentNode) {
         element = window.document.body;
+      } else {
+        _defaultHeight = 1;
       }
     }
 
     var fontSize = window.getComputedStyle(element).getPropertyValue('font-size');
+
+    if (_defaultHeight) {
+      _defaultHeight = parseFloat(defaultHeight) * parseFloat(fontSize);
+      this.set('_defaultHeight', _defaultHeight);
+      return _defaultHeight;
+    }
+
     return parseFloat(defaultHeight) * parseFloat(fontSize);
 
   },
 
+  _redrawEdges: observer('containerHeight', function calculateViewStateBoundaries() {
+    if (this.get('__hasInitialized')) {
+      debounce(this, this._initEdges, this.get('scrollThrottle'));
+    }
+  }),
 
-  _initEdges: observer('containerHeight', function calculateViewStateBoundaries() {
+  _initEdges: function() {
 
     var _container = this.get('_container');
 
@@ -839,7 +886,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     // ensure that visible views are recalculated following a resize
     debounce(this, this._cycleViews, this.get('scrollThrottle'));
 
-  }),
+  },
 
   /**!
    *

@@ -1,6 +1,18 @@
 import Ember from "ember";
 import CacheableMixin from "../../mixins/cacheable";
 
+const {
+  assert,
+  on,
+  generateControllerFactory,
+  run,
+  Logger
+} = Ember;
+
+const {
+  schedule
+} = run;
+
 const STATE_LIST = ['culled', 'cached', 'hidden', 'visible'];
 
 const STATE_TRANSITIONS_UP = [
@@ -124,7 +136,7 @@ export default Ember.ContainerView.extend({
       attributeBindings: ['hidden'],
       hidden: true,
 
-      __cacheHeight: Ember.on('didInsertElement', function() {
+      __cacheHeight: on('didInsertElement', function() {
 
         var parentView = this.get('parentView');
 
@@ -134,7 +146,7 @@ export default Ember.ContainerView.extend({
             var height = parentView.$().height();
             parentView.set('_height', height);
             parentView.set('hasTrueHeight', true);
-            Ember.run.schedule('render', parentView, function() {
+            schedule('render', parentView, function() {
               if (this.element) {
                 this.element.style.height = height + 'px';
               }
@@ -143,7 +155,7 @@ export default Ember.ContainerView.extend({
             var height = this.$().height();
             parentView.set('_height', height);
             parentView.set('hasTrueHeight', true);
-            Ember.run.schedule('render', parentView, function() {
+            schedule('render', parentView, function() {
               if (this.element) {
                 this.element.style.height = height + 'px';
               }
@@ -168,7 +180,6 @@ export default Ember.ContainerView.extend({
    * @private
    */
   _ov_teardown: function() {
-
     var View = this._childViews[0];
 
     // remove instance from dom
@@ -176,8 +187,8 @@ export default Ember.ContainerView.extend({
       this.removeObject(View);
     }
 
+    // Teardown the child view
     if (View || (View = this._cachedView)) {
-      // Teardown the child view
       View.set('_bustCache', true);
       View.destroy();
     }
@@ -194,11 +205,9 @@ export default Ember.ContainerView.extend({
    * @private
    */
   _ov_remove: function() {
-
     var View = this._childViews[0];
     this._cachedView = View;
     this.removeObject(View);
-
   },
 
 
@@ -208,20 +217,9 @@ export default Ember.ContainerView.extend({
    * @private
    */
   _ov_insert: function() {
-
     var View = this._cachedView;
-    var parentNode = this.get('element');
-    var child = View.get('__cachedElement');
-
-    Ember.assert("A Cached View Exists", View);
-    //Ember.assert("The View Has A Cached Element", child);
-
-    if (child) {
-      parentNode.appendChild(child);
-    }
     this.pushObject(View);
     this._cachedView = null;
-
   },
 
 
@@ -231,12 +229,10 @@ export default Ember.ContainerView.extend({
    * @private
    */
   _ov_reveal: function() {
-
     var instance = this._childViews[0];
     var element = this.element;
     instance.set('hidden', false);
     element.style.visibility = 'visible';
-
   },
 
 
@@ -313,11 +309,11 @@ export default Ember.ContainerView.extend({
 
     // let ember generate controller if needed
     if (factory === undefined) {
-      factory = Ember.generateControllerFactory(container, itemController, model);
+      factory = generateControllerFactory(container, itemController, model);
 
       // inform developer about typo
-      Ember.Logger.warn('occlusion-collection: can\'t lookup controller by name "' + controllerFullName + '".');
-      Ember.Logger.warn('occlusion-collection: using ' + factory.toString() + '.');
+      Logger.warn('occlusion-collection: can\'t lookup controller by name "' + controllerFullName + '".');
+      Logger.warn('occlusion-collection: using ' + factory.toString() + '.');
     }
 
     return factory.create({
@@ -332,6 +328,9 @@ export default Ember.ContainerView.extend({
 
     var _height = this.get('_height');
     var defaultHeight = this.get('defaultHeight');
+    if (typeof defaultHeight === 'number') {
+      defaultHeight += 'px';
+    }
 
     this.element.style.visibility = 'hidden';
     this.element.style.height = _height ? _height + 'px' : defaultHeight;
@@ -342,7 +341,7 @@ export default Ember.ContainerView.extend({
 
   },
 
-  updateHeightCache: Ember.on('didInsertElement', function updateHeightCache() {
+  updateHeightCache: on('didInsertElement', function updateHeightCache() {
 
     var _height = this.get('_height');
     var hasTrueHeight = this.get('hasTrueHeight');
