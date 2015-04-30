@@ -626,13 +626,14 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
     this.set('__isPrepending', true);
 
-    var height = this.$().height(); //__getEstimatedDefaultHeight();
-    if (!this.get('_scrollPosition')) {
-      this.set('_scrollPosition', height * content.get('length') + 'px');
+    var scrollPosition = this.get('_scrollPosition');
+
+    if (!scrollPosition && this.get('startFromBottom')) {
+      scrollPosition = this.$().height(); // /* * content.get('length') */ __getEstimatedDefaultHeight();
+      this.set('_scrollPosition', scrollPosition);
     }
 
     var container = this.get('_container').get(0);
-    var scollPosition = this.get('_scrollPosition');
     container.scrollTop = scrollPosition;
 
     next(this, function() {
