@@ -652,24 +652,21 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
     this.set('__isPrepending', true);
 
-    schedule('afterRender', this, function() {
-      var scrollPosition = this.get('_scrollPosition');
+    var scrollPosition = this.get('_scrollPosition');
 
-      if (scrollPosition) {
-        this.get('_container').get(0).scrollTop = scrollPosition;
-      } else if (this.get('startFromBottom')) {
-        var last = this.$().get(0).lastElementChild;
-        if (last) {
-          last.scrollIntoView(false);
-        }
+    if (scrollPosition) {
+      this.get('_container').get(0).scrollTop = scrollPosition;
+    } else if (this.get('startFromBottom')) {
+      var last = this.$().get(0).lastElementChild;
+      if (last) {
+        last.scrollIntoView(false);
       }
+    }
 
-      next(this, function() {
-        this.set('__isPrepending', false);
-        this.set('__isInitialized', true);
-        this._cycleViews();
-      });
-
+    next(this, function() {
+      this.set('__isPrepending', false);
+      this.set('__isInitialized', true);
+      this._cycleViews();
     });
 
   },
