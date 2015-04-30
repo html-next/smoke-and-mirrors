@@ -658,7 +658,10 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       if (scrollPosition) {
         this.get('_container').get(0).scrollTop = scrollPosition;
       } else if (this.get('startFromBottom')) {
-        this.$().get(0).lastElementChild.scrollIntoView(false);
+        var last = this.$().get(0).lastElementChild;
+        if (last) {
+          last.scrollIntoView(false);
+        }
       }
 
       next(this, function() {
