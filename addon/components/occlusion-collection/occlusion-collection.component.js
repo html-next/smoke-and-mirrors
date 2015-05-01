@@ -864,9 +864,18 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     }
   }),
 
+  /**!
+   * Calculates visible borders / cache level break points
+   * based on `containerHeight` or `element.height`.
+   *
+   * debounces a call to `_cycleViews` afterwards to update what's visible
+   *
+   * @private
+   */
   _initEdges: function() {
 
     var _container = this.get('_container');
+    var edges = {};
 
     // segment heights
     var viewportHeight = parseInt(this.get('containerHeight'), 10) || _container.height();
@@ -877,31 +886,23 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     var _maxHeight = this.get('containerHeight') ? this.$().height() : jQuery('body').height();
 
     // segment top break points
-    var viewportTop =_container.position().top;
-    var visibleTop = viewportTop - _visibleBufferHeight;
-    var invisibleTop = visibleTop - _invisibleBufferHeight;
-    var cacheTop = invisibleTop - _cacheBufferHeight;
+    edges.viewportTop =_container.position().top;
+    edges.visibleTop = edges.viewportTop - _visibleBufferHeight;
+    edges.invisibleTop = edges.visibleTop - _invisibleBufferHeight;
+    edges.cacheTop = edges.invisibleTop - _cacheBufferHeight;
 
     // segment bottom break points
-    var viewportBottom = viewportTop + viewportHeight;
+    edges.viewportBottom = edges.viewportTop + viewportHeight;
 
-    // cap this break points to bottom
-    if (viewportBottom > _maxHeight) { viewportBottom = _maxHeight; }
+    // cap this break point to bottom
+    // TODO is this necessary?
+    if (viewportBottom > _maxHeight) { edges.viewportBottom = _maxHeight; }
 
-    var visibleBottom = viewportBottom + _visibleBufferHeight;
-    var invisibleBottom = visibleBottom + _invisibleBufferHeight;
-    var cacheBottom = invisibleBottom + _cacheBufferHeight;
+    edges.visibleBottom = edges.viewportBottom + _visibleBufferHeight;
+    edges.invisibleBottom = edges.visibleBottom + _invisibleBufferHeight;
+    edges.cacheBottom = edges.invisibleBottom + _cacheBufferHeight;
 
-    this.set('_edges', {
-      cacheTop: cacheTop,
-      invisibleTop: invisibleTop,
-      visibleTop: visibleTop,
-      viewportTop: viewportTop,
-      viewportBottom: viewportBottom,
-      visibleBottom: visibleBottom,
-      invisibleBottom: invisibleBottom,
-      cacheBottom: cacheBottom
-    });
+    this.set('_edges', edges);
 
     // ensure that visible views are recalculated following a resize
     debounce(this, this._cycleViews, this.get('scrollThrottle'));
