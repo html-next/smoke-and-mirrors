@@ -1,6 +1,6 @@
 {
   "name": "smoke-and-mirrors",
-  "version": "0.1.2",
+  "version": "0.2.0-beta.1",
   "description": "The default blueprint for ember-cli addons.",
   "directories": {
     "doc": "doc",
