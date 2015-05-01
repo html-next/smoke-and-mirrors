@@ -207,6 +207,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
    * render starting at the bottom.
    */
   startFromBottom: false,
+  __isInitializingFromBottom: false,
 
   /**!
    *
@@ -426,6 +427,14 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
 
   // on scroll, determine view states
+  /**!
+   *
+   * The big question is can we render from the bottom
+   * without the bottom most item being taken off screen?
+   *
+   * @returns {boolean}
+   * @private
+   */
   _cycleViews: function () {
 
     if (this.get('__isPrepending')) {
@@ -582,6 +591,16 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     //schedule next batch
     if (toShow.length !== 0) {
       this._nextBatchUpdate = later(this, this._updateViews, toShow, delay);
+    } else {
+      schedule('afterRender', this, function() {
+        if (this.get('__isInitializingFromBottom')) {
+          var last = this.$().get(0).lastElementChild;
+          this.set('__isInitializingFromBottom', false);
+          if (last) {
+            last.scrollIntoView(false);
+          }
+        }
+      });
     }
 
   },
@@ -658,6 +677,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       this.get('_container').get(0).scrollTop = scrollPosition;
     } else if (this.get('startFromBottom')) {
       var last = this.$().get(0).lastElementChild;
+      this.set('__isInitializingFromBottom', true);
       if (last) {
         last.scrollIntoView(false);
       }

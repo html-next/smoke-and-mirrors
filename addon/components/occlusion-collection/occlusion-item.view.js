@@ -139,30 +139,13 @@ export default Ember.ContainerView.extend({
       __cacheHeight: on('didInsertElement', function() {
 
         var parentView = this.get('parentView');
+        var height = this.get('tagName') === '' ?  parentView.$().height() : this.$().height();
 
-        if (!parentView.get('hasTrueHeight')) {
-
-          if (this.get('tagName') === '') {
-            var height = parentView.$().height();
-            parentView.set('_height', height);
-            parentView.set('hasTrueHeight', true);
-            schedule('render', parentView, function() {
-              if (this.element) {
-                this.element.style.height = height + 'px';
-              }
-            });
-          } else {
-            var height = this.$().height();
-            parentView.set('_height', height);
-            parentView.set('hasTrueHeight', true);
-            schedule('render', parentView, function() {
-              if (this.element) {
-                this.element.style.height = height + 'px';
-              }
-            });
-          }
-
+        if (height !== parentView.get('_height')) {
+          parentView.set('_height', height);
+          parentView.element.style.minHeight = height + 'px';
         }
+
       })
     }).create(createArgs);
 
@@ -261,31 +244,6 @@ export default Ember.ContainerView.extend({
   _cachedView: null,
 
   _height: 0,
-  hasTrueHeight: false,
-
-  __getTrueDefaultHeight: function() {
-    var defaultHeight = '' + this.get('defaultHeight');
-    if (defaultHeight.indexOf('em') === -1) {
-      return parseInt(defaultHeight, 10);
-    }
-    var element;
-
-    // use body if rem
-    if (defaultHeight.indexOf('rem') !== -1) {
-      element = window.document.body;
-    } else {
-      element = this.get('element');
-      if (!element || !element.parentNode) {
-        element = window.document.body;
-      }
-    }
-
-    var fontSize = window.getComputedStyle(element).getPropertyValue('font-size');
-    var height = parseFloat(defaultHeight) * parseFloat(fontSize);
-
-    return height;
-
-  },
 
   getControllerFor: function () {
     var itemController = this.get('itemController');
@@ -333,32 +291,8 @@ export default Ember.ContainerView.extend({
     }
 
     this.element.style.visibility = 'hidden';
-    this.element.style.height = _height ? _height + 'px' : defaultHeight;
+    this.element.style.minHeight = _height ? _height + 'px' : defaultHeight;
 
-    if (!_height) {
-      this.set('_height', this.__getTrueDefaultHeight());
-    }
-
-  },
-
-  updateHeightCache: on('didInsertElement', function updateHeightCache() {
-
-    var _height = this.get('_height');
-    var hasTrueHeight = this.get('hasTrueHeight');
-    var alwaysUseDefaultHeight = this.get('alwaysUseDefaultHeight');
-    var defaultHeight = this.get('defaultHeight');
-
-    if (!hasTrueHeight) {
-      _height = this.__getTrueDefaultHeight();
-
-      if (alwaysUseDefaultHeight) {
-        this.set('hasTrueHeight', true);
-      }
-      this.set('_height', _height);
-
-      this.element.style.height = this.get('defaultHeight');
-    }
-
-  })
+  }
 
 });
