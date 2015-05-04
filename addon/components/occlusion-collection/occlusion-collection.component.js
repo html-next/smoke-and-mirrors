@@ -896,7 +896,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
     // cap this break point to bottom
     // TODO is this necessary?
-    if (viewportBottom > _maxHeight) { edges.viewportBottom = _maxHeight; }
+    // if (edges.viewportBottom > _maxHeight) { edges.viewportBottom = _maxHeight; }
 
     edges.visibleBottom = edges.viewportBottom + _visibleBufferHeight;
     edges.invisibleBottom = edges.visibleBottom + _invisibleBufferHeight;
