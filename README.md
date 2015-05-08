@@ -33,10 +33,9 @@ a lot :)  If not, checkout `iScroll`, it will be exposed by this addon in the ne
 
 Currently, IE10+ / Chrome
 
-This repo uses `window.requestAnimationFrame` without shimming or vendor prefixes.  This will be rectified
-by 0.2.0.  Once this is done, IE8/9 will experience a flicker when prepending to an array during infinite
-scroll.  This is because they do not support `window.requestAnimationFrame` which is being used to reset
-the `scrollTop` during the prepend.
+`window.requestAnimationFrame` is to reset the `scrollTop` during the prepend.  The feature is shimmed
+in browsers that do not support it, such as IE8/9. Due to limitations of the shim, these browsers 
+experience a flicker when prepending to an array during infinite scroll.  
 
 #### [Changelog](./CHANGELOG.md)
 
@@ -55,25 +54,10 @@ tables, selects, lists, each, and bi-directional infinite scrolling.
 
 - [Low hanging fruit: easy optimizations](./docs/optimization.md)
 - [Occlusion: what is it?](./docs/occlusion.md)
-- [Implementing Infinite Scroll](./docs/examples/infinite-scroll.md)
-- [Implementing Tables](./docs/examples/tables.md)
-- [Rearranging On Screen Data](./docs/examples/rearranging.md)
-- [Drag & Drop](./docs/examples/drag&drop.md)
 
 ## Documentation
 
 - [Occlusion Collection](./docs/api/occlusion-collection.md)
-- [Proxied Each](./docs/api/proxied-each.md)
-- [Async Image](./docs/api/async-image.md)
-- [Cache Container](./docs/capi/ache-container.md)
-- [Magic Array](./docs/api/magic-array.md)
-- [Default CSS](./docs/api/css.md)
-- [Select](./docs/api/select.md)
-- [Select Multiple](./docs/api/multi-select.md)
-- [Autocomplete](./docs/api/autocomplete.md)
-- [Autocomplete Multiple](./docs/api/multi-autocomplete.md)
-- [Off Canvas](./docs/api/off-canvas.md)
-- [Occluder](./docs/api/occluder)
 
 ## Animation
 
@@ -92,4 +76,4 @@ with that.
 ### What's the Plan.
 
 Animations are defined in `animations.js` the same way that animations are defined
-in `transitions.js`.  The similarity is for more than 
+in `transitions.js`.
