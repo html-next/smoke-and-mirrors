@@ -1,7 +1,7 @@
 {
   "name": "smoke-and-mirrors",
   "version": "0.2.0-beta.1",
-  "description": "The default blueprint for ember-cli addons.",
+  "description": "Performance minded `views`, `mixins`, and `components` to help you deliver your ambitions",
   "directories": {
     "doc": "doc",
     "test": "tests"
