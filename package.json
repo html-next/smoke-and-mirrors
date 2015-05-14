@@ -44,7 +44,8 @@
     "ember-addon"
   ],
   "dependencies": {
-    "ember-cli-babel": "^4.0.0"
+    "ember-cli-babel": "^4.0.0",
+    "rate-limit-computed": "^1.0.2"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
