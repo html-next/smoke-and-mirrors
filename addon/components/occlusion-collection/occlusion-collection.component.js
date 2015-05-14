@@ -10,6 +10,7 @@ const {
   run,
   assert,
   on,
+  computed,
   observer
 } = Ember;
 
@@ -400,6 +401,10 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
    **/
   _findTopView: function(viewportTop, adj) {
 
+    // adjust viewportTop to prevent the randomized coin toss
+    // from not finding a view when the pixels are off by < 1
+    viewportTop -= 1;
+
     var childViews = this._childViews;
     var maxIndex = childViews.length - 1;
     var minIndex = 0;
@@ -437,7 +442,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
    */
   _cycleViews: function () {
 
-    if (this.get('__isPrepending')) {
+    if (this.get('__isPrepending') || !this.get('_hasRendered')) {
       return false;
     }
 
@@ -625,8 +630,16 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
 
   //–––––––––––––– Setup/Teardown
+  _hasRendered: false,
+  shouldRender: true,
+  canRender: false,
 
-  setup: on('didInsertElement', function() {
+  setup: observer('shouldRender', 'canRender', function() {
+
+    if (this.get('_hasRendered') || !this.get('shouldRender') || !this.get('canRender')) {
+      return;
+    }
+    this.set('_hasRendered', true);
 
     var id = this.get('elementId');
     var scrollThrottle = this.get('scrollThrottle');
@@ -653,7 +666,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     }.bind(this);
 
     var onResizeMethod = function onResizeMethod() {
-      debounce(this, this._initEdges, scrollThrottle);
+      debounce(this, this.notifyPropertyChange, '_edges', scrollThrottle, false);
     }.bind(this);
 
     _container.bind('scroll.occlusion-culling.' + id, onScrollMethod);
@@ -661,9 +674,13 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     jQuery(window).bind('resize.occlusion-culling.' + id, onResizeMethod);
 
     //draw initial boundaries
-    this._initEdges();
+    this.get('_edges');
     this._initializeScrollState();
 
+  }),
+
+  _allowRendering: on('didInsertElement', function() {
+    this.set('canRender', true);
   }),
 
 
@@ -701,6 +718,10 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
    */
   _cleanup: on('willDestroyElement', function() {
 
+    if (!this.get('_hasRendered')){
+      return;
+    }
+
     //cleanup scroll
     var id = this.get('elementId');
     var _container = this.get('_container');
@@ -727,9 +748,6 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
       localStorage.setItem(storageKey, JSON.stringify(cacheAttrs));
     }
-
-    //tear down cached views and DOM
-
 
   }),
 
@@ -858,12 +876,6 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
   },
 
-  _redrawEdges: observer('containerHeight', function calculateViewStateBoundaries() {
-    if (this.get('__hasInitialized')) {
-      debounce(this, this._initEdges, this.get('scrollThrottle'));
-    }
-  }),
-
   /**!
    * Calculates visible borders / cache level break points
    * based on `containerHeight` or `element.height`.
@@ -872,7 +884,12 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
    *
    * @private
    */
-  _initEdges: function() {
+  __edges: null,
+  _edges: computed('containerHeight', function calculateViewStateBoundaries() {
+
+    if (!this.get('__hasInitialized') && this.get('__edges')) {
+      return this.get('__edges');
+    }
 
     var _container = this.get('_container');
     var edges = {};
@@ -883,10 +900,8 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     var _invisibleBufferHeight = Math.round(viewportHeight * this.get('invisibleBuffer'));
     var _cacheBufferHeight = Math.round(viewportHeight * this.get('cacheBuffer'));
 
-    var _maxHeight = this.get('containerHeight') ? this.$().height() : jQuery('body').height();
-
     // segment top break points
-    edges.viewportTop =_container.position().top;
+    edges.viewportTop = _container.position().top;
     edges.visibleTop = edges.viewportTop - _visibleBufferHeight;
     edges.invisibleTop = edges.visibleTop - _invisibleBufferHeight;
     edges.cacheTop = edges.invisibleTop - _cacheBufferHeight;
@@ -894,20 +909,17 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     // segment bottom break points
     edges.viewportBottom = edges.viewportTop + viewportHeight;
 
-    // cap this break point to bottom
-    // TODO is this necessary?
-    // if (edges.viewportBottom > _maxHeight) { edges.viewportBottom = _maxHeight; }
-
     edges.visibleBottom = edges.viewportBottom + _visibleBufferHeight;
     edges.invisibleBottom = edges.visibleBottom + _invisibleBufferHeight;
     edges.cacheBottom = edges.invisibleBottom + _cacheBufferHeight;
 
-    this.set('_edges', edges);
-
     // ensure that visible views are recalculated following a resize
     debounce(this, this._cycleViews, this.get('scrollThrottle'));
 
-  },
+    this.set('__edges', edges);
+    return edges;
+
+  }),
 
   /**!
    *
