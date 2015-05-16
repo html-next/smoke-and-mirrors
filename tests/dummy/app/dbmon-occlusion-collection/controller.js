@@ -1,4 +1,4 @@
-import Ebmer from "ember";
+import Ember from "ember";
 
 export default Ember.Controller.extend({
 

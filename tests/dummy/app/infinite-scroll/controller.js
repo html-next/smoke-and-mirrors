@@ -1,4 +1,4 @@
-import Ebmer from "ember";
+import Ember from "ember";
 import getImages from '../lib/get-images';
 
 export default Ember.Controller.extend({
