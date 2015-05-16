@@ -140,12 +140,6 @@ Time (in ms) between attempts at re-rendering during scrolling.
 A new render every ~16ms preserves 60fps. Most re-renders with
 occlusion-culling have clocked well below 1ms.
 
-#### momentumScrollThrottle
-
-`default: 64` Experimental, used during momentum scroll detection.
-See http://developer.telerik.com/featured/scroll-event-change-ios-8-big-deal/
-and http://iscrolljs.com/ for more information and a robust solution.
-
 #### cycleDelay
 
 When scrolling, new on screen items are immediately handled.
