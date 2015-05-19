@@ -304,7 +304,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
   /**!
    * The property to proxy `contentToProxy` to.
    */
-  __proxyContentTo: '__content',
+  _proxyContentTo: '__content',
 
   /**!
    * a cached jQuery reference to the container element
@@ -960,7 +960,6 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
     }));
 
-    this._updateProxy();
     this._super();
     this._initViews();
 
