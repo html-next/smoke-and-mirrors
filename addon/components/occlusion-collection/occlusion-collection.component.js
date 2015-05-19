@@ -26,6 +26,13 @@ const {
 
 const jQuery = Ember.$;
 
+const actionContextCacheKeys = {
+  'topReached': '_lastTopSent',
+  'bottomReached': '_lastBottomSent',
+  'topVisibleChanged': '_lastVisibleTopSent',
+  'bottomVisibleChanged': '_lastVisibleBottomSent'
+};
+
 export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
   //–––––––––––––– Required Settings
@@ -287,10 +294,17 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
    * Specify an action to fire when the top on-screen item
    * changes.
    *
-   * It will include the index and content of the item now visible.
+   * It includes the index and content of the item now visible.
    */
-  //TODO enable this feature.
   topVisibleChanged: null,
+
+  /**!
+   * Specify an action to fire when the bottom on-screen item
+   * changes.
+   *
+   * It includes the index and content of the item now visible.
+   */
+  bottomVisibleChanged: null,
 
 
   //–––––––––––––– Private Internals
@@ -335,6 +349,17 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
    */
   _lastTopSent: null,
 
+  /**!
+   * Cached reference to the last visible top item used
+   * to notify `topVisibleChanged` to prevent resending.
+   */
+  _lastVisibleTopSent: null,
+
+  /**!
+   * Cached reference to the last visible bottom item used
+   * to notify `bottomVisibleChange` to prevent resending.
+   */
+  _lastVisibleBottomSent: null,
 
   /**!
    * If true, views are currently being added above the visible portion of
@@ -376,18 +401,14 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       return;
     }
 
-    if (name === 'bottomReached' && this.get('_lastBottomSent') === context.item) {
-      return;
+    if (actionContextCacheKeys[name]) {
+      if (this.get(actionContextCacheKeys[name]) === context.item) {
+        return;
+      } else {
+        this.set(actionContextCacheKeys[name], context.item);
+      }
     }
-    if (name === 'topReached' && this.get('_lastTopSent') === context.item) {
-      return;
-    }
-    if (name === 'bottomReached') {
-      this.set('_lastBottomSent', context.item);
-    }
-    if (name === 'topReached') {
-      this.set('_lastTopSent', context.item);
-    }
+
     this.sendAction(name, context);
   },
 
@@ -530,8 +551,16 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
         if (!topVisibleSpotted) {
           topVisibleSpotted = true;
           this.set('_topVisible', view);
+          this.sendActionOnce('topVisibleChanged', {
+            item: view.get('content.content'),
+            index: bottomViewIndex
+          });
         }
         this.set('_bottomVisible', view);
+        this.sendActionOnce('bottomVisibleChanged', {
+          item: view.get('content.content'),
+          index: bottomViewIndex
+        });
 
         //above the lower reveal boundary
       } else if (viewTop < edges.visibleBottom) {
