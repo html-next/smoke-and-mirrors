@@ -459,6 +459,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     var topViewIndex = this._findTopView(currentUpperBound, edges.viewportTop);
     var bottomViewIndex = topViewIndex;
     var lastIndex = childViews.length - 1;
+    var topVisibleSpotted = false;
 
     // views to cull
     var toCull = [];
@@ -505,9 +506,8 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
         if (bottomViewIndex === 0) {
           this.sendActionOnce('topReached', {
             item: view.get('content.content'),
-            index: lastIndex
+            index: bottomViewIndex
           });
-          this.set('_topVisible', view);
         }
 
         //above the lower screen boundary
@@ -517,16 +517,21 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
         if (bottomViewIndex === 0) {
           this.sendActionOnce('topReached', {
             item: view.get('content.content'),
-            index: lastIndex
+            index: bottomViewIndex
           });
-          this.set('_topVisible', view);
         }
         if (bottomViewIndex === lastIndex) {
           this.sendActionOnce('bottomReached', {
             item: view.get('content.content'),
-            index: lastIndex
+            index: bottomViewIndex
           });
         }
+
+        if (!topVisibleSpotted) {
+          topVisibleSpotted = true;
+          this.set('_topVisible', view);
+        }
+        this.set('_bottomVisible', view);
 
         //above the lower reveal boundary
       } else if (viewTop < edges.visibleBottom) {
@@ -534,7 +539,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
         if (bottomViewIndex === lastIndex) {
           this.sendActionOnce('bottomReached', {
             item: view.get('content.content'),
-            index: lastIndex
+            index: bottomViewIndex
           });
         }
 
