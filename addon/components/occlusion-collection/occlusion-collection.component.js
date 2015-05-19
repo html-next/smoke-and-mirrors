@@ -164,20 +164,20 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
    * how much extra room to keep visible on
    * either side of the visible area
    */
-  visibleBuffer: .5,
+  visibleBuffer: 0.5,
 
   /**!
    * how much extra room to keep in DOM but
    * with `visible:false` set.
    */
-  invisibleBuffer: .5,
+  invisibleBuffer: 0.5,
 
   /**!
    * sets how many views to cache in buffer
    * instead of tearing down on either side
    * of the revealed area
    */
-  cacheBuffer: .5,
+  cacheBuffer: 0.5,
 
   //–––––––––––––– Animations
   /**!

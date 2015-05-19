@@ -12,6 +12,7 @@ function computeProxiedArray() {
   var content = this.get('__proxiedContent');
   var newLength;
   var newObjects = [];
+  var diff;
 
   // play nice with arrays that are already proxied
   // TODO this seems to cause recalculations when ember-data swaps outs the array
@@ -29,7 +30,7 @@ function computeProxiedArray() {
 
       newLength = Ember.get(proxied, 'length');
       var i = 0;
-      var diff = newLength - content.get('length');
+      diff = newLength - content.get('length');
       for (i = 0; i < diff; i++) {
         newObjects.push(SmartObjectProxy.create({content: proxied[i], __indexPath: key}));
       }
@@ -60,7 +61,7 @@ function computeProxiedArray() {
   newLength = proxied ? Ember.get(proxied, 'length') : 0;
 
   if (newLength < content.get('length')) {
-    var diff = content.get('length') - newLength;
+    diff = content.get('length') - newLength;
     content.removeAt(newLength, diff);
   }
 

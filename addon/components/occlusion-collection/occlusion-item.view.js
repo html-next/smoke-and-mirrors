@@ -2,16 +2,10 @@ import Ember from "ember";
 import CacheableMixin from "../../mixins/cacheable";
 
 const {
-  assert,
   on,
   generateControllerFactory,
-  run,
   Logger
 } = Ember;
-
-const {
-  schedule
-} = run;
 
 const STATE_LIST = ['culled', 'cached', 'hidden', 'visible'];
 
@@ -117,7 +111,7 @@ export default Ember.ContainerView.extend({
     var container = this.get('container');
     var viewFullName = 'view:' + this.get('innerView');
     var viewFactory = container.lookupFactory(viewFullName);
-    var keyForId = this.get('keyForId');
+    //var keyForId = this.get('keyForId'); // TODO: Remove or use
 
     var createArgs = {};
 
@@ -156,7 +150,7 @@ export default Ember.ContainerView.extend({
    * Destroy the View/Element
    *
    * Unlike the other methods, this method
-   * can be called from any state. It is stil not valid
+   * can be called from any state. It is still not valid
    * to transition to it directly, but willDestroy uses it
    * to teardown the instance.
    *
@@ -172,7 +166,6 @@ export default Ember.ContainerView.extend({
 
     // Teardown the child view
     if (View || (View = this._cachedView)) {
-      View.set('_bustCache', true);
       View.destroy();
     }
 
@@ -236,7 +229,7 @@ export default Ember.ContainerView.extend({
 
   innerView: '', //passed in
   defaultHeight: 75,
-  keyForId: null, //keyForId
+  keyForId: null,
   itemController: null,
 
   preserveContext: false,
@@ -258,7 +251,6 @@ export default Ember.ContainerView.extend({
 
     // Wire up the itemController
     var model = this.get('content');
-    var controller = null;
     var container = this.get('container');
 
     var controllerFullName = 'controller:' + itemController;
