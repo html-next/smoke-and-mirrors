@@ -3,26 +3,17 @@ import MagicArrayMixin from "../../mixins/magic-array";
 import OcclusionView from "./occlusion-item.view";
 import getTagDescendant from "../../utils/get-tag-descendant";
 import nextFrame from "../../utils/next-frame";
+import Scheduler from "../../utils/backburner-ext";
 
 const {
   ContainerView,
   TargetActionSupport,
-  run,
   assert,
   on,
+  run,
   computed,
   observer
 } = Ember;
-
-const {
-  debounce,
-  schedule,
-  scheduleOnce,
-  throttle,
-  next,
-  later,
-  cancel
-} = run;
 
 const jQuery = Ember.$;
 
@@ -360,7 +351,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
   sendAction: function(name, context) {
     var action = this.get(name);
     if (action) {
-      next(this, this.triggerAction, {
+      this._taskrunner.next(this, this.triggerAction, {
         action: action,
         actionContext: context,
         target: this.get('controller')
@@ -555,10 +546,10 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
     // cancel any previous update
     //TODO possibly redundant?
-    cancel(this._nextBatchUpdate);
+    this._taskrunner.cancel(this._nextBatchUpdate);
 
     // update view states
-    schedule('render', this, function updateViewStates(toCull, toCache, toHide, toShow, toScreen) {
+    this._taskrunner.schedule('render', this, function updateViewStates(toCull, toCache, toHide, toShow, toScreen) {
 
       //reveal on screen views
       toScreen.forEach(function (v) { v.show(); });
@@ -572,8 +563,8 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       //cull views
       toCull.forEach(function (v) { v.cull(); });
 
-      cancel(this._nextBatchUpdate);
-      this._nextBatchUpdate = later(this, this._updateViews, toShow, this.get('cycleDelay'));
+      this._taskrunner.cancel(this._nextBatchUpdate);
+      this._nextBatchUpdate = this._taskrunner.later(this, this._updateViews, toShow, this.get('cycleDelay'));
 
     }, toCull, toCache, toHide, toShow, toScreen);
 
@@ -590,14 +581,14 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     // reveal batch
     while (processed++ < updateBatchSize && toShow.length > 0) {
       view = toShow.shift();
-      schedule('render', view, view.show);
+      this._taskrunner.schedule('render', view, view.show);
     }
 
     //schedule next batch
     if (toShow.length !== 0) {
-      this._nextBatchUpdate = later(this, this._updateViews, toShow, delay);
+      this._nextBatchUpdate = this._taskrunner.later(this, this._updateViews, toShow, delay);
     } else {
-      schedule('afterRender', this, function() {
+      this._taskrunner.schedule('afterRender', this, function() {
         if (this.get('__isInitializingFromBottom')) {
           var last = this.$().get(0).lastElementChild;
           this.set('__isInitializingFromBottom', false);
@@ -620,7 +611,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
     if (Math.abs(scrollTop - _scrollTop) >= defaultHeight / 2) {
       this.set('_scrollPosition', scrollTop);
-      scheduleOnce('render', this, this._cycleViews);
+      this._taskrunner.scheduleOnce('render', this, this._cycleViews);
     }
 
   },
@@ -662,11 +653,11 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       if (this.get('__isPrepending') || !this.get('__isInitialized')) {
         return false;
       }
-      throttle(this, this._scheduleOcclusion, scrollThrottle);
+      this._taskrunner.throttle(this, this._scheduleOcclusion, scrollThrottle);
     }.bind(this);
 
     var onResizeMethod = function onResizeMethod() {
-      debounce(this, this.notifyPropertyChange, '_edges', scrollThrottle, false);
+      this._taskrunner.debounce(this, this.notifyPropertyChange, '_edges', scrollThrottle, false);
     }.bind(this);
 
     _container.bind('scroll.occlusion-culling.' + id, onScrollMethod);
@@ -700,7 +691,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       }
     }
 
-    next(this, function() {
+    this._taskrunner.next(this, function() {
       this.set('__isPrepending', false);
       this.set('__isInitialized', true);
       this._cycleViews();
@@ -749,6 +740,9 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       localStorage.setItem(storageKey, JSON.stringify(cacheAttrs));
     }
 
+    //clean up scheduled tasks
+    this._taskrunner.cancelAll();
+
   }),
 
   __performViewPrepention: function() {
@@ -764,7 +758,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
     this.__prependViewParams = null;
 
-    next(this, function() {
+    this._taskrunner.next(this, function() {
       this.set('__isPrepending', false);
 
       // ensure that visible views are recalculated following an array length change
@@ -914,7 +908,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     edges.cacheBottom = edges.invisibleBottom + _cacheBufferHeight;
 
     // ensure that visible views are recalculated following a resize
-    debounce(this, this._cycleViews, this.get('scrollThrottle'));
+    this._taskrunner.debounce(this, this._cycleViews, this.get('scrollThrottle'));
 
     this.set('__edges', edges);
     return edges;
@@ -959,6 +953,8 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       itemController: this.get('itemController')
 
     }));
+
+    this._taskrunner = Scheduler.create();
 
     this._super();
     this._initViews();
