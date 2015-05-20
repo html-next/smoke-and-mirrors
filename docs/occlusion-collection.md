@@ -66,6 +66,12 @@ This height is replaced with the actual rendered height once content is rendered
 If your content will always have the height specified by `defaultHeight`, you can improve performance
 by specifying `alwaysUseDefaultHeight: true`.
 
+#### keyForId
+
+The `keyForId` property improves performance when the underlying array is changed but most
+of the items remain the same.  It is used by the [MagicArrayMixin](./magic-array.md).
+
+If `useLocalStorageCache` is true, it is also used to cache the rendered heights of content in the list.
 
 --------------------------------------------
 
@@ -107,13 +113,6 @@ with the `OcclusionItem`.
 
 Used if you want to explicitly set the tagName of `OccludedView`s
 
-#### keyForId
-
-The `keyForId` property improves performance when the underlying array is changed but most
-of the items remain the same.  It is used by the [MagicArrayMixin](./magic-array.md).
-
-If `useLocalStorageCache` is true, it is also used to cache the rendered heights of content in the list.
-
 #### loadingViewClass
 
 The name of the view to render either above or below the existing content when
@@ -126,6 +125,8 @@ used, see the `Actions` section below.
 ### Performance Tuning
 
 #### alwaysUseDefaultHeight
+
+**Planned Feature, Not Enabled**
 
 `default: false`
 
@@ -208,8 +209,6 @@ The unique key to use when caching the component's state in storage
 
 #### _scrollPosition
 
-**Planned Feature, Not Enabled, likely not implemented in favor of topVisibleIndex**
-
 Launch to a specific scroll offset.  Height cacheing and requestAnimationFrame
 will be used to ensure this happen seamlessly.
 
@@ -228,16 +227,17 @@ position with specific content visible.
 
 #### bottomVisibleChanged
 
-**Planned Feature, Not Enabled**
+Specify an action to fire when the bottom on-screen item
+changes.
+
+It includes the index and content of the item now visible.
 
 #### topVisibleChanged
-
-**Planned Feature, Not Enabled**
 
 Specify an action to fire when the top on-screen item
 changes.
 
-It will include the index and content of the item now visible.
+It includes the index and content of the item now visible.
 
 #### bottomReached
 
@@ -298,23 +298,3 @@ it's `loadingFailed` property to true.
 **TODO this feature needs the `Promise` portion done.**
 
 --------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

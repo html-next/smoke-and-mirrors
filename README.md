@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/runspired/smoke-and-mirrors.png?label=ready&title=Ready)](https://waffle.io/runspired/smoke-and-mirrors)
 Smoke-and-mirrors
 =================
 
