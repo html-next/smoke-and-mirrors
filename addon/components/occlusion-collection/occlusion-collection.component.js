@@ -179,7 +179,6 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
    * will add the attribute `hidden` to the cloakedView when ever it's content is hidden, cached, or
    * culled.
    */
-
   //TODO enable this feature.
   useHiddenAttr: false,
 
@@ -346,8 +345,6 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
 
   //–––––––––––––– Helper Functions
-
-
   sendAction: function(name, context) {
     var action = this.get(name);
     if (action) {
@@ -437,7 +434,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       return false;
     }
 
-    var edges = this.get('_edges');
+    var edges = this.get('_edges') || this._calculateEdges();
     var childViews = this._childViews;
 
     var currentViewportBound = edges.viewportTop + this.$().position().top;
@@ -545,8 +542,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     toCull = toCull.concat(childViews.slice(0, topViewIndex)).concat(childViews.slice(bottomViewIndex));
 
     // cancel any previous update
-    //TODO possibly redundant?
-    this._taskrunner.cancel(this._nextBatchUpdate);
+    this._taskrunner.cancel(this.get('_nextBatchUpdate'));
 
     // update view states
     this._taskrunner.schedule('render', this, function updateViewStates(toCull, toCache, toHide, toShow, toScreen) {
@@ -563,8 +559,8 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       //cull views
       toCull.forEach(function (v) { v.cull(); });
 
-      this._taskrunner.cancel(this._nextBatchUpdate);
-      this._nextBatchUpdate = this._taskrunner.later(this, this._updateViews, toShow, this.get('cycleDelay'));
+      this._taskrunner.cancel(this.get('_nextBatchUpdate'));
+      this.set('_nextBatchUpdate', this._taskrunner.later(this, this._updateViews, toShow, this.get('cycleDelay')));
 
     }, toCull, toCache, toHide, toShow, toScreen);
 
@@ -618,8 +614,6 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
 
 
-
-
   //–––––––––––––– Setup/Teardown
   _hasRendered: false,
   shouldRender: true,
@@ -657,7 +651,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     }.bind(this);
 
     var onResizeMethod = function onResizeMethod() {
-      this._taskrunner.debounce(this, this.notifyPropertyChange, '_edges', scrollThrottle, false);
+      this._taskrunner.debounce(this, this._calculateEdges, scrollThrottle, false);
     }.bind(this);
 
     _container.bind('scroll.occlusion-culling.' + id, onScrollMethod);
@@ -749,6 +743,8 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
     this.set('__isPrepending', true);
 
+    console.log('prepending');
+
     var params = this.__prependViewParams;
     var container = this.get('_container').get(0);
     var added = params.addCount * this.__getEstimatedDefaultHeight();
@@ -768,13 +764,15 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
   _reflectContentChanges: function() {
     var content = this.get('__content');
+
+    console.log('_reflectContentChanges', content);
+
     var self = this;
     var viewClass = this.get('itemViewClass');
-    if (!content) {
-      throw "Content not available to observe!";
-    }
 
-    content.contentArrayDidChange = function handleArrayChange(items, offset, removeCount, addCount) {
+    content.set('contentArrayDidChange', function handleArrayChange(items, offset, removeCount, addCount) {
+
+      console.log('contentArrayDidChange');
 
       var affectedViews = [], i;
       if (removeCount) {
@@ -801,7 +799,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
         }
 
       }
-    };
+    });
 
   },
 
@@ -878,11 +876,12 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
    *
    * @private
    */
-  __edges: null,
-  _edges: computed('containerHeight', function calculateViewStateBoundaries() {
+  _edges: null,
+  _calculateEdges: observer('containerHeight', function calculateViewStateBoundaries() {
 
-    if (!this.get('__hasInitialized') && this.get('__edges')) {
-      return this.get('__edges');
+    if (!this.get('__hasInitialized') && this.get('_edges')) {
+      console.log('returning initial edges');
+      return;
     }
 
     var _container = this.get('_container');
@@ -910,7 +909,8 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     // ensure that visible views are recalculated following a resize
     this._taskrunner.debounce(this, this._cycleViews, this.get('scrollThrottle'));
 
-    this.set('__edges', edges);
+    console.log('new edges', edges);
+    this.set('_edges', edges);
     return edges;
 
   }),
@@ -926,7 +926,8 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     var itemViewClass = this.get('itemViewClass');
     var defaultHeight = this.get('defaultHeight');
     var collectionTagName = (this.get('tagName') || '').toLowerCase();
-    var itemTagName = this.get('itemTagName') || getTagDescendant(collectionTagName);
+    var
+      itemTagName = this.get('itemTagName') || getTagDescendant(collectionTagName);
 
 
     if (itemTagName === 'none') {
@@ -939,7 +940,7 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
     this.set('itemViewClass', OcclusionView.extend({
 
       classNames: [itemViewClass + '-occlusion', 'occluded-view'],
-      tagName : itemTagName,
+      tagName: itemTagName,
       innerView: itemViewClass,
       defaultHeight: defaultHeight,
       alwaysUseDefaultHeight: this.get('alwaysUseDefaultHeight'),
