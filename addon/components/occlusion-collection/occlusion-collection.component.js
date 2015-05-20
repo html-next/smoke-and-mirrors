@@ -218,9 +218,13 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
   __isInitializingFromBottom: false,
 
   /**!
-   *
+   * If set, upon initializiation the scroll
+   * position will be set such that the item
+   * with the provided key is at the top.
+   * If the item cannot be found, scrollTop
+   * is set to 0.
    */
-  _topVisible: null,
+  topVisibleKey: null,
 
   /**!
    *
@@ -724,6 +728,8 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
     var scrollPosition = this.get('_scrollPosition');
 
+    var topVisibleKey = this.get('topVisibleKey');
+
     if (scrollPosition) {
       this.get('_container').get(0).scrollTop = scrollPosition;
     } else if (this.get('startFromBottom')) {
@@ -732,6 +738,15 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
       if (last) {
         last.scrollIntoView(false);
       }
+    } else if (topVisibleKey) {
+      var content = this.get('__content'), topVisibleIndex;
+
+      for (let i = 0; i < content.get('length'); i++) {
+        if (topVisibleKey === content.objectAt(i).get('__key')) {
+          topVisibleIndex = i;
+        }
+      }
+      this.get('_container').get(0).scrollTop = (topVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
     }
 
     next(this, function() {
