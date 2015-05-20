@@ -3,8 +3,8 @@ import Ember from "ember";
 export default Ember.View.extend({
 
   templateName: 'dbmon-row-cells',
-  classNames: ['Query'],
-  classNameBindings: ['elapsedClassName'],
+  classNames: ['Query', 'elapsed'],
+  classNameBindings: ['isShort:short', 'isNormal:warn', 'isLong:warn_long:'],
 
   tagName: 'td',
 
@@ -13,22 +13,39 @@ export default Ember.View.extend({
     return elapsed ? formatElapsed(elapsed) : '';
   }).readOnly(),
 
-  elapsedClassName: Ember.computed('content.elapsed', function(){
+  isShort: false,
+  isLong: false,
+  isNormal: false,
+
+  elapsedClassName: Ember.immediateObserver('elapsed', function(){
     var elapsed = this.get('content.elapsed');
+    if (elapsed >= 10.0) {
+      this.setProperties({
+        isShort: false,
+        isLong: true,
+        isNormal: false
+      });
+    } else if (elapsed >= 1.0) {
+      this.setProperties({
+        isShort: false,
+        isLong: false,
+        isNormal: true
+      });
+    } else {
+      this.setProperties({
+        isShort: true,
+        isLong: false,
+        isNormal: false
+      });
+    }
     return elapsedClass(elapsed);
-  }).readOnly()
+  })
 
 });
 
 
 function elapsedClass(elapsed) {
-  if (elapsed >= 10.0) {
-    return "elapsed warn_long";
-  } else if (elapsed >= 1.0) {
-    return "elapsed warn";
-  } else {
-    return "elapsed short";
-  }
+
 }
 
 function formatElapsed(value) {

@@ -1,21 +1,26 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-7">
+          {{!- BEGIN-SNIPPET infinite-scroll-example }}
             <div class="table-wrapper">
-              {{occlusion-collection
-              itemViewClass="image-slide"
-              defaultHeight=350
-              visibleBuffer=2
-              invisibleBuffer=3
-              cacheBuffer=2
-              alwaysUseDefaultHeight=true
-              containerSelector=".table-wrapper"
-              bottomReached="loadBelow"
-              topReached="loadAbove"
-              keyForId="small"
-              contentToProxy=model.images
-              }}
+              <occlusion-collection
+                model.images as |image|
+                defaultHeight=350
+                alwaysUseDefaultHeight=true
+                visibleBuffer=2
+                invisibleBuffer=3
+                cacheBuffer=2
+                containerSelector=".table-wrapper"
+                bottomReached="loadBelow"
+                topReached="loadAbove"
+                keyForId="small"
+                >
+                  <div class="image-slide">
+                      <async-image src=image.small />
+                  </div>
+              </occlusion-collection>
             </div>
+            {{!- END-SNIPPET }}
         </div>
         <div class="col-sm-5">
             <h3>Infinite Scroll</h3>
@@ -31,6 +36,8 @@
                 10 new views are created and prepended without affecting the old views.  Any other
                 data changes further in the array will still be updated.
             </p>
+            <h4>Code for Demo</h4>
+            <code-snippet name="infinite-scroll-example.hbs"/>
         </div>
     </div>
 </div>
