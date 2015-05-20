@@ -8,6 +8,7 @@ import Scheduler from "../../utils/backburner-ext";
 const {
   ContainerView,
   TargetActionSupport,
+  ArrayProxy,
   assert,
   on,
   run,
@@ -916,9 +917,9 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
   }),
 
   /**!
-   *
+   * Initialize
    */
-  init: function() {
+  _prepareComponent: function() {
 
     var prependFn = this.__performViewPrepention.bind(this);
     this.set('__performViewPrepention', prependFn);
@@ -957,9 +958,12 @@ export default ContainerView.extend(TargetActionSupport, MagicArrayMixin, {
 
     this._taskrunner = Scheduler.create();
 
-    this._super();
-    this._initViews();
+  },
 
+  init: function() {
+    this._prepareComponent();
+    this._initializeMagicArray(this, arguments, this._super);
+    this._initViews();
   }
 
 
