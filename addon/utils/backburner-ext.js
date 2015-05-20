@@ -1,8 +1,7 @@
 import Ember from "ember";
 
 const {
-  run,
-  A
+  run
   } = Ember;
 
 export default Ember.Object.extend({
@@ -55,11 +54,11 @@ export default Ember.Object.extend({
     this.__queue.forEach(function(v) {
       run.cancel(v);
     });
-    this.__queue = A();
+    this.__queue = Ember.A();
   },
 
   init: function() {
-    this.__queue = A();
+    this.__queue = Ember.A();
   }
 
 });
