@@ -3,7 +3,7 @@
         <div class="col-sm-7">
           {{!- BEGIN-SNIPPET infinite-scroll-example }}
             <div class="table-wrapper">
-              <occlusion-collection
+              {{#occlusion-collection
                 model.images as |image|
                 defaultHeight=350
                 alwaysUseDefaultHeight=true
@@ -14,11 +14,11 @@
                 bottomReached="loadBelow"
                 topReached="loadAbove"
                 keyForId="small"
-                >
+                }}
                   <div class="image-slide">
-                      <async-image src=image.small />
+                      {{async-image src=image.small}}
                   </div>
-              </occlusion-collection>
+              {{/occlusion-collection}}
             </div>
             {{!- END-SNIPPET }}
         </div>
@@ -37,7 +37,7 @@
                 data changes further in the array will still be updated.
             </p>
             <h4>Code for Demo</h4>
-            <code-snippet name="infinite-scroll-example.hbs"/>
+            {{code-snippet name="infinite-scroll-example.hbs"}}
         </div>
     </div>
 </div>
