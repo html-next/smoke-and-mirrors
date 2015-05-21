@@ -3,7 +3,10 @@
 
 var EmberAddon = require('ember-cli/lib/broccoli/ember-addon');
 
-var app = new EmberAddon();
+var app = new EmberAddon({
+  snippetPaths: ['tests/dummy/snippets'],
+  snippetSearchPaths: ['app', 'tests/dummy/app', 'addon']
+});
 
 // Use `app.import` to add additional libraries to the generated
 // output files.
