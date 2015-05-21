@@ -1,12 +1,16 @@
 import Ember from 'ember';
 
+const {
+  computed
+  } = Ember;
+
 export default Ember.View.extend({
 
   tagName: 'tr',
 
   templateName: 'dbmon-database-naive',
 
-  topFiveQueries: function() {
+  topFiveQueries: computed('content.queries', function() {
 
     var queries = this.get('content.queries');
     var topFiveQueries = queries.slice(0, 5);
@@ -15,10 +19,10 @@ export default Ember.View.extend({
       topFiveQueries.push({ query: "" });
     }
 
-    return topFiveQueries;
-  }.property('content.queries'),
+    return Ember.A(topFiveQueries);
+  }),
 
-  countClassName: function() {
+  countClassName: computed('content.queries', function() {
     var queries = this.get('content.queries');
 
     var countClassName = "label";
@@ -32,6 +36,6 @@ export default Ember.View.extend({
     }
 
     return countClassName;
-  }.property('content.queries')
+  })
 
 });

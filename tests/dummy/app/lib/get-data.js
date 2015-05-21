@@ -1,3 +1,4 @@
+import Ember from "ember";
 var DEFAULT_ROWS = 20;
 
 export default function getData(ROWS) {
@@ -56,5 +57,6 @@ export default function getData(ROWS) {
     });
   });
 
+  data.databases = Ember.A(data.databases);
   return data;
 }

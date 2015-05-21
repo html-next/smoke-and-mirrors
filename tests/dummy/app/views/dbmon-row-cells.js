@@ -1,5 +1,9 @@
 import Ember from "ember";
 
+const {
+  computed
+  } = Ember;
+
 export default Ember.View.extend({
 
   templateName: 'dbmon-row-cells',
@@ -38,15 +42,9 @@ export default Ember.View.extend({
         isNormal: false
       });
     }
-    return elapsedClass(elapsed);
   })
 
 });
-
-
-function elapsedClass(elapsed) {
-
-}
 
 function formatElapsed(value) {
   var str = parseFloat(value).toFixed(2);

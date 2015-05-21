@@ -1,18 +1,34 @@
-<h3>DBMon | Occlusion Collection</h3>
-<div class="table-wrapper">
-    <table class="table table-striped latest-data">
-      {{occlusion-collection
-        tagName="tbody"
-        itemViewClass="dbmon-database-tagless"
-        defaultHeight=37
-        alwaysUseDefaultHeight=true
-        containerSelector=".table-wrapper"
-        invisibleBuffer=0.5
-        visibleBuffer=0.25
-        cacheBuffer=0
-        keyForId="id"
-        contentToProxy=model.databases
-      }}
-    </table>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-7">
+          {{!- BEGIN-SNIPPET occlusion-collection-example }}
+            <div class="table-wrapper">
+                <table class="table table-striped latest-data">
+                  {{#occlusion-collection
+                    tagName="tbody"
+                    contentToProxy=model.databases
+                    defaultHeight=37
+                    alwaysUseDefaultHeight=true
+                    invisibleBuffer=0.5
+                    visibleBuffer=0.25
+                    containerSelector=".table-wrapper"
+                    keyForId="small"
+                    as |row|
+                  }}
+                      {{view "dbmon-database-tagless" content=row}}
+                  {{/occlusion-collection}}
+                </table>
+            </div>
+          {{!- END-SNIPPET }}
+        </div>
+        <div class="col-sm-5">
+            <h3>DBMon | Occlusion Collection</h3>
+            <p>
+                The Occlusion Collection not only proxies it's content to avoid unnecessarily
+                destroying views, but also smartly hides and removes off screen content.
+            </p>
+            <h4>Code for Demo</h4>
+          {{code-snippet name="occlusion-collection-example.hbs"}}
+        </div>
+    </div>
 </div>
-
