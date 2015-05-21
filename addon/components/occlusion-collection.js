@@ -194,13 +194,15 @@ export default Component.extend(MagicArrayMixin, {
   __isInitializingFromBottom: false,
 
   /**!
-   * If set, upon initializiation the scroll
+   * If set, upon initialization the scroll
    * position will be set such that the item
    * with the provided key is at the top.
    * If the item cannot be found, scrollTop
    * is set to 0.
    */
   topVisibleKey: null,
+  _topVisible: null,
+  _topVisibleIndex: 0,
 
   /**!
    *
@@ -513,6 +515,7 @@ export default Component.extend(MagicArrayMixin, {
         if (!topVisibleSpotted) {
           topVisibleSpotted = true;
           this.set('_topVisible', view);
+          this.set('_topVisibleIndex', bottomViewIndex);
           this.sendActionOnce('topVisibleChanged', {
             item: view.get('content.content'),
             index: bottomViewIndex
@@ -732,8 +735,6 @@ export default Component.extend(MagicArrayMixin, {
 
   __performViewPrepention: function(addCount) {
 
-    console.log('prepending');
-
     this.set('__isPrepending', true);
 
     var container = this.get('_container').get(0);
@@ -750,14 +751,11 @@ export default Component.extend(MagicArrayMixin, {
   _reflectContentChanges: function() {
 
     var content = this.get('__content');
-    console.log('_reflectContentChanges', content);
 
     var self = this;
 
     content.contentArrayDidChange = function handleArrayChange(items, offset, removeCount, addCount) {
-      console.log('contentArrayDidChange');
-      if (offset <= self.get('_topVisible')) {
-        console.log('change was prepend');
+      if (offset <= self.get('_topVisibleIndex')) {
         self.__performViewPrepention(addCount);
       }
     };
@@ -844,7 +842,6 @@ export default Component.extend(MagicArrayMixin, {
     // ensure that visible views are recalculated following a resize
     this._taskrunner.debounce(this, this._cycleViews, this.get('scrollThrottle'));
 
-    console.log('new edges', edges);
     this.set('_edges', edges);
     return edges;
 
