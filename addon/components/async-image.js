@@ -1,51 +1,59 @@
 import Ember from "ember";
+import jQuery from "jquery";
+
+const {
+  computed,
+  observer,
+  run,
+  on
+  } = Ember;
 
 export default Ember.Component.extend({
 
-  tagName : 'async-image',
+  tagName: 'async-image',
 
-  classNames : ['async-image'],
-  classNameBindings : ['imgState'],
+  classNames: ['async-image'],
+  classNameBindings: ['imgState'],
 
-  src : '',
+  src: '',
 
-  imgState : function () {
+  imgState: computed('isLoaded', 'isLoading', 'isFailed', 'isEmpty', 'isAppending', function () {
     if (this.get('isFailed')) { return 'is-failed'; }
     if (this.get('isLoaded')) { return 'is-loaded'; }
     if (this.get('isAppending')) { return 'is-appending'; }
     if (this.get('isLoading')) { return 'is-loading'; }
     if (this.get('isEmpty')) { return 'is-empty'; }
     return 'unknown';
-  }.property('isLoaded', 'isLoading', 'isFailed', 'isEmpty', 'isAppending'),
+  }),
 
-  isAppending : false,
-  isLoaded : false,
-  isLoading : false,
-  isFailed : false,
-  isEmpty : true,
+  isAppending: false,
+  isLoaded: false,
+  isLoading: false,
+  isFailed: false,
+  isEmpty: true,
 
   _image: null,
 
-  _onInsert: Ember.on('didInsertElement', function() {
+  _onInsert: on('didInsertElement', function() {
     if (this.get('isLoaded')) {
-      var $image = Ember.$('<img src="' + Image.src + '">');
+      var $image = jQuery('<img src="' + Image.src + '">');
       this.$().html($image);
     }
   }),
 
-  _onRemove: Ember.on('willDestroyElement', function() {
+  _onRemove: on('willDestroyElement', function() {
     var $image = this.get('_image');
     if ($image) {
       $image.off('load');
     }
   }),
 
-  _onload : function (Image) {
+  _onload: function (Image) {
     if (!(this.get('isDestroyed') || this.get('isDestroying'))) {
       this.set('isAppending', true);
       var self = this;
       var $view = this.$();
-      var $image = Ember.$('<img src="' + Image.src + '">');
+      var $image = jQuery('<img src="' + Image.src + '">');
       this.set('_image', $image);
       $image.on('load', function () {
         self.set('isLoaded', true);
@@ -54,15 +62,15 @@ export default Ember.Component.extend({
     }
   },
 
-  _loadImage : function () {
+  _loadImage: observer('src', function() {
 
     // reset if component's image has been changed
     this.setProperties({
-      isAppending : false,
-      isLoaded : false,
-      isLoading : false,
-      isFailed : false,
-      isEmpty : true
+      isAppending: false,
+      isLoaded: false,
+      isLoading: false,
+      isFailed: false,
+      isEmpty: true
     });
 
     var src = this.get('src');
@@ -71,7 +79,7 @@ export default Ember.Component.extend({
     //debounce the load callback to ensure it only fires once
     var loaded = function loaded() {
       if (!(this.get('isDestroyed') || this.get('isDestroying'))) {
-        Ember.run.debounce(this, this._onload, Img, 10);
+        run.debounce(this, this._onload, Img, 10);
       }
     }.bind(this);
 
@@ -94,6 +102,11 @@ export default Ember.Component.extend({
       }
 
     }
-  }.observes('src').on('init')
+  }),
+
+  init: function() {
+    this._loadImage();
+    this._super();
+  }
 
 });
