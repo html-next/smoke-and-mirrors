@@ -1,7 +1,8 @@
 import Ember from "ember";
 
 const {
-  computed
+  computed,
+  run
 } = Ember;
 
 const STATE_LIST = ['culled', 'hidden', 'visible'];
@@ -111,9 +112,13 @@ export default Ember.Component.extend({
   _ov_insert: function() {
     this.setProperties({ contentHidden: true, contentCulled: false });
     if (!this.get('_height')) {
-      var height = this.$().height();
-      this.set('_height', height);
-      this.element.style.height = height + 'px';
+      run.schedule('afterRender', this, function() {
+        if (!this.get('isDestroyed')) {
+          var height = this.$().height();
+          this.set('_height', height);
+          this.element.style.height = height + 'px';
+        }
+      });
     }
   },
 
