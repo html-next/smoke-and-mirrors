@@ -29,6 +29,13 @@
   height: 500px;
 }
 
+occlusion-collection,
+occlusion-item {
+  display: block;
+  width: 100%;
+  position: static;
+}
+
 async-image {
   display: inline-block;
   position: relative;
@@ -52,6 +59,7 @@ async-image.is-loaded > img {
   height: 100%;
   margin: 0%;
 }
+
 
 .image-slide {
   width: 350px;
