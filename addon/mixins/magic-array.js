@@ -24,7 +24,7 @@ var Mixin = Ember.Mixin.create({
     var diff;
 
     // play nice with arrays that are already proxied
-    if (proxied.get('content')) {
+    if (proxied.get && proxied.get('content')) {
       proxied = proxied.get('content');
     }
 
