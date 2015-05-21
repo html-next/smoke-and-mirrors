@@ -417,15 +417,22 @@ export default Component.extend(MagicArrayMixin, {
   _children: [],
   register: function(child) {
     this.get('_children').push(child);
+    this._taskrunner.debounce(this, this._sortChildren, 3);
   },
   unregister: function(child) {
     var arr = this.get('_children');
     arr.splice(arr.indexOf(child), 1);
+    this._taskrunner.debounce(this, this._sortChildren, 3);
   },
   _sortChildren: function() {
 
     var children = this.get('_children');
     var items = this.get('__content');
+
+    if (items.get('length') !== children.length) {
+      this._taskrunner.debounce(this, this._sortChildren, 3);
+      return;
+    }
 
     var len = children.length;
     var i;
@@ -777,8 +784,6 @@ export default Component.extend(MagicArrayMixin, {
       if (offset <= self.get('_topVisibleIndex')) {
         self.__performViewPrepention(addCount);
       }
-
-      self._taskrunner.schedule('actions', self, self._sortChildren);
 
     };
 
