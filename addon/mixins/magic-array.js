@@ -2,10 +2,75 @@ import Ember from "ember";
 import SmartObjectProxy from "../utils/smart-object-proxy";
 
 const {
-  observer,
+  computed,
   ArrayProxy,
   A
   } = Ember;
+
+function computeProxiedArray() {
+
+  var proxied = this.get('contentToProxy');
+  var key = this.get('keyForId');
+  var content = this.get('__proxyContent');
+  var newLength;
+  var newObjects = A();
+  var diff;
+
+  // play nice with arrays that are already proxied
+  if (proxied.get && proxied.get('content')) {
+    proxied = proxied.get('content');
+  }
+
+  this.beginPropertyChanges();
+
+  // create a new array object if we don't have one yet
+  if (proxied) {
+
+    // handle additions to the beginning of the array
+    if (this._changeIsPrepend(proxied, content, key)) {
+
+      newLength = Ember.get(proxied, 'length');
+      diff = newLength - content.get('length');
+      for (var i = 0; i < diff; i++) {
+        newObjects.push(SmartObjectProxy.create({content: proxied[i], __indexPath: key}));
+      }
+      if (newObjects.length) {
+        content.replace(0, 0, newObjects);
+      }
+
+      // handle additions and inline changes
+    } else {
+
+      proxied.forEach(function(item, index) {
+        var proxiedObject = content.objectAt(index);
+        if (proxiedObject) {
+          proxiedObject.__update(item);
+        } else {
+          newObjects.push(SmartObjectProxy.create({content: item, __indexPath: key}));
+        }
+      });
+
+      if (newObjects.length) {
+        content.pushObjects(newObjects);
+      }
+
+    }
+
+  }
+
+  newLength = proxied ? Ember.get(proxied, 'length') : 0;
+
+  if (newLength < content.get('length')) {
+    diff = content.get('length') - newLength;
+    content.removeAt(newLength, diff);
+  }
+
+  this.endPropertyChanges();
+
+  return content;
+
+}
+
 
 
 var Mixin = Ember.Mixin.create({
@@ -14,67 +79,7 @@ var Mixin = Ember.Mixin.create({
 
   _proxyContentTo: 'content',
 
-  __proxyContent: observer('contentToProxy', 'contentToProxy.@each', function computeProxiedArray() {
-
-    var proxied = this.get('contentToProxy');
-    var key = this.get('keyForId');
-    var content = this.get(this.get('_proxyContentTo'));
-    var newLength;
-    var newObjects = A();
-    var diff;
-
-    // play nice with arrays that are already proxied
-    if (proxied.get && proxied.get('content')) {
-      proxied = proxied.get('content');
-    }
-
-    this.beginPropertyChanges();
-
-    // create a new array object if we don't have one yet
-    if (proxied) {
-
-      // handle additions to the beginning of the array
-      if (this._changeIsPrepend(proxied, content, key)) {
-
-        newLength = Ember.get(proxied, 'length');
-        diff = newLength - content.get('length');
-        for (var i = 0; i < diff; i++) {
-          newObjects.push(SmartObjectProxy.create({content: proxied[i], __indexPath: key}));
-        }
-        if (newObjects.length) {
-          content.replace(0, 0, newObjects);
-        }
-
-        // handle additions and inline changes
-      } else {
-
-        proxied.forEach(function(item, index) {
-          var proxiedObject = content.objectAt(index);
-          if (proxiedObject) {
-            proxiedObject.__update(item);
-          } else {
-            newObjects.push(SmartObjectProxy.create({content: item, __indexPath: key}));
-          }
-        });
-
-        if (newObjects.length) {
-          content.pushObjects(newObjects);
-        }
-
-      }
-
-    }
-
-    newLength = proxied ? Ember.get(proxied, 'length') : 0;
-
-    if (newLength < content.get('length')) {
-      diff = content.get('length') - newLength;
-      content.removeAt(newLength, diff);
-    }
-
-    this.endPropertyChanges();
-
-  }),
+  __proxyContent: null,
 
   _changeIsPrepend: function(newArray, proxiedArray, key) {
 
@@ -95,9 +100,10 @@ var Mixin = Ember.Mixin.create({
 
   _initializeMagicArray: function(context, args, _super) {
     var dest = this.get('_proxyContentTo');
-    this.set(dest, ArrayProxy.create({ content: A() }));
+
+    this.set('__proxyContent', ArrayProxy.create({ content: A() }));
+    this.set(dest, computed('contentToProxy', 'contentToProxy.@each', computeProxiedArray));
     _super.apply(context, args);
-    this.__proxyContent();
   },
 
   init: function() {

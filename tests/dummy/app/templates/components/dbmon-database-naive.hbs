@@ -7,14 +7,10 @@
     {{queries.length}}
   </span>
 </td>
-{{#proxied-each
-  contentToProxy=topFiveQueries
-  keyForId="key"
-  as |query|
-}}
+{{#each topFiveQueries key="key" as |query|}}
   <td>{{query.elapsed}}</td>
   <div class="popover bottom">
       <div class="popover-content">{{query.query}}</div>
       <div class="arrow"></div>
   </div>
-{{/proxied-each}}
+{{/each}}

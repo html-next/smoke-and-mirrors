@@ -9,13 +9,13 @@
                     contentToProxy=model.databases
                     defaultHeight=37
                     alwaysUseDefaultHeight=true
-                    invisibleBuffer=0.5
+                    invisibleBuffer=0.25
                     visibleBuffer=0.25
                     containerSelector=".table-wrapper"
-                    keyForId="small"
-                    as |row|
+                    keyForId="id"
+                    as |db|
                   }}
-                      {{view "dbmon-database-tagless" content=row}}
+                      {{dbmon-database tagName="" db=db}}
                   {{/occlusion-collection}}
                 </table>
             </div>

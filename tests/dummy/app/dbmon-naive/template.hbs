@@ -7,8 +7,8 @@
 <button {{action "removeRow"}}>Remove Row</button>
 <table class="table table-striped latest-data">
   <tbody>
-    {{#each model.databases as |db|}}
-      {{dbmon-database db=db}}
+    {{#each model.databases key="id" as |db|}}
+      {{dbmon-database-naive db=db}}
     {{/each}}
   </tbody>
 </table>

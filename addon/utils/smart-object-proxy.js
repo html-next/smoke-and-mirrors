@@ -10,7 +10,7 @@ export default Ember.ObjectProxy.extend({
   __key: null,
   __indexPath: null,
   __isIndexable: true,
-  __update: function (content) {
+  __update: function(content) {
 
     if (content) {
       this.set('content', content);

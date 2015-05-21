@@ -1,3 +1,3 @@
-import Component from "smoke-and-mirrors/components/proxied-each/proxied-each.component";
+import Component from "smoke-and-mirrors/components/proxied-each";
 
 export default Component;

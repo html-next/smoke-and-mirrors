@@ -8,9 +8,8 @@ export default Ember.Component.extend({
 
   tagName: 'tr',
 
-  queries: computed('attrs', function() {
-    var queries = this.get('attrs.db');
-    console.log(queries);
+  queries: computed('db', function() {
+    var queries = this.get('db.queries');
     return queries;
   }),
 
@@ -18,8 +17,6 @@ export default Ember.Component.extend({
 
     var queries = this.get('queries');
     var topFiveQueries = queries.slice(0, 5);
-
-    console.log('queries', queries);
 
     while (topFiveQueries.length < 5) {
       topFiveQueries.push({ query: "" });
@@ -38,7 +35,6 @@ export default Ember.Component.extend({
 
   countClassName: computed('queries', function() {
     var queries = this.get('queries');
-
     var countClassName = "label";
 
     if (queries.length >= 20) {
@@ -50,7 +46,7 @@ export default Ember.Component.extend({
     }
 
     return countClassName;
-  }),
+  })
 
 });
 

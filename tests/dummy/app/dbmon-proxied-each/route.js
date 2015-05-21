@@ -17,8 +17,7 @@ export default Ember.Route.extend({
 
     Ember.run.schedule('afterRender', this, function () {
       var controller = this.controllerFor('dbmon-proxied-each');
-      controller
-        .set('model', getData(controller.get('numRows')));
+      controller.set('model', getData(controller.get('numRows')));
     });
 
     Ember.run.later(this.loadSamples.bind(this), TIMEOUT);

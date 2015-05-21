@@ -2,11 +2,14 @@
 <button {{action "addRow"}}>Add Row</button>
 <button {{action "removeRow"}}>Remove Row</button>
 <table class="table table-striped latest-data">
-  {{proxied-each
-    tagName="tbody"
-    itemViewClass="dbmon-database"
-    keyForId="id"
-    contentToProxy=model.databases
-  }}
+    <tbody>
+    {{#proxied-each
+      keyForId="id"
+      contentToProxy=model.databases
+      as |db|
+      }}
+      {{dbmon-database db=db}}
+      {{/proxied-each}}
+    </tbody>
 </table>
 
