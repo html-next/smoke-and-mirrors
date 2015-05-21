@@ -1,3 +1,3 @@
-import Component from "smoke-and-mirrors/components/async-image/async-image.component";
+import Component from "smoke-and-mirrors/components/async-image";
 
 export default Component;
