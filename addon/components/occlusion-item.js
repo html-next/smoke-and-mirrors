@@ -36,6 +36,7 @@ export default Ember.Component.extend({
   contentVisible: false,
   contentHidden: false,
   contentCulled: false,
+  collection: null,
 
   viewStateClass: computed('viewState', function() {
     return 'state-' + this.get('viewState');
@@ -160,6 +161,15 @@ export default Ember.Component.extend({
     this.element.style.visibility = 'hidden';
     this.element.style.minHeight = _height ? _height + 'px' : defaultHeight;
 
+  },
+
+  willDestroy: function() {
+    this.collection.unregister(this);
+  },
+
+  init: function() {
+    this.collection.register(this);
+    this._super();
   }
 
 });

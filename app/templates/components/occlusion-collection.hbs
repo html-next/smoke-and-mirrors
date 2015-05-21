@@ -1,10 +1,11 @@
-{{#each __content as |item|}}
+{{#each __content key="__key" as |item|}}
   {{#occlusion-item
     defaultHeight=defaultHeight
     tagName=itemTagName
     content=item
     alwaysUseDefaultHeight=alwaysUseDefaultHeight
     keyForId=keyForId
+    collection=this
     as |wrapper|
   }}
     {{#if wrapper.contentVisible}}

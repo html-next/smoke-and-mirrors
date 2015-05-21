@@ -12,7 +12,8 @@ const {
   on,
   run,
   computed,
-  observer
+  observer,
+  EnumerableUtils
 } = Ember;
 
 const jQuery = Ember.$;
@@ -388,7 +389,7 @@ export default Component.extend(MagicArrayMixin, {
     // from not finding a view when the pixels are off by < 1
     viewportTop -= 1;
 
-    var childViews = this._childViews;
+    var childViews = this.get('_children');
     var maxIndex = childViews.length - 1;
     var minIndex = 0;
     var midIndex;
@@ -413,15 +414,33 @@ export default Component.extend(MagicArrayMixin, {
     return minIndex;
   },
 
-
-  _getViews: function() {
-    var childViews = Ember.A(this._childViews[0]._childViews);
-    var ret = [];
-    childViews.forEach(function(view) {
-      ret.push(view._childViews[0]);
-    });
-    return ret;
+  _children: [],
+  register: function(child) {
+    this.get('_children').push(child);
   },
+  unregister: function(child) {
+    var arr = this.get('_children');
+    arr.splice(arr.indexOf(child), 1);
+  },
+  _sortChildren: function() {
+
+    var children = this.get('_children');
+    var items = this.get('__content');
+
+    var len = children.length;
+    var i;
+    var sorted = new Array(len);
+
+    for (i = 0; i < len; i++) {
+      let item = children[i];
+      let val = item.get('content');
+      let index = items.indexOf(val);
+      sorted[index] = item;
+    }
+
+    this.set('_children', sorted);
+  },
+
   // on scroll, determine view states
   /**!
    *
@@ -438,7 +457,7 @@ export default Component.extend(MagicArrayMixin, {
     }
 
     var edges = this.get('_edges') || this._calculateEdges();
-    var childViews = this._getViews();
+    var childViews = this.get('_children');
 
     var currentViewportBound = edges.viewportTop + this.$().position().top;
     var currentUpperBound = edges.invisibleTop;
@@ -657,7 +676,6 @@ export default Component.extend(MagicArrayMixin, {
     this.set('__isPrepending', true);
 
     var scrollPosition = this.get('_scrollPosition');
-
     var topVisibleKey = this.get('topVisibleKey');
 
     if (scrollPosition) {
@@ -755,9 +773,13 @@ export default Component.extend(MagicArrayMixin, {
     var self = this;
 
     content.contentArrayDidChange = function handleArrayChange(items, offset, removeCount, addCount) {
+
       if (offset <= self.get('_topVisibleIndex')) {
         self.__performViewPrepention(addCount);
       }
+
+      self._taskrunner.schedule('actions', self, self._sortChildren);
+
     };
 
   },

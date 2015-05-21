@@ -50,8 +50,8 @@ export default Ember.ObjectProxy.extend({
   },
 
   init: function() {
-    this._super();
     this.__update();
+    this._super();
   }
 
 });
