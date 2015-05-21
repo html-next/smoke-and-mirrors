@@ -188,8 +188,6 @@ cached, or culled.
 
 ### Initial State
 
-**Planned Feature, Not Enabled**
-
 #### useLocalStorageCache
 
 **Planned Feature, Not Enabled**
@@ -210,16 +208,13 @@ The unique key to use when caching the component's state in storage
 #### _scrollPosition
 
 Launch to a specific scroll offset.  Height cacheing and requestAnimationFrame
-will be used to ensure this happen seamlessly.
+will be used to ensure this happen seamlessly. This setting takes priority over topVisibleKey.
 
-#### topVisibleIndex
+#### topVisibleKey
 
-**Planned Feature, Not Enabled**
-
-Updated with the value of `keyForId` of the currently top visible element.
-In the future, you will be able to set this to an index to launch the scroll
-position with specific content visible.
-
+If set, upon initializiation the scroll position will be set such that the item
+with the provided key is at the top.  If the item cannot be found, scrollTop
+is set to 0. This property defers to _scrollPosition if provided.
 
 --------------------------------------------
 
