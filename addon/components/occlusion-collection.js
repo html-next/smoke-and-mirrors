@@ -755,6 +755,7 @@ export default Component.extend(MagicArrayMixin, {
 
     //clean up scheduled tasks
     this._taskrunner.cancelAll();
+    this._taskrunner.destroy();
 
   }),
 
