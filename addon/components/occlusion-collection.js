@@ -1,11 +1,11 @@
 import Ember from "ember";
-import MagicArrayMixin from "../mixins/magic-array";
 import OcclusionView from "./occlusion-item";
 import getTagDescendant from "../utils/get-tag-descendant";
 import nextFrame from "../utils/next-frame";
 import Scheduler from "../utils/backburner-ext";
 
 const {
+  get: get,
   Component,
   ArrayProxy,
   assert,
@@ -25,24 +25,14 @@ const actionContextCacheKeys = {
   'bottomVisibleChanged': '_lastVisibleBottomSent'
 };
 
-export default Component.extend(MagicArrayMixin, {
+
+function valueForIndex(arr, index) {
+  return arr.objectAt ? arr.objectAt(index) : arr[index];
+}
+
+export default Component.extend({
 
   //–––––––––––––– Required Settings
-
-  /**!
-   * An array of content to render.  The array is proxied via the `MagicArrayMixin` before being used on screen.
-   * If your content consists of Ember.Objects, the guid, is used to make this proxying even faster. Alternatively,
-   * specify `keyForId`.  See the [docs for MagicArrayMixin](./magic-array.md) to learn more.  See below for more
-   * on `keyForId`.
-   *
-   * This proxy behavior ensures that even should you do a full content swap, your performance doesn't suffer.
-   * Just how fast is this proxy?  I've implemented the [*Ryan Florence Performance Test*™](http://discuss.emberjs.com/t/ryan-florences-react-talk-does-not-make-ember-look-very-good/7223)
-   * (aka [Glimmer Demo](https://dbmonster.firebaseapp.com/)) using [Ember 1.11.0 and `smoke-and-mirrors`](http://runspired.github.io/smoke-and-mirrors/#/dbmon-occlusion-collection).
-   *
-   * Is Ember fast yet? [It doesn't matter what this says](https://is-ember-fast-yet.firebaseapp.com/), the answer is YES.
-   * Just goes to show a good algorithm is always clutch ;)
-   */
-  contentToProxy: null,
 
   /**!
    * This height is used to give the `OcclusionItem`s height prior to their content being rendered.
@@ -292,17 +282,6 @@ export default Component.extend(MagicArrayMixin, {
 
   //–––––––––––––– Private Internals
 
-
-  /**!
-   * The content array of proxied content.
-   */
-  __content: null,
-
-  /**!
-   * The property to proxy `contentToProxy` to.
-   */
-  _proxyContentTo: '__content',
-
   /**!
    * a cached jQuery reference to the container element
    */
@@ -364,15 +343,18 @@ export default Component.extend(MagicArrayMixin, {
       return;
     }
 
+    var key = this.get('keyForId');
+
     if (actionContextCacheKeys[name]) {
-      if (this.get(actionContextCacheKeys[name]) === context.item) {
+      if (this.get(actionContextCacheKeys[name]) === get(context.item, key)) {
         return;
       } else {
-        this.set(actionContextCacheKeys[name], context.item);
+        this.set(actionContextCacheKeys[name], get(context.item, key));
       }
     }
 
-    this.sendAction(name, context);
+    // this MUST be async or glimmer will freak
+    this._taskrunner.schedule('afterRender', this, this.sendAction, name, context);
   },
 
 
@@ -389,8 +371,8 @@ export default Component.extend(MagicArrayMixin, {
     // from not finding a view when the pixels are off by < 1
     viewportTop -= 1;
 
-    var childViews = this.get('_children');
-    var maxIndex = childViews.length - 1;
+    var items = this.get('content');
+    var maxIndex = get(items, 'length') - 1;
     var minIndex = 0;
     var midIndex;
 
@@ -401,8 +383,8 @@ export default Component.extend(MagicArrayMixin, {
       midIndex = Math.floor((minIndex + maxIndex) / 2);
 
       // in case of not full-window scrolling
-      var view = childViews[midIndex];
-      var viewBottom = view.$().position().top + view.get('_height') + adj;
+      var component = this.childForItem(valueForIndex(items, midIndex));
+      var viewBottom = component.$().position().top + component.get('_height') + adj;
 
       if (viewBottom > viewportTop) {
         maxIndex = midIndex - 1;
@@ -414,38 +396,16 @@ export default Component.extend(MagicArrayMixin, {
     return minIndex;
   },
 
-  _children: [],
-  register: function(child) {
-    this.get('_children').push(child);
-    this._taskrunner.debounce(this, this._sortChildren, 3);
+  _children: null,
+  childForItem: function(item) {
+    var val = get(item, this.get('keyForId'));
+    return this.get('_children')[val];
   },
-  unregister: function(child) {
-    var arr = this.get('_children');
-    arr.splice(arr.indexOf(child), 1);
-    this._taskrunner.debounce(this, this._sortChildren, 3);
+  register: function(child, key) {
+    this.get('_children')[key] = child;
   },
-  _sortChildren: function() {
-
-    var children = this.get('_children');
-    var items = this.get('__content');
-
-    if (items.get('length') !== children.length) {
-      this._taskrunner.debounce(this, this._sortChildren, 3);
-      return;
-    }
-
-    var len = children.length;
-    var i;
-    var sorted = new Array(len);
-
-    for (i = 0; i < len; i++) {
-      let item = children[i];
-      let val = item.get('content');
-      let index = items.indexOf(val);
-      sorted[index] = item;
-    }
-
-    this.set('_children', sorted);
+  unregister: function(key) {
+    this.get('_children')[key] = null; // don't delete, it leads to too much GC
   },
 
   // on scroll, determine view states
@@ -464,7 +424,7 @@ export default Component.extend(MagicArrayMixin, {
     }
 
     var edges = this.get('_edges') || this._calculateEdges();
-    var childViews = this.get('_children');
+    var items = this.get('content');
 
     var currentViewportBound = edges.viewportTop + this.$().position().top;
     var currentUpperBound = edges.invisibleTop;
@@ -475,7 +435,7 @@ export default Component.extend(MagicArrayMixin, {
 
     var topViewIndex = this._findTopView(currentUpperBound, edges.viewportTop);
     var bottomViewIndex = topViewIndex;
-    var lastIndex = childViews.length - 1;
+    var lastIndex = get(items, 'length') - 1;
     var topVisibleSpotted = false;
 
     // views to cull
@@ -495,86 +455,91 @@ export default Component.extend(MagicArrayMixin, {
 
     while (bottomViewIndex <= lastIndex) {
 
-      var view = childViews[bottomViewIndex];
+      var component = this.childForItem(valueForIndex(items, bottomViewIndex));
 
-      var viewTop = view.$().position().top;
-      var viewBottom = viewTop + view.get('_height');
+      var viewTop = component.$().position().top;
+      var viewBottom = viewTop + component.get('_height');
 
       // end the loop if we've reached the end of views we care about
       if (viewTop > edges.invisibleBottom) { break; }
 
         //above the upper invisible boundary
       if (viewBottom < edges.invisibleTop) {
-        toCull.push(view);
+        toCull.push(component);
 
         //above the upper reveal boundary
       } else if (viewBottom < edges.visibleTop) {
-        toHide.push(view);
+        toHide.push(component);
 
         //above the upper screen boundary
       } else if (viewBottom < edges.viewportTop) {
-        toShow.push(view);
+        toShow.push(component);
         if (bottomViewIndex === 0) {
           this.sendActionOnce('topReached', {
-            item: view.get('content.content'),
+            item: component.get('content'),
             index: bottomViewIndex
           });
         }
 
         //above the lower screen boundary
       } else if(viewTop < edges.viewportBottom) {
-        toScreen.push(view);
-        onscreen.push(view.get('content'));
+        toScreen.push(component);
+        onscreen.push(component.get('content'));
         if (bottomViewIndex === 0) {
           this.sendActionOnce('topReached', {
-            item: view.get('content.content'),
+            item: component.get('content'),
             index: bottomViewIndex
           });
         }
         if (bottomViewIndex === lastIndex) {
           this.sendActionOnce('bottomReached', {
-            item: view.get('content.content'),
+            item: component.get('content'),
             index: bottomViewIndex
           });
         }
 
         if (!topVisibleSpotted) {
           topVisibleSpotted = true;
-          this.set('_topVisible', view);
+          this.set('_topVisible', component);
           this.set('_topVisibleIndex', bottomViewIndex);
           this.sendActionOnce('topVisibleChanged', {
-            item: view.get('content.content'),
+            item: component.get('content'),
             index: bottomViewIndex
           });
         }
-        this.set('_bottomVisible', view);
+        this.set('_bottomVisible', component);
         this.sendActionOnce('bottomVisibleChanged', {
-          item: view.get('content.content'),
+          item: component.get('content'),
           index: bottomViewIndex
         });
 
         //above the lower reveal boundary
       } else if (viewTop < edges.visibleBottom) {
-        toShow.push(view);
+        toShow.push(component);
         if (bottomViewIndex === lastIndex) {
           this.sendActionOnce('bottomReached', {
-            item: view.get('content.content'),
+            item: component.get('content'),
             index: bottomViewIndex
           });
         }
 
         //above the lower invisible boundary
       } else { // (viewTop <= edges.invisibleBottom) {
-        toHide.push(view);
+        toHide.push(component);
       }
 
       bottomViewIndex++;
     }
 
-    toCull = toCull.concat(childViews.slice(0, topViewIndex)).concat(childViews.slice(bottomViewIndex));
+    var self = this;
+    toCull = toCull.concat(
+      (items.slice(0, topViewIndex)).concat(items.slice(bottomViewIndex)).map(function(item){
+        return self.childForItem(item);
+      })
+    );
 
     // update view states
-    this._taskrunner.schedule('render', this, function updateViewStates(toCull, toHide, toShow, toScreen) {
+    this._taskrunner.schedule('actions', this, function updateViewStates(toCull, toHide, toShow, toScreen) {
 
       //reveal on screen views
       toScreen.forEach(function (v) { v.show(); });
@@ -616,7 +581,7 @@ export default Component.extend(MagicArrayMixin, {
 
     if (Math.abs(scrollTop - _scrollTop) >= defaultHeight / 2) {
       this.set('_scrollPosition', scrollTop);
-      this._taskrunner.scheduleOnce('render', this, this._cycleViews);
+      this._taskrunner.scheduleOnce('actions', this, this._cycleViews);
     }
 
   },
@@ -684,6 +649,7 @@ export default Component.extend(MagicArrayMixin, {
 
     var scrollPosition = this.get('_scrollPosition');
     var topVisibleKey = this.get('topVisibleKey');
+    var key = this.get('keyForId');
 
     if (scrollPosition) {
       this.get('_container').get(0).scrollTop = scrollPosition;
@@ -694,10 +660,10 @@ export default Component.extend(MagicArrayMixin, {
         last.scrollIntoView(false);
       }
     } else if (topVisibleKey) {
-      var content = this.get('__content'), topVisibleIndex;
+      var content = this.get('content'), topVisibleIndex;
 
       for (let i = 0; i < content.get('length'); i++) {
-        if (topVisibleKey === content.objectAt(i).get('__key')) {
+        if (topVisibleKey === get(valueForIndex(content, i), key)) {
           topVisibleIndex = i;
         }
       }
@@ -774,20 +740,30 @@ export default Component.extend(MagicArrayMixin, {
     });
   },
 
-  _reflectContentChanges: function() {
+  didReceiveAttrs: function(attrs) {
+    var oldArray = attrs.oldAttrs ? attrs.oldAttrs.content.value : false;
+    var newArray = attrs.newAttrs.content.value;
+    if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
+      var addCount = get(newArray, 'length') - get(oldArray, 'length');
+      this.__performViewPrepention(addCount);
+    }
+  },
 
-    var content = this.get('__content');
+  _changeIsPrepend: function(oldArray, newArray) {
 
-    var self = this;
+    var lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
+    var key = this.get('keyForId');
 
-    content.contentArrayDidChange = function handleArrayChange(items, offset, removeCount, addCount) {
+    // if either array is empty or the new array is not longer, do not treat as prepend
+    if (!get(newArray, 'length') || !get(oldArray, 'length') || lengthDifference <= 0) {
+      return false;
+    }
 
-      if (offset <= self.get('_topVisibleIndex')) {
-        self.__performViewPrepention(addCount);
-      }
+    // if the keys at the correct indexes are the same, this is a prepend
+    var oldInitialItem = oldArray.objectAt ? get(oldArray.objectAt(0), key) : get(oldArray[0], key);
+    var newInitialItem = newArray.objectAt ? get(newArray.objectAt(lengthDifference), key) : get(newArray[lengthDifference], key);
 
-    };
-
+    return oldInitialItem === newInitialItem;
   },
 
 
@@ -880,6 +856,8 @@ export default Component.extend(MagicArrayMixin, {
    */
   _prepareComponent: function() {
 
+    this.set('_children', {});
+
     var prependFn = this.__performViewPrepention.bind(this);
     this.set('__performViewPrepention', prependFn);
 
@@ -904,7 +882,6 @@ export default Component.extend(MagicArrayMixin, {
   init: function() {
     this._prepareComponent();
     this._super();
-    this._reflectContentChanges();
   }
 
 

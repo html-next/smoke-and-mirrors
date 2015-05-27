@@ -26,7 +26,9 @@ function getRandomNumber(min, max) {
 function getWidth() {
   return getRandomNumber(1500, 3000);
 }
-
+function generateImageId(index) {
+  return (new Date()).getTime() + '-' + index;
+}
 function getId() {
   return getRandomNumber(1, 10);
 }
@@ -36,7 +38,7 @@ function getCategoryIndex() {
   return getRandomNumber(0, max);
 }
 
-function generateImageSrc() {
+function generateImageSrc(index) {
   var parts = [];
   var preview = [];
   parts.push(URL_BASE);
@@ -59,7 +61,8 @@ function generateImageSrc() {
   preview.push(id);
   return {
     large: parts.join('/'),
-    small: preview.join('/')
+    small: preview.join('/'),
+    id: generateImageId(index)
   };
 }
 
@@ -71,7 +74,7 @@ export default function getImages(count) {
 
 
   for (var i = 1; i <= count; i++) {
-    imageUrls.push(generateImageSrc());
+    imageUrls.push(generateImageSrc(i));
   }
 
   return imageUrls;

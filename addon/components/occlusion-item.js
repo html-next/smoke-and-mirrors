@@ -35,6 +35,7 @@ export default Ember.Component.extend({
   viewState: 'culled',
   contentVisible: false,
   contentHidden: false,
+  contentInserted: false,
   contentCulled: false,
   collection: null,
 
@@ -101,7 +102,7 @@ export default Ember.Component.extend({
    * @private
    */
   _ov_teardown: function() {
-    this.setProperties({ contentCulled: true, contentHidden: false });
+    this.setProperties({ contentCulled: true, contentHidden: false, contentInserted: false });
   },
 
 
@@ -111,7 +112,7 @@ export default Ember.Component.extend({
    * @private
    */
   _ov_insert: function() {
-    this.setProperties({ contentHidden: true, contentCulled: false });
+    this.setProperties({ contentHidden: true, contentCulled: false, contentInserted: true });
     if (!this.get('_height')) {
       run.schedule('afterRender', this, function() {
         if (!this.get('isDestroyed')) {
@@ -130,7 +131,7 @@ export default Ember.Component.extend({
    * @private
    */
   _ov_reveal: function() {
-    this.setProperties({ contentHidden: false, contentVisible: true });
+    this.setProperties({ contentHidden: false, contentVisible: true, contentInserted: true });
     this.element.style.visibility = 'visible';
   },
 
@@ -141,7 +142,7 @@ export default Ember.Component.extend({
    * @private
    */
   _ov_obscure: function() {
-    this.setProperties({ contentHidden: true, contentVisible: false });
+    this.setProperties({ contentHidden: true, contentVisible: false, contentInserted: true });
     this.element.style.visibility = 'hidden';
   },
 
@@ -163,12 +164,24 @@ export default Ember.Component.extend({
 
   },
 
+  didReceiveAttrs: function(attrs) {
+    var key = this.get('keyForId');
+    var oldKeyVal = attrs.oldAttrs ? attrs.oldAttrs.content.value[key] : false;
+    var newKeyVal = attrs.newAttrs.content.value[key];
+    if (oldKeyVal && oldKeyVal !== newKeyVal) {
+      this.collection.unregister(oldKeyVal);
+      this.collection.register(this, newKeyVal);
+    }
+  },
   willDestroy: function() {
-    this.collection.unregister(this);
+    var key = this.get('keyForId');
+    var val = this.get('content.' + key);
+    this.collection.unregister(val);
   },
 
   init: function() {
-    this.collection.register(this);
+    var val = this.get('content.' + this.get('keyForId'));
+    this.collection.register(this, val);
     this._super();
   }
 

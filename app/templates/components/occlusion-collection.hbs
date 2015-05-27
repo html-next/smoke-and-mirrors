@@ -1,4 +1,4 @@
-{{#each __content key=keyForId as |item|}}
+{{#each content key=keyForId as |item|}}
   {{#occlusion-item
     defaultHeight=defaultHeight
     tagName=itemTagName
@@ -8,12 +8,8 @@
     collection=this
     as |wrapper|
   }}
-    {{#if wrapper.contentVisible}}
+    {{#if wrapper.contentInserted}}
       {{yield item}}
-    {{else}}
-      {{#if wrapper.contentHidden}}
-        {{yield item}}
-      {{/if}}
     {{/if}}
   {{/occlusion-item}}
 {{/each}}

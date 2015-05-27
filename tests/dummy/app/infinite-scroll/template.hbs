@@ -4,7 +4,7 @@
           {{!- BEGIN-SNIPPET infinite-scroll-example }}
             <div class="table-wrapper">
               {{#occlusion-collection
-                contentToProxy=model.images
+                content=model.images
                 defaultHeight=350
                 alwaysUseDefaultHeight=true
                 visibleBuffer=1
@@ -12,7 +12,7 @@
                 containerSelector=".table-wrapper"
                 bottomReached="loadBelow"
                 topReached="loadAbove"
-                keyForId="small"
+                keyForId="id"
                 as |image|
                 }}
                   <div class="image-slide">
