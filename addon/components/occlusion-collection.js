@@ -812,6 +812,9 @@ export default Component.extend({
     }
 
     var _container = this.get('_container');
+    if (!_container) {
+      return;
+    }
     var edges = {};
 
     // segment heights

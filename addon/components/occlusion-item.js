@@ -55,11 +55,6 @@ export default Ember.Component.extend({
     this._setState('culled');
   },
 
-  willDestroy : function () {
-    this._ov_teardown();
-    this.set('viewState', 'culled');
-  },
-
   _setState: function (toState) {
 
     var fromState = this.get('viewState');
@@ -173,7 +168,10 @@ export default Ember.Component.extend({
       this.collection.register(this, newKeyVal);
     }
   },
+
   willDestroy: function() {
+    this._ov_teardown();
+    this.set('viewState', 'culled');
     var key = this.get('keyForId');
     var val = this.get('content.' + key);
     this.collection.unregister(val);
