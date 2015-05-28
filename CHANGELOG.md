@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.0
+
+- [FEAT] Glimmer support
+- [BREAKING] `MagicArray` has been removed, glimmer remove the need.
+- [BREAKING] `proxied-each` has been removed, glimmer removed the need.
+- [BREAKING] `occlusion-collection` now uses `each` semantics.
+- [BUGS] The number of bugs squashed between 0.1.0 and 0.2.0 is too large to number
+- [FEATURE] `exit-left` `exit-right` and `fade` transitions for `liquid-fire` have been added,
+they are not currently directly exposed.
+- [BUGFIX] addon styles are now properly included.
+
+Many thanks to everyone who contributed bug reports, pull requests, and helped cleanup
+the project during the 0.2.0 beta cycle!  After seeing the results of glimmer, I've
+decided not to implement `select` or `Autocomplete` within this lib.
+
+`ui-carousel` and `off-canvas` will still be developed, but are waiting on `liquid-fire`
+improvements that make clean transition APIs for these components possible.
+
 ## 0.1.0
 
 This is the first release, so this is a feature overview for what's included already.

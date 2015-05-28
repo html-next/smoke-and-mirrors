@@ -129,19 +129,6 @@ export default Component.extend({
   scrollThrottle: 32,
 
   /**!
-   * When scrolling, new on screen items are immediately handled.
-   * `cycleDelay` sets the amount of time to debounce before updating
-   * off screen items.
-   */
-  cycleDelay: 32,
-
-  /**!
-   * Sets how many items to update view state for at a time when updating
-   * offscreen items.
-   */
-  updateBatchSize: 6,
-
-  /**!
    * how much extra room to keep visible on
    * either side of the visible area
    */

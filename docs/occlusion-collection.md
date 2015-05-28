@@ -36,25 +36,9 @@ and how `smoke-and-mirrors` implements it.
 
 ### Required
 
-#### itemViewClass
+#### content
 
-The view to use for each item in the `contentToProxy` array. 
-If you need dynamic item types, you can use a wrapper view to
-swap out the view based on the model.
-
-#### contentToProxy
-
-An array of content to render.  The array is proxied through `MagicArray` before being used on screen.
-If your content consists of Ember.Objects, the guid, is used to make `MagicArray` even faster. Alternatively,
-specify `keyForId`.  See the [docs for MagicArray](./magic-array.md) to learn more.  See below for more
-on `keyForId`.
-
-This proxy behavior ensures that even should you do a full content swap, your performance doesn't suffer.
-Just how fast is this proxy?  I've implemented the [*Ryan Florence Performance Test*™](http://discuss.emberjs.com/t/ryan-florences-react-talk-does-not-make-ember-look-very-good/7223)
-(aka [Glimmer Demo](https://dbmonster.firebaseapp.com/)) using [Ember 1.11.0 and `smoke-and-mirrors`](http://runspired.github.io/smoke-and-mirrors/#/dbmon-occlusion-collection).
-
-Is Ember fast yet? [It doesn't matter what this says](https://is-ember-fast-yet.firebaseapp.com/), the answer is YES.
-Just goes to show a good algorithm is always clutch ;)
+An array of content to render.
 
 #### defaultHeight
 
@@ -69,7 +53,8 @@ by specifying `alwaysUseDefaultHeight: true`.
 #### keyForId
 
 The `keyForId` property improves performance when the underlying array is changed but most
-of the items remain the same.  It is used by the [MagicArrayMixin](./magic-array.md).
+of the items remain the same.  It is used by Glimmer and by the collection to lookup the internal
+component for a given item.
 
 If `useLocalStorageCache` is true, it is also used to cache the rendered heights of content in the list.
 
@@ -141,17 +126,6 @@ Time (in ms) between attempts at re-rendering during scrolling.
 A new render every ~16ms preserves 60fps. Most re-renders with
 occlusion-culling have clocked well below 1ms.
 
-#### cycleDelay
-
-When scrolling, new on screen items are immediately handled.
-`cycleDelay` sets the amount of time to debounce before updating
-off screen items.
-
-#### updateBatchSize
-
-Sets how many items to update view state for at a time when updating
-offscreen items.
-
 #### visibleBuffer default .5
 
 how much extra room to keep visible on
@@ -161,12 +135,6 @@ either side of the visible area
 
 how much extra room to keep in DOM but
 with `visible:false` set.
-
-#### cacheBuffer default .5
-
-sets how many views to cache in buffer
-instead of tearing down on either side
-of the revealed area
 
 ### Enabling CSS Animation
 

@@ -1,18 +1,15 @@
 async-image
   display inline-block
-  margin .5em
   position relative
   width 100%
   height 100%
+  background #f8f8f8
 
 async-image > img
   display none
   opacity 0
-  transition 1s ease-in
+  transition opacity 1s ease-in
   position relative
-  width 96%
-  height 96%
-  margin 2%
 
 async-image.is-appending > img
   display block
@@ -22,4 +19,4 @@ async-image.is-loaded > img
   opacity 1
   width 100%
   height 100%
-  margin 0%
+  margin 0

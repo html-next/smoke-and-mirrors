@@ -1,13 +1,21 @@
 # Roadmap
 
+### 0.3.0
+
+- `horizontal-collection` and `vertical-collection` (to replace `occlusion-collection`)
+
 ### 0.2.0
 
-- fix cache-container lookup and model reactivation
-- expose {{#proxied-each}} with same semantics / usability as {{#each}}
-- expose {{#occlusion-collection}} with same semantics / usability as {{#each}}
-- iScroll mixin
-- option to use iScroll
-- detect UIWebView and use iScroll by default when in use (see http://jsfiddle.net/ThinkingStiff/6qrbn/ )
+- [X] expose {{#occlusion-collection}} with same semantics / usability as {{#each}}
+
+
+These improvements/features turned out to be doomed.
+
+- ~~fix cache-container lookup and model reactivation~~
+- ~~expose {{#proxied-each}} with same semantics / usability as {{#each}}~~
+- ~~iScroll mixin~~
+- ~~option to use iScroll~~
+- ~~detect UIWebView and use iScroll by default when in use (see http://jsfiddle.net/ThinkingStiff/6qrbn/ )~~
 
 ### Planned Features
 

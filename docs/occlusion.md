@@ -26,6 +26,13 @@ This is accomplished by setting `visibility:hidden` on an element, which removes
 content from rendering without forcing a reflow.  This is not the same as `display:none`,
 which would cause a reflow.
 
+### Glimmer Update
+
+The information below is only true for pre 0.2.0-beta.1 and before, beginning in beta.2 we
+moved to nested components to be able to utilize `{{#each}}` semantics.  This reduced the
+number of required views, as well as our ability to control the instantiation and rendering
+of those views.  Both states below are now combined to simply `teardown`.
+
 #### View + Dom Caching
 
 View caching is accomplished by removing the view from the list of active views, preventing
