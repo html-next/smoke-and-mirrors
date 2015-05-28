@@ -1,0 +1,18 @@
+{{#each __content key="__key" as |item|}}
+  {{#vm-item
+    defaultHeight=defaultHeight
+    tagName=itemTagName
+    content=item
+    alwaysUseDefaultHeight=alwaysUseDefaultHeight
+    keyForId=keyForId
+    as |wrapper|
+  }}
+    {{#if wrapper.contentVisible}}
+      {{yield item}}
+    {{else}}
+      {{#if wrapper.contentHidden}}
+        {{yield item}}
+      {{/if}}
+    {{/if}}
+  {{/vm-item}}
+{{/each}}
