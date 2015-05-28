@@ -1,6 +1,6 @@
 import Ember from "ember";
 import MagicArrayMixin from "../mixins/magic-array";
-import OcclusionView from "./occlusion-item";
+import OcclusionView from "./vm-item";
 import getTagDescendant from "../utils/get-tag-descendant";
 import nextFrame from "../utils/next-frame";
 import Scheduler from "../utils/backburner-ext";

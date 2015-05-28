@@ -1,5 +1,5 @@
 import Ember from "ember";
-import OcclusionView from "./occlusion-item";
+import OcclusionView from "./vertical-item";
 import getTagDescendant from "../utils/get-tag-descendant";
 import nextFrame from "../utils/next-frame";
 import Scheduler from "../utils/backburner-ext";

@@ -4,7 +4,7 @@
           {{!- BEGIN-SNIPPET occlusion-collection-example }}
             <div class="table-wrapper">
                 <table class="table table-striped latest-data">
-                  {{#occlusion-collection
+                  {{#vertical-collection
                     tagName="tbody"
                     content=model.databases
                     defaultHeight=37
@@ -16,7 +16,7 @@
                     as |db|
                   }}
                       {{dbmon-database tagName="" db=db}}
-                  {{/occlusion-collection}}
+                  {{/vertical-collection}}
                 </table>
             </div>
           {{!- END-SNIPPET }}
