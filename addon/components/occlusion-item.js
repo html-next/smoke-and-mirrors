@@ -167,8 +167,8 @@ export default Ember.Component.extend({
   didReceiveAttrs: function(attrs) {
     var key = this.get('keyForId');
     var oldKeyVal = attrs.oldAttrs ? attrs.oldAttrs.content.value[key] : false;
-    var newKeyVal = attrs.newAttrs.content.value[key];
-    if (oldKeyVal && oldKeyVal !== newKeyVal) {
+    var newKeyVal = attrs.oldAttrs ? attrs.newAttrs.content.value[key] : false;
+    if (oldKeyVal && newKeyVal && oldKeyVal !== newKeyVal) {
       this.collection.unregister(oldKeyVal);
       this.collection.register(this, newKeyVal);
     }
