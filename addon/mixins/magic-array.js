@@ -43,7 +43,6 @@ function computeProxiedArray() {
       proxied.forEach(function(item, index) {
         var proxiedObject = content.objectAt(index);
         if (proxiedObject) {
-          console.log('updating item');
           proxiedObject.__update(item);
         } else {
           newObjects.push(SmartObjectProxy.create({content: item, __indexPath: key}));
