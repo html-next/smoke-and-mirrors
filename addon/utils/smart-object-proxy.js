@@ -12,6 +12,7 @@ export default Ember.ObjectProxy.extend({
   __isIndexable: true,
   __update: function(content) {
 
+    console.log('__updating item');
     if (content) {
       this.set('content', content);
       this.notifyPropertyChange('content');

@@ -20,4 +20,4 @@ export default function getTagDescendant(tag) {
     default:
       return 'div';
   }
-};
+}

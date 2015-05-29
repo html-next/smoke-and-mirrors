@@ -35,6 +35,7 @@ export default Ember.Component.extend({
   viewState: 'culled',
   contentVisible: false,
   contentHidden: false,
+  contentInserted: false,
   contentCulled: false,
   collection: null,
 
@@ -52,11 +53,6 @@ export default Ember.Component.extend({
 
   cull: function () {
     this._setState('culled');
-  },
-
-  willDestroy : function () {
-    this._ov_teardown();
-    this.set('viewState', 'culled');
   },
 
   _setState: function (toState) {
@@ -101,7 +97,7 @@ export default Ember.Component.extend({
    * @private
    */
   _ov_teardown: function() {
-    this.setProperties({ contentCulled: true, contentHidden: false });
+    this.setProperties({ contentCulled: true, contentHidden: false, contentInserted: false });
   },
 
 
@@ -111,7 +107,7 @@ export default Ember.Component.extend({
    * @private
    */
   _ov_insert: function() {
-    this.setProperties({ contentHidden: true, contentCulled: false });
+    this.setProperties({ contentHidden: true, contentCulled: false, contentInserted: true });
     if (!this.get('_height')) {
       run.schedule('afterRender', this, function() {
         if (!this.get('isDestroyed')) {
@@ -130,7 +126,7 @@ export default Ember.Component.extend({
    * @private
    */
   _ov_reveal: function() {
-    this.setProperties({ contentHidden: false, contentVisible: true });
+    this.setProperties({ contentHidden: false, contentVisible: true, contentInserted: true });
     this.element.style.visibility = 'visible';
   },
 
@@ -141,7 +137,7 @@ export default Ember.Component.extend({
    * @private
    */
   _ov_obscure: function() {
-    this.setProperties({ contentHidden: true, contentVisible: false });
+    this.setProperties({ contentHidden: true, contentVisible: false, contentInserted: true });
     this.element.style.visibility = 'hidden';
   },
 
@@ -161,6 +157,11 @@ export default Ember.Component.extend({
     this.element.style.visibility = 'hidden';
     this.element.style.minHeight = _height ? _height + 'px' : defaultHeight;
 
+  },
+
+  willDestroy: function() {
+    this._ov_teardown();
+    this.set('viewState', 'culled');
   }
 
 });

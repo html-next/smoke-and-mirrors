@@ -1,5 +1,4 @@
-'use strict';
-
+/* global module*/
 module.exports = {
   normalizeEntityName: function() {},
 

@@ -1,19 +1,15 @@
 import Ember from "ember";
 import MagicArrayMixin from "../mixins/magic-array";
-import OcclusionView from "./vm-item";
 import getTagDescendant from "../utils/get-tag-descendant";
 import nextFrame from "../utils/next-frame";
 import Scheduler from "../utils/backburner-ext";
 
 const {
   Component,
-  ArrayProxy,
   assert,
   on,
-  run,
   computed,
-  observer,
-  EnumerableUtils
+  observer
   } = Ember;
 
 const jQuery = Ember.$;
@@ -414,14 +410,14 @@ export default Component.extend(MagicArrayMixin, {
     return minIndex;
   },
 
-  _children: function() {
+  _children: computed('_childViews.@each', function() {
     var eachList = Ember.A(this._childViews[0]);
     var childViews = [];
     eachList.forEach(function(virtualView){
       childViews.push(virtualView._childViews[0]);
     });
     return childViews;
-  }.property('_childViews.@each'),
+  }),
 
   // on scroll, determine view states
   /**!
@@ -549,7 +545,7 @@ export default Component.extend(MagicArrayMixin, {
     toCull = toCull.concat(childViews.slice(0, topViewIndex)).concat(childViews.slice(bottomViewIndex));
 
     // update view states
-    this._taskrunner.schedule('render', this, function updateViewStates(toCull, toHide, toShow, toScreen) {
+    this._taskrunner.schedule('actions', this, function updateViewStates(toCull, toHide, toShow, toScreen) {
 
       //reveal on screen views
       toScreen.forEach(function (v) { v.show(); });
@@ -591,7 +587,7 @@ export default Component.extend(MagicArrayMixin, {
 
     if (Math.abs(scrollTop - _scrollTop) >= defaultHeight / 2) {
       this.set('_scrollPosition', scrollTop);
-      this._taskrunner.scheduleOnce('render', this, this._cycleViews);
+      this._taskrunner.scheduleOnce('actions', this, this._cycleViews);
     }
 
   },

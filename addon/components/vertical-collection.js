@@ -1,5 +1,4 @@
 import Ember from "ember";
-import OcclusionView from "./vertical-item";
 import getTagDescendant from "../utils/get-tag-descendant";
 import nextFrame from "../utils/next-frame";
 import Scheduler from "../utils/backburner-ext";
@@ -7,13 +6,9 @@ import Scheduler from "../utils/backburner-ext";
 const {
   get: get,
   Component,
-  ArrayProxy,
   assert,
   on,
-  run,
-  computed,
   observer,
-  EnumerableUtils
 } = Ember;
 
 const jQuery = Ember.$;
