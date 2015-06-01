@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import getData from '../../lib/get-data';
 
-var TIMEOUT = 500;
+var TIMEOUT = 0;
 
 export default Ember.Route.extend({
 
