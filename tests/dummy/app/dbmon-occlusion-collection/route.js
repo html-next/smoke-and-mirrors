@@ -10,7 +10,7 @@ export default Ember.Route.extend({
   },
 
   afterModel: function() {
-    Ember.run.later(this.loadSamples.bind(this), TIMEOUT);
+    Ember.run.later(this.loadSamples.bind(this), 100);
   },
 
   loadSamples: function() {

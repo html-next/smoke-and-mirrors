@@ -1,10 +1,19 @@
+<header>
+    <h1>Smoke And Mirrors</h1>
+    <nav>
+      {{#link-to "index"}}Overview{{/link-to}}
+        | {{#link-to "dbmon-naive"}}DBMon - Naive{{/link-to}}
+        | {{#link-to "dbmon-occlusion-collection"}}Vertical Collection{{/link-to}}
+        | {{#link-to "infinite-scroll"}}Infinite Scroll{{/link-to}}
+    </nav>
+</header>
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-7">
           {{!- BEGIN-SNIPPET occlusion-collection-example }}
             <div class="table-wrapper">
                 <table class="table table-striped latest-data">
-                  {{#vm-collection
+                  {{#vertical-collection
                     tagName="tbody"
                     contentToProxy=model.databases
                     defaultHeight=37
@@ -15,8 +24,8 @@
                     keyForId="id"
                     as |db|
                   }}
-                      {{mdbmon-database tagName="" db=db}}
-                  {{/vm-collection}}
+                      {{dbmon-database tagName="" db=db}}
+                  {{/vertical-collection}}
                 </table>
             </div>
           {{!- END-SNIPPET }}

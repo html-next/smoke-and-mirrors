@@ -1,23 +1,21 @@
-<h2>Demos!</h2>
-
+<header>
+    <h1>Smoke And Mirrors</h1>
+    <nav>
+      {{#link-to "index"}}Overview{{/link-to}}
+        | {{#link-to "dbmon-naive"}}DBMon - Naive{{/link-to}}
+        | {{#link-to "dbmon-occlusion-collection"}}Vertical Collection{{/link-to}}
+        | {{#link-to "infinite-scroll"}}Infinite Scroll{{/link-to}}
+    </nav>
+</header>
+<h2>Overview</h2>
 <p>
-    There's nothing like putting a performance addon to the test like
-    a serious stress test.
+    I should probably type something cool here, but that would only distract
+    from the demos linked above.
 </p>
 <p>
-    All of the demos here are built using Ember 1.11.  These are NOT Glimmer'd.
+    This repo is currently running 1.13.0-beta.2
 </p>
 <p>
-    The naive implementation uses nested "each" helpers. Don't worry, the naive
-    implementation will (probably) load.  It just might take a long time.
-</p>
-<p>
-    The proxied-each implementation uses the "proxied-each" component which prevents
-    views being needlessly torn down even when the underlying content array is
-    completely changed out.
-</p>
-<p>
-    The "occlusion-collection" implementation has the same underlying array behavior
-    as "proxied-each", but additionally intelligently hides, caches, or removes
-    rows depending upon how far off screen they are.
+    There are two nearly identical components in this lib, `vertical-collection` and
+    `vm-collection`.  The former is for use with glimmer, the latter is for use pre-glimmer.
 </p>
