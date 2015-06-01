@@ -14,13 +14,11 @@ export default Ember.Route.extend({
   },
 
   loadSamples: function() {
-
+    var controller = this.controllerFor('perf-demo.proxied-array');
     Ember.run.schedule('afterRender', this, function () {
-      var controller = this.controllerFor('perf-demo.proxied-array');
       controller
         .set('model', getData(controller.get('numRows')));
     });
-
     Ember.run.later(this.loadSamples.bind(this), controller.get('timeout'));
   }
 
