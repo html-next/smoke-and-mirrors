@@ -14,8 +14,6 @@ export default Ember.Component.extend({
   }),
 
   topFiveQueries: computed('queries', function() {
-
-    console.log('topFiveQueries');
     var queries = this.get('queries');
     var topFiveQueries = queries.slice(0, 5);
 

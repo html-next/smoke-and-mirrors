@@ -8,8 +8,8 @@ export default Ember.Component.extend({
 
   tagName: 'tr',
 
-  queries: computed('db.content', function() {
-    return this.get('db.content.queries');
+  queries: computed('db', function() {
+    return this.get('db.queries');
   }),
 
   topFiveQueries: computed('queries', function() {
