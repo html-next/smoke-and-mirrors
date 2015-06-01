@@ -1,0 +1,18 @@
+
+<td class="dbname">
+  {{attrs.db.id}}
+</td>
+<td class="query-count">
+  <span class="{{countClassName}}">
+    {{queries.length}}
+  </span>
+</td>
+{{#oproxied-each
+  keyForId="key"
+  contentToProxy=topFiveQueries as |query|}}
+  <td>{{query.elapsed}}</td>
+  <div class="popover bottom">
+      <div class="popover-content">{{query.query}}</div>
+      <div class="arrow"></div>
+  </div>
+{{/oproxied-each}}
