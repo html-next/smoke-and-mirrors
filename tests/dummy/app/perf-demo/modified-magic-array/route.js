@@ -1,8 +1,6 @@
 import Ember from 'ember';
 import getData from '../../lib/get-data';
 
-var TIMEOUT = 0;
-
 export default Ember.Route.extend({
 
   model: function() {
@@ -23,14 +21,7 @@ export default Ember.Route.extend({
         .set('model', getData(controller.get('numRows')));
     });
 
-    Ember.run.later(this.loadSamples.bind(this), TIMEOUT);
-  },
-
-  actions: {
-    adjustTimeout: function(val) {
-      console.log('adjusting timeout', val);
-      TIMEOUT = val;
-    }
+    Ember.run.later(this.loadSamples.bind(this), controller.get('timeout'));
   }
 
 });

@@ -5,9 +5,6 @@ export default Ember.Controller.extend({
   queryParams: ['numRows', 'timeout'],
   numRows: 100,
   timeout: 0,
-  timeoutObserver: Ember.observer('timeout', function() {
-    this.send('adjustTimeout', this.get('timeout'));
-  }),
 
   actions: {
 
