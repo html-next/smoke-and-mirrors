@@ -1,0 +1,39 @@
+
+<h3>Glimmer Performance Issues</h3>
+<p>
+    The following two screens show a demo of Glimmer choking hard.
+    This is the setup for the demo.
+</p>
+
+<h4>Proxied Array</h4>
+<p>
+    This implementation of the dbmon demo uses normal array proxies
+    to smooth the switching out of underlying array instances.
+</p>
+<p>
+    Only the array of databases is proxied, nothing else.
+</p>
+
+<h4>Magic Array</h4>
+<p>
+    This implementation of the dbmon demo uses the `MagicArray` for both
+    the array of databases and the `topFiveQueries` array both via the `proxied-each`
+    component.
+</p>
+<p>
+    The `MagicArray` proxies not only the underlying array instance, but also each object
+    in the array.  Pre-glimmer, this was done to enable reusing views and DOM. While no
+    longer necessary, it would still be good to understand why this causes Glimmer to
+    choke.
+</p>
+
+<h4>Modified Magic Array</h4>
+<p>
+    This implementation of the dbmon demo is identical to the `MagicArray` demo, except
+    for ONE modification.  It uses an `observer` to detect changes to the underlying
+    array and update the proxy, instead of using a `computed`.
+</p>
+<p>
+    In a prior version of this component, the observer was required in order to support
+    view creation via a ContainerView.
+</p>

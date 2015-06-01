@@ -97,15 +97,15 @@ var Mixin = Ember.Mixin.create({
 
   },
 
-  _initializeMagicArray: function(context, args, _super) {
+  _initializeMagicArray: function() {
     var dest = this.get('_proxyContentTo');
     this.set('__proxyContent', ArrayProxy.create({ content: Ember.A() }));
     this.set(dest, computed('contentToProxy', 'contentToProxy.@each', computeProxiedArray));
-    _super.apply(context, args);
   },
 
   init: function() {
-    this._initializeMagicArray(this, arguments, this._super);
+    this._initializeMagicArray();
+    this._super.apply(this, arguments);
   }
 
 });
