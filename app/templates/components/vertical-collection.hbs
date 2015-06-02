@@ -1,5 +1,5 @@
 {{#each content key=keyForId as |item|}}
-  {{#occlusion-item
+  {{#vertical-item
     defaultHeight=defaultHeight
     tagName=itemTagName
     content=item
@@ -11,5 +11,5 @@
     {{#if wrapper.contentInserted}}
       {{yield item}}
     {{/if}}
-  {{/occlusion-item}}
+  {{/vertical-item}}
 {{/each}}

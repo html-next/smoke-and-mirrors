@@ -12,7 +12,7 @@
         <div class="col-sm-7">
           {{!- BEGIN-SNIPPET infinite-scroll-example }}
             <div class="table-wrapper">
-              {{#occlusion-collection
+              {{#vertical-collection
                 content=model.images
                 defaultHeight=350
                 alwaysUseDefaultHeight=true
@@ -27,7 +27,7 @@
                   <div class="image-slide">
                       {{async-image src=image.small}}
                   </div>
-              {{/occlusion-collection}}
+              {{/vertical-collection}}
             </div>
             {{!- END-SNIPPET }}
         </div>
