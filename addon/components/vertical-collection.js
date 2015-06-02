@@ -723,8 +723,8 @@ export default Component.extend({
   },
 
   didReceiveAttrs: function(attrs) {
-    var oldArray = attrs.oldAttrs ? attrs.oldAttrs.content.value : false;
-    var newArray = attrs.newAttrs ? attrs.newAttrs.content.value : false;
+    var oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
+    var newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
     if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
       var addCount = get(newArray, 'length') - get(oldArray, 'length');
       this.__performViewPrepention(addCount);
