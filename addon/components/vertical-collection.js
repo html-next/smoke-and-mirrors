@@ -121,7 +121,7 @@ export default Component.extend({
    * visible area, it doesn't make sense to set the throttle
    * to 16ms my default.
    */
-  scrollThrottle: 32,
+  scrollThrottle: 16,
 
   /**!
    * how much extra room to keep visible on
@@ -274,12 +274,6 @@ export default Component.extend({
    */
   //TODO enable this feature.
   _heightCache: {},
-
-  /**!
-   * cached Scheduled Task reference for cancelling
-   * and replacing the task.
-   */
-  _nextBatchUpdate: null,
 
   /**!
    * Cached reference to the last bottom item used

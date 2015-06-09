@@ -5,6 +5,7 @@ import nextFrame from "../utils/next-frame";
 import Scheduler from "../utils/backburner-ext";
 
 const {
+  get: get,
   Component,
   assert,
   on,
@@ -132,20 +133,7 @@ export default Component.extend(MagicArrayMixin, {
    * visible area, it doesn't make sense to set the throttle
    * to 16ms my default.
    */
-  scrollThrottle: 32,
-
-  /**!
-   * When scrolling, new on screen items are immediately handled.
-   * `cycleDelay` sets the amount of time to debounce before updating
-   * off screen items.
-   */
-  cycleDelay: 32,
-
-  /**!
-   * Sets how many items to update view state for at a time when updating
-   * offscreen items.
-   */
-  updateBatchSize: 6,
+  scrollThrottle: 16,
 
   /**!
    * how much extra room to keep visible on
@@ -311,12 +299,6 @@ export default Component.extend(MagicArrayMixin, {
   _heightCache: {},
 
   /**!
-   * cached Scheduled Task reference for cancelling
-   * and replacing the task.
-   */
-  _nextBatchUpdate: null,
-
-  /**!
    * Cached reference to the last bottom item used
    * to notify `bottomReached` to prevent resending.
    */
@@ -360,15 +342,18 @@ export default Component.extend(MagicArrayMixin, {
       return;
     }
 
+    var key = this.get('keyForId');
+
     if (actionContextCacheKeys[name]) {
-      if (this.get(actionContextCacheKeys[name]) === context.item) {
+      if (this.get(actionContextCacheKeys[name]) === get(context.item, key)) {
         return;
       } else {
-        this.set(actionContextCacheKeys[name], context.item);
+        this.set(actionContextCacheKeys[name], get(context.item, key));
       }
     }
 
-    this.sendAction(name, context);
+    // this MUST be async or glimmer will freak
+    this._taskrunner.schedule('afterRender', this, this.sendAction, name, context);
   },
 
 
@@ -385,7 +370,7 @@ export default Component.extend(MagicArrayMixin, {
     // from not finding a view when the pixels are off by < 1
     viewportTop -= 1;
 
-    var childViews = this.get('_children');
+    var childViews = this._getChildren();
     var maxIndex = childViews.length - 1;
     var minIndex = 0;
     var midIndex;
@@ -410,14 +395,14 @@ export default Component.extend(MagicArrayMixin, {
     return minIndex;
   },
 
-  _children: computed('_childViews.@each', function() {
+  _getChildren: function() {
     var eachList = Ember.A(this._childViews[0]);
     var childViews = [];
     eachList.forEach(function(virtualView){
       childViews.push(virtualView._childViews[0]);
     });
     return childViews;
-  }),
+  },
 
   // on scroll, determine view states
   /**!
@@ -435,7 +420,7 @@ export default Component.extend(MagicArrayMixin, {
     }
 
     var edges = this.get('_edges') || this._calculateEdges();
-    var childViews = this.get('_children');
+    var childViews = this._getChildren();
 
     var currentViewportBound = edges.viewportTop + this.$().position().top;
     var currentUpperBound = edges.invisibleTop;
@@ -446,7 +431,7 @@ export default Component.extend(MagicArrayMixin, {
 
     var topViewIndex = this._findTopView(currentUpperBound, edges.viewportTop);
     var bottomViewIndex = topViewIndex;
-    var lastIndex = childViews.length - 1;
+    var lastIndex = get(childViews, 'length') - 1;
     var topVisibleSpotted = false;
 
     // views to cull
@@ -726,6 +711,7 @@ export default Component.extend(MagicArrayMixin, {
 
     //clean up scheduled tasks
     this._taskrunner.cancelAll();
+    this._taskrunner.destroy();
 
   }),
 
@@ -754,6 +740,8 @@ export default Component.extend(MagicArrayMixin, {
 
       if (offset <= self.get('_topVisibleIndex')) {
         self.__performViewPrepention(addCount);
+      } else {
+        self._taskrunner.schedule('render', self, self._cycleViews);
       }
 
     };
@@ -819,6 +807,9 @@ export default Component.extend(MagicArrayMixin, {
     }
 
     var _container = this.get('_container');
+    if (!_container) {
+      return;
+    }
     var edges = {};
 
     // segment heights

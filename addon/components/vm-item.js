@@ -113,7 +113,9 @@ export default Ember.Component.extend({
         if (!this.get('isDestroyed')) {
           var height = this.$().height();
           this.set('_height', height);
-          this.element.style.height = height + 'px';
+
+          // allow organic growth
+          this.element.style.minHeight = height + 'px';
         }
       });
     }
