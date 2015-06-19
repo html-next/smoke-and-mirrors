@@ -1,0 +1,50 @@
+{{!--
+<div class="in-viewport-grid">
+  {{#each model as |row index|}}
+    {{#each row as |col|}}
+      <div class="grid-item">
+        <span class="title">Item {{index}}–{{col}}</span>
+      </div>
+    {{/each}}
+  {{/each}}
+</div>
+--}}
+{{!--
+<div class="in-viewport-grid">
+  {{#each model as |row index|}}
+    {{#each row as |col|}}
+        {{#view-port hideAt=2 occludeAt=3 class="grid-item"}}
+            <span class="title">Item {{index}}–{{col}}</span>
+        {{/view-port}}
+    {{/each}}
+  {{/each}}
+</div>
+--}}
+<div class="in-viewport-grid">
+  {{#each model as |row index|}}
+    {{#view-port hideAt=2 occludeAt=3 class="grid-row"}}
+      {{#each row as |col|}}
+          <div class="grid-item">
+            <span class="title">Item {{index}}–{{col}}</span>
+          </div>
+      {{/each}}
+    {{/view-port}}
+  {{/each}}
+</div>
+{{!--
+<div class="in-viewport-grid">
+    {{#each pages as |page|}}
+      {{#view-port hideAt=2 occludeAt=3 class="grid-page"}}
+        {{#each page as |row index|}}
+          <div class="grid-row">
+            {{#each row as |col|}}
+                <div class="grid-item">
+                    <span class="title">Item {{index}}–{{col}}</span>
+                </div>
+            {{/each}}
+          </div>
+        {{/each}}
+      {{/view-port}}
+    {{/each}}
+</div>
+--}}
