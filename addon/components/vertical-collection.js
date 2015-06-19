@@ -562,8 +562,6 @@ export default Component.extend({
 
   },
 
-
-
   //–––––––––––––– Setup/Teardown
   _hasRendered: false,
   shouldRender: true,
@@ -722,6 +720,8 @@ export default Component.extend({
     if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
       var addCount = get(newArray, 'length') - get(oldArray, 'length');
       this.__performViewPrepention(addCount);
+    } else {
+      this._taskrunner.schedule('actions', this, this._cycleViews);
     }
   },
 
