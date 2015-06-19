@@ -97,6 +97,7 @@ export default Ember.Component.extend({
    * @private
    */
   _ov_teardown: function() {
+    this.element.style.minHeight = this.$().height() + 'px';
     this.setProperties({ contentCulled: true, contentHidden: false, contentInserted: false });
   },
 
@@ -108,17 +109,12 @@ export default Ember.Component.extend({
    */
   _ov_insert: function() {
     this.setProperties({ contentHidden: true, contentCulled: false, contentInserted: true });
-    if (!this.get('_height')) {
-      run.schedule('afterRender', this, function() {
-        if (!this.get('isDestroyed')) {
-          var height = this.$().height();
-          this.set('_height', height);
-
-          // allow growth if needed
-          this.element.style.minHeight = height + 'px';
-        }
-      });
-    }
+    run.schedule('afterRender', this, function() {
+      if (!this.get('isDestroyed')) {
+        // allow height to change organically while the element is inDom
+        this.element.style.minHeight = null;
+      }
+    });
   },
 
 
