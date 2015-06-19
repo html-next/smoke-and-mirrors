@@ -76,6 +76,8 @@ var Mixin = Ember.Mixin.create({
 
   keyForId: null,
 
+  contentToProxy: null,
+
   _proxyContentTo: '__content',
 
   __proxyContent: null,
