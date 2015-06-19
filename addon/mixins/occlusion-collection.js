@@ -59,16 +59,6 @@ export default Mixin.create({
    */
   containerSelector: null,
 
-  /**!
-   * Set this if you need to dynamically change the height of the container
-   * (useful for viewport resizing on mobile apps when the keyboard is open).
-   *
-   * Changes to this property's value are observed and trigger new view boundary
-   * calculations.
-   */
-    // TODO this will change based on vertical/horizontal
-  containerHeight: null,
-
 
   /**!
    * The name of the view to render either above or below the existing content when
@@ -78,7 +68,7 @@ export default Mixin.create({
    * This feature will be deprecated quickly when named yields become available in
    * Ember.
    */
-  // TODO implement this
+  //TODO implement, also can we do named yield's to make this API better?
   loadingComponentClass: null,
 
   //–––––––––––––– Performance Tuning
@@ -118,6 +108,7 @@ export default Mixin.create({
    * culled.
    */
   //TODO enable this feature.
+  //TODO find better prop name
   useHiddenAttr: false,
 
 
@@ -133,10 +124,18 @@ export default Mixin.create({
   /**!
    * If set, if scrollPosition is empty
    * at initialization, the component will
-   * render starting at the end.
+   * render starting at the bottom.
    */
-  startFromEnd: false,
-  __isInitializingFromEnd: false,
+  renderFromLast: false,
+  __isInitializingFromLast: false,
+
+  /**!
+   * If set, all items will initially be revealed
+   * so that their dimensions can be correctly
+   * determined
+   */
+  // TODO enable this feature
+  renderAllInitially: false,
 
   /**!
    *
@@ -145,29 +144,103 @@ export default Mixin.create({
   useLocalStorageCache: false,
 
 
+  //–––––––––––––– Initial State
+
   /**!
    * If set, upon initialization the scroll
    * position will be set such that the item
-   * with the provided key is at the top or left.
-   * If the item cannot be found, scrollTop/scrollLeft
+   * with the provided id is at the top left
+   * on screen.
+   *
+   * If the item cannot be found, scrollTop
    * is set to 0.
    */
-  keyForStart: null,
-
+  idForFirstItem: null,
 
 
 
   //–––––––––––––– Actions
-  // These are delegated to by the appropriate collection
-  __endReached: null, // e.g. bottomReached
-  __startReached: null,
-  __afterVisibleChanged: null, // e.g. bottomVisibleChanged
-  __beforeVisibleChanged: null,
+
+  /**!
+   * Specify an action to fire when the last item is reached.
+   *
+   * This action will only fire once per unique last item, and
+   * is fired the moment the last element is visible, it does
+   * not need to be on screen yet.
+   *
+   * It will include the index and content of the last item,
+   * as well as a promise.
+   *
+   * ```
+   * {
+   *  index: 0,
+   *  item : {},
+   *  promise: fn
+   * }
+   * ```
+   *
+   * The promise should be resolved once any loading is complete, or
+   * rejected if loading has failed.
+   *
+   * If `loadingComponentClass` is defined, it will be inserted above existing content.
+   *
+   * Rejecting the promise leaves the loadingComponent in place for 5s and set's
+   * it's `loadingFailed` property to true.
+   *
+   */
+  //TODO this feature needs the `Promise` portion done.
+  firstReached: null,
+
+  /**!
+   * Specify an action to fire when the first item is reached.
+   *
+   * This action will only fire once per unique first item, and
+   * is fired the moment the first element is visible, it does
+   * not need to be on screen yet.
+   *
+   * It will include the index and content of the first item
+   * as well as a promise.
+   *
+   * ```
+   * {
+   *  index: 0,
+   *  item : {},
+   *  promise: fn
+   * }
+   * ```
+   *
+   * The promise should be resolved once any loading is complete, or
+   * rejected if loading has failed.
+   *
+   * If `loadingViewClass` is defined, it will be inserted above existing content.
+   *
+   * Rejecting the promise leaves the loadingView in place for 5s and set's
+   * it's `loadingFailed` property to true.
+   *
+   */
+  //TODO this feature needs the `Promise` portion done.
+  lastReached: null,
+
+  /**!
+   * Specify an action to fire when the first on-screen item
+   * changes.
+   *
+   * It includes the index and content of the item now visible.
+   */
+  firstVisibleChanged: null,
+
+  /**!
+   * Specify an action to fire when the last on-screen item
+   * changes.
+   *
+   * It includes the index and content of the item now visible.
+   */
+  lastVisibleChanged: null,
 
 
   //–––––––––––––– Private Internals
-  _beforeVisible: null,
-  _beforeVisibleIndex: 0,
+  _firstVisible: null,
+  _firstVisibleIndex: 0,
 
   /**!
    * a cached jQuery reference to the container element
@@ -175,34 +248,34 @@ export default Mixin.create({
   _container: null,
 
   /**!
-   * caches the height/width of each item in the list
+   * caches the height or width of each item in the list
    */
   //TODO enable this feature.
-  _dimensionCache: null, // TODO since this is a mixin this object {} needs initialized
+  __dimensions: null, // TODO since this is a mixin this object {} needs initialized
 
   /**!
    * Cached reference to the last bottom item used
-   * to notify `__afterReached` to prevent resending.
+   * to notify `lastReached` to prevent resending.
    */
-  _lastAfterSent: null,
+  _lastLastSent: null,
 
   /**!
    * Cached reference to the last top item used
-   * to notify `__beforeReached` to prevent resending.
+   * to notify `firstReached` to prevent resending.
    */
-  _lastBeforeSent: null,
+  _lastFirstSent: null,
 
   /**!
    * Cached reference to the last visible top item used
-   * to notify `__beforeVisibleChanged` to prevent resending.
+   * to notify `firstVisibleChanged` to prevent resending.
    */
-  _lastVisibleBeforeSent: null,
+  _lastVisibleFirstSent: null,
 
   /**!
    * Cached reference to the last visible bottom item used
-   * to notify `__afterVisibleChange` to prevent resending.
+   * to notify `lastVisibleChange` to prevent resending.
    */
-  _lastVisibleAfterSent: null,
+  _lastVisibleLastSent: null,
 
   /**!
    * If true, views are currently being added above the visible portion of
@@ -238,25 +311,25 @@ export default Mixin.create({
     this._taskrunner.schedule('afterRender', this, this.sendAction, name, context);
   },
 
-
   /**
    Binary search for finding the topmost visible view.
    This is not the first visible item on screen, but the first
    item that will render it's content.
 
-   @method findFirstRenderedView
+   @method _findFirstRenderedComponent
    @param {Number} viewportStart The top/left of the viewport to search against
    @Param {Number} height adjustment TODO wtf is this
    @returns {Number} the index into childViews of the first view to render
    **/
-  _findFirstRenderedView: function(viewportStart, adj) {
+  _findFirstRenderedComponent: function(viewportStart, adj) {
 
     // adjust viewportStart to prevent the randomized coin toss
     // from not finding a view when the pixels are off by < 1
     viewportStart -= 1;
 
-    var items = this.get('content');
-    var maxIndex = get(items, 'length') - 1;
+    // GLIMMER: var items = this.get('content');
+    var childComponents = this._getChildren();
+    var maxIndex = get(childComponents, 'length') - 1;
     var minIndex = 0;
     var midIndex;
 
@@ -267,10 +340,11 @@ export default Mixin.create({
       midIndex = Math.floor((minIndex + maxIndex) / 2);
 
       // in case of not full-window scrolling
-      var component = this.childForItem(valueForIndex(items, midIndex));
-      var viewBottom = component.$().position().top + component.get('_height') + adj;
+      // GLIMMER: var component = this.childForItem(valueForIndex(items, midIndex));
+      var component = childComponents[midIndex];
+      var componentBottom = component.$().position().top + component.get('_height') + adj;
 
-      if (viewBottom > viewportStart) {
+      if (componentBottom > viewportStart) {
         maxIndex = midIndex - 1;
       } else {
         minIndex = midIndex + 1;
@@ -280,18 +354,13 @@ export default Mixin.create({
     return minIndex;
   },
 
-  _children: null,
+  // this method MUST be implemented by the consuming collection
+  _getChildren: null,
+
   childForItem: function(item) {
     var val = get(item, this.get('keyForId'));
-    return this.get('_children')[val];
+    return this._getChildren()[val];
   },
-  register: function(child, key) {
-    this.get('_children')[key] = child;
-  },
-  unregister: function(key) {
-    this.get('_children')[key] = null; // don't delete, it leads to too much GC
-  },
-
 
   /**!
    * @private
@@ -339,7 +408,7 @@ export default Mixin.create({
       } else if (viewBottom < edges.viewportTop) {
         component.show();
         if (bottomViewIndex === 0) {
-          this.sendActionOnce('topReached', {
+          this.sendActionOnce('firstReached', {
             item: component.get('content'),
             index: bottomViewIndex
           });
@@ -349,13 +418,13 @@ export default Mixin.create({
       } else if(viewTop < edges.viewportBottom) {
         component.show();
         if (bottomViewIndex === 0) {
-          this.sendActionOnce('topReached', {
+          this.sendActionOnce('firstReached', {
             item: component.get('content'),
             index: bottomViewIndex
           });
         }
         if (bottomViewIndex === lastIndex) {
-          this.sendActionOnce('bottomReached', {
+          this.sendActionOnce('lastReached', {
             item: component.get('content'),
             index: bottomViewIndex
           });
@@ -363,15 +432,15 @@ export default Mixin.create({
 
         if (!topVisibleSpotted) {
           topVisibleSpotted = true;
-          this.set('_topVisible', component);
-          this.set('_topVisibleIndex', bottomViewIndex);
-          this.sendActionOnce('topVisibleChanged', {
+          this.set('_firstVisible', component);
+          this.set('_firstVisibleIndex', bottomViewIndex);
+          this.sendActionOnce('firstVisibleChanged', {
             item: component.get('content'),
             index: bottomViewIndex
           });
         }
-        this.set('_bottomVisible', component);
-        this.sendActionOnce('bottomVisibleChanged', {
+        this.set('_lastVisible', component);
+        this.sendActionOnce('lastVisibleChanged', {
           item: component.get('content'),
           index: bottomViewIndex
         });
@@ -380,7 +449,7 @@ export default Mixin.create({
       } else if (viewTop < edges.visibleBottom) {
         component.show();
         if (bottomViewIndex === lastIndex) {
-          this.sendActionOnce('bottomReached', {
+          this.sendActionOnce('lastReached', {
             item: component.get('content'),
             index: bottomViewIndex
           });
@@ -421,11 +490,12 @@ export default Mixin.create({
 
     // cache the scroll offset, and discard the cycle if
     // movement is within (x) threshold
+    // TODO make this work horizontally too
     var scrollTop = this.get('_container').get(0).scrollTop;
     var _scrollTop = this.get('scrollPosition');
     var defaultHeight = this.__getEstimatedDefaultHeight();
 
-    this._taskrunner.debounce(this.get('_cleanupScrollThrottle'));
+    this._taskrunner.cancel(this.get('_cleanupScrollThrottle'));
     this.set(
       '_cleanupScrollThrottle',
       this._taskrunner.debounce(this, this._updateChildStates, this.get('scrollThrottle'))
@@ -500,26 +570,27 @@ export default Mixin.create({
     this.set('__isPrepending', true);
 
     var scrollPosition = this.get('scrollPosition');
-    var topVisibleKey = this.get('topVisibleKey');
+    var idForFirstItem = this.get('idForFirstItem');
     var key = this.get('keyForId');
 
     if (scrollPosition) {
       this.get('_container').get(0).scrollTop = scrollPosition;
-    } else if (this.get('startFromEnd')) {
+    } else if (this.get('renderFromLast')) {
       var last = this.$().get(0).lastElementChild;
-      this.set('__isInitializingFromEnd', true);
+      this.set('__isInitializingFromLast', true);
       if (last) {
         last.scrollIntoView(false);
       }
-    } else if (topVisibleKey) {
-      var content = this.get('content'), topVisibleIndex;
+    } else if (idForFirstItem) {
+      var content = this.get('content');
+      var firstVisibleIndex;
 
       for (let i = 0; i < content.get('length'); i++) {
-        if (topVisibleKey === get(valueForIndex(content, i), key)) {
-          topVisibleIndex = i;
+        if (idForFirstItem === get(valueForIndex(content, i), key)) {
+          firstVisibleIndex = i;
         }
       }
-      this.get('_container').get(0).scrollTop = (topVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
+      this.get('_container').get(0).scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
     }
 
     this._taskrunner.next(this, function() {
@@ -559,14 +630,13 @@ export default Mixin.create({
       var keyForId = this.get('keyForId');
       var cacheAttrs = this.getProperties(
         'scrollPosition',
-        '_heights',
-        '_topVisible',
-        '_bottomVisible',
-        '_visibleCount'
+        '__dimensions',
+        '_firstVisible',
+        '_lastVisible'
       );
 
-      cacheAttrs._topVisible = cacheAttrs._topVisible.get(keyForId);
-      cacheAttrs._bottomVisible = cacheAttrs._bottomVisible.get(keyForId);
+      cacheAttrs._firstVisible = cacheAttrs._firstVisible.get(keyForId);
+      cacheAttrs._lastVisible = cacheAttrs._lastVisible.get(keyForId);
 
       localStorage.setItem(storageKey, JSON.stringify(cacheAttrs));
     }
@@ -590,32 +660,6 @@ export default Mixin.create({
       // ensure that visible views are recalculated following an array length change
       nextFrame(this, this._updateChildStates);
     });
-  },
-
-  didReceiveAttrs: function(attrs) {
-    var oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
-    var newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
-    if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
-      var addCount = get(newArray, 'length') - get(oldArray, 'length');
-      this.__performViewPrepention(addCount);
-    }
-  },
-
-  _changeIsPrepend: function(oldArray, newArray) {
-
-    var lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
-    var key = this.get('keyForId');
-
-    // if either array is empty or the new array is not longer, do not treat as prepend
-    if (!get(newArray, 'length') || !get(oldArray, 'length') || lengthDifference <= 0) {
-      return false;
-    }
-
-    // if the keys at the correct indexes are the same, this is a prepend
-    var oldInitialItem = oldArray.objectAt ? get(oldArray.objectAt(0), key) : get(oldArray[0], key);
-    var newInitialItem = newArray.objectAt ? get(newArray.objectAt(lengthDifference), key) : get(newArray[lengthDifference], key);
-
-    return oldInitialItem === newInitialItem;
   },
 
 
@@ -710,8 +754,6 @@ export default Mixin.create({
    * Initialize
    */
   _prepareComponent: function() {
-
-    this.set('_children', {});
 
     var prependFn = this.__performViewPrepention.bind(this);
     this.set('__performViewPrepention', prependFn);
