@@ -1,12 +1,12 @@
-import Ember from "ember";
-import getTagDescendant from "../utils/get-tag-descendant";
-import nextFrame from "../utils/next-frame";
-import Scheduler from "../utils/backburner-ext";
+import Ember from 'ember';
+import getTagDescendant from '../utils/get-tag-descendant';
+import nextFrame from '../utils/next-frame';
+import Scheduler from '../utils/backburner-ext';
+import jQuery from 'jquery';
 
 /**
  * Investigations: http://jsfiddle.net/sxqnt/73/
  */
-
 const {
   get: get,
   Mixin,
@@ -15,15 +15,12 @@ const {
   observer,
   } = Ember;
 
-const jQuery = Ember.$;
-
 const actionContextCacheKeys = {
-  'topReached': '_lastTopSent',
-  'bottomReached': '_lastBottomSent',
-  'topVisibleChanged': '_lastVisibleTopSent',
-  'bottomVisibleChanged': '_lastVisibleBottomSent'
+  'firstReached':   '_lastFirstSent',
+  'lastReached':    '_lastLastSent',
+  'firstVisibleChanged':  '_lastVisibleFirstSent',
+  'lastVisibleChanged':   '_lastVisibleLastSent'
 };
-
 
 function valueForIndex(arr, index) {
   return arr.objectAt ? arr.objectAt(index) : arr[index];
@@ -69,6 +66,7 @@ export default Mixin.create({
    * Changes to this property's value are observed and trigger new view boundary
    * calculations.
    */
+    // TODO this will change based on vertical/horizontal
   containerHeight: null,
 
 
@@ -426,6 +424,12 @@ export default Mixin.create({
     var scrollTop = this.get('_container').get(0).scrollTop;
     var _scrollTop = this.get('scrollPosition');
     var defaultHeight = this.__getEstimatedDefaultHeight();
+
+    this._taskrunner.debounce(this.get('_cleanupScrollThrottle'));
+    this.set(
+      '_cleanupScrollThrottle',
+      this._taskrunner.debounce(this, this._updateChildStates, this.get('scrollThrottle'))
+    );
 
     if (Math.abs(scrollTop - _scrollTop) >= defaultHeight / 2) {
       this.set('scrollPosition', scrollTop);
