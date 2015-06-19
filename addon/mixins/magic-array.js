@@ -8,7 +8,7 @@ const {
 
 function computeProxiedArray() {
 
-  var proxied = this.get('contentToProxy');
+  var proxied = this.get('content');
   var key = this.get('keyForId');
   var content = this.get('__proxyContent');
   var newLength;
@@ -76,7 +76,7 @@ var Mixin = Ember.Mixin.create({
 
   keyForId: null,
 
-  contentToProxy: null,
+  content: null,
 
   _proxyContentTo: '__content',
 
@@ -102,7 +102,7 @@ var Mixin = Ember.Mixin.create({
   _initializeMagicArray: function() {
     var dest = this.get('_proxyContentTo');
     this.set('__proxyContent', ArrayProxy.create({ content: Ember.A() }));
-    this.set(dest, computed('contentToProxy', 'contentToProxy.@each', computeProxiedArray));
+    this.set(dest, computed('content', 'content.@each', computeProxiedArray));
   },
 
   init: function() {
