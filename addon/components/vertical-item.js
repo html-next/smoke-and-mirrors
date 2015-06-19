@@ -1,4 +1,5 @@
-import Ember from "ember";
+import Ember from 'ember';
+import jQuery from 'jquery';
 
 const {
   computed,
@@ -97,7 +98,9 @@ export default Ember.Component.extend({
    * @private
    */
   _ov_teardown: function() {
-    this.element.style.minHeight = this.$().height() + 'px';
+    if (this.element) {
+      this.element.style.minHeight = jQuery(this.element).height() + 'px';
+    }
     this.setProperties({ contentCulled: true, contentHidden: false, contentInserted: false });
   },
 
