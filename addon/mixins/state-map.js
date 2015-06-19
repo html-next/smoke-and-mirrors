@@ -1,10 +1,24 @@
 import Ember from 'ember';
+import jQuery from 'jquery';
 
 const {
   computed,
   run
   } = Ember;
 
+const STATE_LIST = ['culled', 'hidden', 'visible'];
+
+const STATE_TRANSITIONS_UP = [
+  { state: 'culled', method: '' },
+  { state: 'hidden', method: '_ov_insert' },
+  { state: 'visible', method: '_ov_reveal' }
+  ];
+
+const STATE_TRANSITIONS_DOWN = [
+  { state: 'visible', method: '' },
+  { state: 'hidden', method: '_ov_obscure' },
+  { state: 'culled', method: '_ov_teardown' }
+  ];
 
 export default Ember.Mixin.create({
 
@@ -73,7 +87,7 @@ export default Ember.Mixin.create({
    * @private
    */
   _ov_teardown: function() {
-    if (this.get('contentInserted')) {
+    if (this.get('contentInserted') && this.element) {
       this.element.style.minHeight = jQuery(this.element).height() + 'px';
     }
     this.setProperties({ contentCulled: true, contentHidden: false, contentInserted: false });
