@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import OcclusionCollectionMixin from '../mixins/occlusion-collection';
 
 export default Ember.Component.extend(OcclusionCollectionMixin, {

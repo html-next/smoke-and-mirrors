@@ -2,14 +2,13 @@ import Ember from "ember";
 
 const {
   computed,
-  ArrayProxy,
-  A
+  ArrayProxy
   } = Ember;
 
 function computeProxiedArray() {
   var inbound = this.get('contentToProxy');
   var outbound = this.get('__proxyContent');
-  outbound.set('content', A(inbound));
+  outbound.set('content', Ember.A(inbound));
   return outbound;
 }
 
@@ -43,7 +42,7 @@ var Mixin = Ember.Mixin.create({
   _initializeMagicArray: function(context, args, _super) {
     var dest = this.get('_proxyContentTo');
 
-    this.set('__proxyContent', ArrayProxy.create({ content: A() }));
+    this.set('__proxyContent', ArrayProxy.create({ content: Ember.A() }));
     this.set(dest, computed('contentToProxy', 'contentToProxy.@each', computeProxiedArray));
     _super.apply(context, args);
   },

@@ -1,16 +1,10 @@
 import Ember from 'ember';
 import MagicArrayMixin from '../mixins/magic-array';
 import OcclusionCollectionMixin from '../mixins/occlusion-collection';
-import nextFrame from '../utils/next-frame';
-import jQuery from 'jquery';
 
 const {
   get: get,
-  Component,
-  assert,
-  on,
-  computed,
-  observer
+  Component
   } = Ember;
 
 export default Component.extend(MagicArrayMixin, OcclusionCollectionMixin, {

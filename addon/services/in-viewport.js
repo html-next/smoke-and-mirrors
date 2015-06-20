@@ -15,7 +15,7 @@ var ScrollPosition = {
   y: document.body.scrollTop
 };
 
-function getViewportPosition(rect, zoneRatio) {
+function getViewportPosition(rect /*, zoneRatio*/) {
 
   // TODO this makes no sense, should swap based on being above or below
   var distanceX = rect.bottom || rect.top;

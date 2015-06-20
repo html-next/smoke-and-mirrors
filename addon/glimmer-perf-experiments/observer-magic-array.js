@@ -3,8 +3,7 @@ import SmartObjectProxy from "../utils/smart-object-proxy";
 
 const {
   observer,
-  ArrayProxy,
-  A
+  ArrayProxy
   } = Ember;
 
 
@@ -20,7 +19,7 @@ var Mixin = Ember.Mixin.create({
     var key = this.get('keyForId');
     var content = this.get(this.get('_proxyContentTo'));
     var newLength;
-    var newObjects = A();
+    var newObjects = Ember.A();
     var diff;
 
     // play nice with arrays that are already proxied
@@ -95,7 +94,7 @@ var Mixin = Ember.Mixin.create({
 
   _initializeMagicArray: function(context, args, _super) {
     var dest = this.get('_proxyContentTo');
-    this.set(dest, ArrayProxy.create({ content: A() }));
+    this.set(dest, ArrayProxy.create({ content: Ember.A() }));
     _super.apply(context, args);
     this.__proxyContent();
   },
