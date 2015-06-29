@@ -58,4 +58,4 @@ tables, selects, lists, each, and bi-directional infinite scrolling.
 
 ## Documentation
 
-- [Occlusion Collection](./docs/api/occlusion-collection.md)
+- [Occlusion Collection](./docs/occlusion-collection.md)
