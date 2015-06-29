@@ -3,7 +3,7 @@ module.exports = {
   normalizeEntityName: function() {},
 
   afterInstall: function() {
-    this.addBowerPackagesToProject([
+    return this.addBowerPackagesToProject([
       { name: 'animation-frame', target: '~0.2.4' }
     ]);
   }
