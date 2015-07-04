@@ -1,9 +1,9 @@
 import Ember from "ember";
-import SmartObjectProxy from "../utils/smart-object-proxy";
 
 const {
   computed,
-  ArrayProxy
+  ArrayProxy,
+  ObjectProxy
   } = Ember;
 
 function computeProxiedArray() {
@@ -31,7 +31,7 @@ function computeProxiedArray() {
       newLength = Ember.get(proxied, 'length');
       diff = newLength - content.get('length');
       for (var i = 0; i < diff; i++) {
-        newObjects.push(SmartObjectProxy.create({content: proxied[i], __indexPath: key}));
+        newObjects.push(ObjectProxy.create({content: proxied[i]}));
       }
       if (newObjects.length) {
         content.replace(0, 0, newObjects);
@@ -43,9 +43,9 @@ function computeProxiedArray() {
       proxied.forEach(function(item, index) {
         var proxiedObject = content.objectAt(index);
         if (proxiedObject) {
-          proxiedObject.__update(item);
+          proxiedObject.set('content', item);
         } else {
-          newObjects.push(SmartObjectProxy.create({content: item, __indexPath: key}));
+          newObjects.push(ObjectProxy.create({content: item}));
         }
       });
 
