@@ -22,32 +22,41 @@
   "license": "MIT",
   "devDependencies": {
     "broccoli-asset-rev": "^2.0.2",
-    "ember-cli": "^0.2.7",
-    "ember-cli-app-version": "0.3.3",
+    "ember-cli": "1.13.1",
+    "ember-cli-app-version": "0.4.0",
     "ember-cli-content-security-policy": "0.4.0",
     "ember-cli-dependency-checker": "^1.0.0",
-    "ember-cli-htmlbars": "0.7.6",
-    "ember-cli-ic-ajax": "0.1.1",
+    "ember-cli-htmlbars": "0.7.9",
+    "ember-cli-htmlbars-inline-precompile": "^0.1.1",
+    "ember-cli-ic-ajax": "0.2.1",
     "ember-cli-inject-live-reload": "^1.3.0",
-    "ember-cli-qunit": "0.3.13",
+    "ember-cli-qunit": "0.3.15",
+    "ember-cli-release": "0.2.3",
     "ember-cli-uglify": "^1.0.1",
     "ember-code-snippet": "^1.1.0",
-    "ember-data": "1.0.0-beta.18",
-    "ember-disable-prototype-extensions": "^1.0.0",
-    "ember-disable-proxy-controllers": "^0.7.0",
+    "ember-data": "1.13.5",
+    "ember-disable-proxy-controllers": "^1.0.0",
     "ember-export-application-global": "^1.0.2",
-    "ember-try": "0.0.4",
+    "ember-disable-prototype-extensions": "^1.0.0",
     "grunt": "0.4.5",
     "grunt-bump": "0.0.16",
     "grunt-cli": "0.1.13",
     "jit-grunt": "0.9.0",
-    "time-grunt": "1.0.0"
+    "time-grunt": "1.0.0",
+    "ember-try": "0.0.6"
   },
   "keywords": [
-    "ember-addon"
+    "ember-addon",
+    "occlusion",
+    "list-view",
+    "recycling",
+    "cloaking",
+    "performance",
+    "lists"
   ],
   "dependencies": {
-    "ember-cli-babel": "^5.0.0"
+    "ember-cli-babel": "^5.0.0",
+    "ember-cli-htmlbars": "0.7.9"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
