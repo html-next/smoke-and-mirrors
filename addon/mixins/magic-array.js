@@ -106,8 +106,8 @@ var Mixin = Ember.Mixin.create({
   },
 
   init: function() {
-    this._initializeMagicArray();
     this._super.apply(this, arguments);
+    this._initializeMagicArray();
   }
 
 });
