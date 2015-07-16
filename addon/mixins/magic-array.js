@@ -16,7 +16,7 @@ function computeProxiedArray() {
   var diff;
 
   // play nice with arrays that are already proxied
-  if (proxied.get && proxied.get('content')) {
+  if (proxied && proxied.get && proxied.get('content')) {
     proxied = proxied.get('content');
   }
 
