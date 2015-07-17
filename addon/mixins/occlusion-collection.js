@@ -755,7 +755,6 @@ export default Mixin.create({
     edges.invisibleBottom = edges.visibleBottom + _invisibleBufferHeight;
 
     this.set('__edges', edges);
-    Ember.Logger.debug('EDGES', edges);
     return edges;
 
   }),
