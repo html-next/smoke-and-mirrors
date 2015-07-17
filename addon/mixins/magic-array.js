@@ -3,45 +3,72 @@ import Ember from "ember";
 const {
   computed,
   ArrayProxy,
-  ObjectProxy
+  ObjectProxy,
+  get: get
   } = Ember;
+
+
+function mergeDiffedArrays() {
+  var inbound = this.get('content');
+  var outbound = this.get('__proxyContent');
+  var keyForId = this.get('keyForId');
+  var cache = this.get('__cache');
+  var newList = {};
+  var newOutbound = [];
+
+  inbound.forEach((item) => {
+    let key = get(item, keyForId);
+    let obj = cache[key] || ObjectProxy.create({content: item});
+    newList[key] = obj;
+    newOutbound.push(obj);
+  });
+
+  outbound.set('content', newOutbound);
+  this.set('__cache', newList);
+
+  return outbound;
+}
 
 function computeProxiedArray() {
 
-  var proxied = this.get('content');
+  if (this.get('useDiffing')) {
+    return mergeDiffedArrays.call(this);
+  }
+
+  var inbound = this.get('content');
   var key = this.get('keyForId');
-  var content = this.get('__proxyContent');
+  var outbound = this.get('__proxyContent');
   var newLength;
   var newObjects = Ember.A();
   var diff;
 
   // play nice with arrays that are already proxied
-  if (proxied && proxied.get && proxied.get('content')) {
-    proxied = proxied.get('content');
+  if (inbound && inbound.get && inbound.get('content')) {
+    inbound = inbound.get('content');
   }
 
   this.beginPropertyChanges();
 
   // create a new array object if we don't have one yet
-  if (proxied) {
+  if (inbound) {
 
     // handle additions to the beginning of the array
-    if (this._changeIsPrepend(proxied, content, key)) {
+    if (this._changeIsPrepend(inbound, outbound, key)) {
 
-      newLength = Ember.get(proxied, 'length');
-      diff = newLength - content.get('length');
+      newLength = Ember.get(inbound, 'length');
+      diff = newLength - outbound.get('length');
       for (var i = 0; i < diff; i++) {
-        newObjects.push(ObjectProxy.create({content: proxied[i]}));
+        newObjects.push(ObjectProxy.create({content: inbound[i]}));
       }
       if (newObjects.length) {
-        content.replace(0, 0, newObjects);
+        outbound.replace(0, 0, newObjects);
       }
 
       // handle additions and inline changes
     } else {
 
-      proxied.forEach(function(item, index) {
-        var proxiedObject = content.objectAt(index);
+      inbound.forEach(function(item, index) {
+        var proxiedObject = outbound.objectAt(index);
         if (proxiedObject) {
           proxiedObject.set('content', item);
         } else {
@@ -50,23 +77,23 @@ function computeProxiedArray() {
       });
 
       if (newObjects.length) {
-        content.pushObjects(newObjects);
+        outbound.pushObjects(newObjects);
       }
 
     }
 
   }
 
-  newLength = proxied ? Ember.get(proxied, 'length') : 0;
+  newLength = inbound ? Ember.get(inbound, 'length') : 0;
 
-  if (newLength < content.get('length')) {
-    diff = content.get('length') - newLength;
-    content.removeAt(newLength, diff);
+  if (newLength < outbound.get('length')) {
+    diff = outbound.get('length') - newLength;
+    outbound.removeAt(newLength, diff);
   }
 
   this.endPropertyChanges();
 
-  return content;
+  return outbound;
 
 }
 
@@ -78,9 +105,13 @@ var Mixin = Ember.Mixin.create({
 
   content: null,
 
+  useDiffing: false,
+
   _proxyContentTo: '__content',
 
   __proxyContent: null,
+
+  __cache: null,
 
   _changeIsPrepend: function(newArray, proxiedArray, key) {
 
@@ -101,12 +132,13 @@ var Mixin = Ember.Mixin.create({
 
   _initializeMagicArray: function() {
     var dest = this.get('_proxyContentTo');
-    this.set('__proxyContent', ArrayProxy.create({ content: Ember.A() }));
+    this.set('__proxyContent', ArrayProxy.create({ content: [] }));
     this.set(dest, computed('content', 'content.@each', computeProxiedArray));
   },
 
   init: function() {
     this._super.apply(this, arguments);
+    this.set('__cache', {});
     this._initializeMagicArray();
   }
 
