@@ -16,6 +16,8 @@ function mergeDiffedArrays() {
   var newList = {};
   var newOutbound = [];
 
+  this.beginPropertyChanges();
+
   inbound.forEach((item) => {
     let key = get(item, keyForId);
     let obj = cache[key] || ObjectProxy.create();
@@ -26,6 +28,8 @@ function mergeDiffedArrays() {
 
   outbound.set('content', newOutbound);
   this.set('__cache', newList);
+
+  this.endPropertyChanges();
 
   return outbound;
 }
