@@ -18,7 +18,8 @@ function mergeDiffedArrays() {
 
   inbound.forEach((item) => {
     let key = get(item, keyForId);
-    let obj = cache[key] || ObjectProxy.create({content: item});
+    let obj = cache[key] || ObjectProxy.create();
+    obj.set('content', item);
     newList[key] = obj;
     newOutbound.push(obj);
   });
