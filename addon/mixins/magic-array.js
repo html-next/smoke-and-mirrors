@@ -14,19 +14,47 @@ function mergeDiffedArrays() {
   var keyForId = this.get('keyForId');
   var cache = this.get('__cache');
   var newList = {};
-  var newOutbound = [];
+  var staged = Ember.A();
+  var deletions = [];
 
   this.beginPropertyChanges();
 
-  inbound.forEach((item) => {
+  inbound.forEach((item, index) => {
     let key = get(item, keyForId);
     let obj = cache[key] || ObjectProxy.create();
     obj.set('content', item);
-    newList[key] = obj;
-    newOutbound.push(obj);
+    let i = newList[key] = obj;
+    staged.push(i);
   });
 
-  outbound.set('content', newOutbound);
+  // prune old objects
+  outbound.forEach((item, index) => {
+    let key = get(item, keyForId);
+    let i = newList[key];
+    if (!i) {
+      deletions.push(index);
+    }
+  });
+  while (deletions.length) {
+    let index = deletions.pop();
+    outbound.removeAt(index, 1);
+  }
+
+  // insert or move items
+  staged.forEach((item, index) => {
+    let key = get(item, keyForId);
+    let old = cache[key];
+    if (outbound.objectAt(index) !== item) {
+      // remove
+      if (old) {
+        outbound.removeObject(item);
+      }
+      // insert
+      outbound.insertAt(index, item);
+    }
+
+  });
+
   this.set('__cache', newList);
 
   this.endPropertyChanges();
@@ -137,7 +165,7 @@ var Mixin = Ember.Mixin.create({
 
   _initializeMagicArray: function() {
     var dest = this.get('_proxyContentTo');
-    this.set('__proxyContent', ArrayProxy.create({ content: [] }));
+    this.set('__proxyContent', ArrayProxy.create({ content: Ember.A() }));
     this.set(dest, computed('content', 'content.@each', computeProxiedArray));
   },
 
