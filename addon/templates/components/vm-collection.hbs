@@ -7,8 +7,10 @@
     keyForId=keyForId
     as |wrapper|
   }}
-    {{#if wrapper.contentInserted}}
-      {{yield item}}
+    {{#if shouldRenderList}}
+      {{#if wrapper.contentInserted}}
+        {{yield item}}
+      {{/if}}
     {{/if}}
   {{/vm-item}}
 {{/each}}

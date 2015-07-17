@@ -11,6 +11,8 @@ const {
   get: get,
   Mixin,
   assert,
+  computed,
+  run,
   on,
   observer,
   } = Ember;
@@ -288,6 +290,24 @@ export default Mixin.create({
    */
   __isInitialized: false,
 
+  shouldGPUAccelerate: true,
+  shouldRender: true,
+  canRender: false,
+
+  __shouldRender: true,
+  shouldRenderList: computed('shouldRender', 'canRender', function() {
+    let shouldRender = this.get('shouldRender');
+    let canRender = this.get('canRender');
+    let doRender = shouldRender && canRender;
+    let _shouldDidChange = this.get('__shouldRender') !== shouldRender;
+
+    // trigger a cycle
+    if (doRender && _shouldDidChange) {
+      run.next(this, this._updateChildStates);
+    }
+
+    return doRender;
+  }),
 
   //–––––––––––––– Helper Functions
   sendActionOnce: function(name, context) {
@@ -367,11 +387,11 @@ export default Mixin.create({
    */
   _updateChildStates: function () {
 
-    if (this.get('__isPrepending') || !this.get('_hasRendered')) {
+    if (this.get('__isPrepending') || !this.get('canRender')) {
       return false;
     }
 
-    var edges = this.get('_edges') || this._calculateEdges();
+    var edges = this.get('_edges');
     var items = this.get('content');
 
     var currentViewportBound = edges.viewportTop + this.$().position().top;
@@ -511,33 +531,29 @@ export default Mixin.create({
 
 
   //–––––––––––––– Setup/Teardown
-  _hasRendered: false,
-  shouldRender: true,
-  canRender: false,
-
-  setup: observer('shouldRender', 'canRender', function() {
-
-    if (this.get('_hasRendered') || !this.get('shouldRender') || !this.get('canRender')) {
-      return;
-    }
-    this.set('_hasRendered', true);
+  setupContainer: function() {
 
     var id = this.get('elementId');
     var scrollThrottle = this.get('scrollThrottle');
     var containerSelector = this.get('containerSelector');
-    var _container = containerSelector ? jQuery(containerSelector) : this.$().parent();
+    var _container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
     this.set('_container', _container);
 
     // TODO This may need vendor prefix detection
     _container.css({
-      '-webkit-transform' : 'translate3d(0,0,0)',
-      '-moz-transform'    : 'translate3d(0,0,0)',
-      '-ms-transform'     : 'translate3d(0,0,0)',
-      '-o-transform'      : 'translate3d(0,0,0)',
-      'transform'         : 'translate3d(0,0,0)',
       '-webkit-overflow-scrolling': 'touch',
       'overflow-scrolling': 'touch'
     });
+
+    if (this.get('shouldGPUAccelerate')) {
+      _container.css({
+        '-webkit-transform' : 'translate3d(0,0,0)',
+        '-moz-transform'    : 'translate3d(0,0,0)',
+        '-ms-transform'     : 'translate3d(0,0,0)',
+        '-o-transform'      : 'translate3d(0,0,0)',
+        'transform'         : 'translate3d(0,0,0)'
+      });
+    }
 
     var onScrollMethod = function onScrollMethod() {
       if (this.get('__isPrepending') || !this.get('__isInitialized')) {
@@ -547,21 +563,21 @@ export default Mixin.create({
     }.bind(this);
 
     var onResizeMethod = function onResizeMethod() {
-      this._taskrunner.debounce(this, this._calculateEdges, scrollThrottle, false);
+      this._taskrunner.debounce(this, this.notifyPropertyChange, '_edges', scrollThrottle, false);
     }.bind(this);
 
     _container.bind('scroll.occlusion-culling.' + id, onScrollMethod);
     _container.bind('touchmove.occlusion-culling.' + id, onScrollMethod);
     jQuery(window).bind('resize.occlusion-culling.' + id, onResizeMethod);
 
-    //draw initial boundaries
-    this.get('_edges');
-    this._initializeScrollState();
-
-  }),
+  },
 
   _allowRendering: on('didInsertElement', function() {
+    this.setupContainer();
     this.set('canRender', true);
+    //draw initial boundaries
+    this._initializeScrollState();
+
   }),
 
 
@@ -610,10 +626,6 @@ export default Mixin.create({
    * scroll position on relaunch.
    */
   _cleanup: on('willDestroyElement', function() {
-
-    if (!this.get('_hasRendered')){
-      return;
-    }
 
     //cleanup scroll
     var id = this.get('elementId');
@@ -713,11 +725,11 @@ export default Mixin.create({
    *
    * @private
    */
-  _edges: null,
-  _calculateEdges: observer('containerHeight', function calculateViewStateBoundaries() {
+  __edges: null,
+  _edges: computed('_container', 'containerHeight', 'shouldRenderList', function calculateViewStateBoundaries() {
 
-    if (!this.get('__hasInitialized') && this.get('_edges')) {
-      return;
+    if (!this.get('shouldRenderList') && this.get('__edges')) {
+      return this.get('__edges');
     }
 
     var _container = this.get('_container');
@@ -725,9 +737,10 @@ export default Mixin.create({
       return;
     }
     var edges = {};
+    var containerHeight = this.get('containerHeight');
 
     // segment heights
-    var viewportHeight = parseInt(this.get('containerHeight'), 10) || _container.height();
+    var viewportHeight = parseInt(containerHeight, 10) || _container.height();
     var _visibleBufferHeight = Math.round(viewportHeight * this.get('visibleBuffer'));
     var _invisibleBufferHeight = Math.round(viewportHeight * this.get('invisibleBuffer'));
 
@@ -742,10 +755,8 @@ export default Mixin.create({
     edges.visibleBottom = edges.viewportBottom + _visibleBufferHeight;
     edges.invisibleBottom = edges.visibleBottom + _invisibleBufferHeight;
 
-    // ensure that visible views are recalculated following a resize
-    this._taskrunner.debounce(this, this._updateChildStates, this.get('scrollThrottle'));
-
-    this.set('_edges', edges);
+    this.set('__edges', edges);
+    Ember.Logger.debug('EDGES', edges);
     return edges;
 
   }),
@@ -757,6 +768,7 @@ export default Mixin.create({
 
     var prependFn = this.__performViewPrepention.bind(this);
     this.set('__performViewPrepention', prependFn);
+    this.set('__shouldRender', this.get('shouldRender'));
 
     var collectionTagName = (this.get('tagName') || '').toLowerCase();
     var itemTagName = this.get('itemTagName');

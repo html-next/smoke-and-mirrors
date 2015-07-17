@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import MagicArrayMixin from '../mixins/magic-array';
 import OcclusionCollectionMixin from '../mixins/occlusion-collection';
+import layout from '../templates/components/vm-collection';
 
 const {
   get: get,
@@ -8,6 +9,8 @@ const {
   } = Ember;
 
 export default Component.extend(MagicArrayMixin, OcclusionCollectionMixin, {
+
+  layout: layout,
 
   //–––––––––––––– Required Settings
 
@@ -63,8 +66,6 @@ export default Component.extend(MagicArrayMixin, OcclusionCollectionMixin, {
   alwaysUseDefaultHeight: false,
 
 
-
-
   _getChildren: function() {
     var eachList = Ember.A(this._childViews[0]);
     var childViews = [];
@@ -86,11 +87,11 @@ export default Component.extend(MagicArrayMixin, OcclusionCollectionMixin, {
     // TODO this is nearly in line with the mixin version
   _updateChildStates: function () {
 
-    if (this.get('__isPrepending') || !this.get('_hasRendered')) {
+    if (this.get('__isPrepending') || !this.get('shouldRenderList')) {
       return false;
     }
 
-    var edges = this.get('_edges') || this._calculateEdges();
+    var edges = this.get('_edges');
     var childComponents = this._getChildren();
 
     var currentViewportBound = edges.viewportTop + this.$().position().top;
