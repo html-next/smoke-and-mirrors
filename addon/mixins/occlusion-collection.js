@@ -14,7 +14,6 @@ const {
   computed,
   run,
   on,
-  observer,
   } = Ember;
 
 const actionContextCacheKeys = {
