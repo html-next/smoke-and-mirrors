@@ -19,7 +19,11 @@ function mergeDiffedArrays() {
 
   this.beginPropertyChanges();
 
-  inbound.forEach((item, index) => {
+  if (!inbound) {
+    return outbound;
+  }
+
+  inbound.forEach((item) => {
     let key = get(item, keyForId);
     let obj = cache[key] || ObjectProxy.create();
     obj.set('content', item);
@@ -166,7 +170,7 @@ var Mixin = Ember.Mixin.create({
   _initializeMagicArray: function() {
     var dest = this.get('_proxyContentTo');
     this.set('__proxyContent', ArrayProxy.create({ content: Ember.A() }));
-    this.set(dest, computed('content', 'content.@each', computeProxiedArray));
+    this.set(dest, computed('content.[]', computeProxiedArray));
   },
 
   init: function() {
