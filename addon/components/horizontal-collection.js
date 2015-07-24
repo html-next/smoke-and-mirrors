@@ -3,8 +3,11 @@
  */
 import Ember from 'ember';
 import OcclusionCollectionMixin from '../mixins/occlusion-collection';
+import layout from '../templates/components/horizontal-collection';
 
 export default Ember.Component.extend(OcclusionCollectionMixin, {
+
+  layout: layout,
 
   defaultWidth: 200,
   _defaultWidth: null,
