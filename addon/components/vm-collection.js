@@ -45,10 +45,10 @@ export default Component.extend(MagicArrayMixin, OcclusionCollectionMixin, {
   /**!
    * Defaults to `div`.
    *
-   * If itemTagName is blank or null, the `occlusion-collection` will [tag match](../addon/utils/get-tag-descendant.js)
-   * with the `OcclusionItem`.
+   * If itemTagName is blank or null, the `vertical-collection` will [tag match](../addon/utils/get-tag-descendant.js)
+   * with the `vertical-item`.
    */
-  tagName: 'occlusion-collection',
+  tagName: 'vertical-collection',
 
   /**!
    * Used if you want to explicitly set the tagName of `OcclusionItem`s

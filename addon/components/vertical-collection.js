@@ -1,7 +1,9 @@
-import Ember from "ember";
-import getTagDescendant from "../utils/get-tag-descendant";
-import nextFrame from "../utils/next-frame";
-import Scheduler from "../utils/backburner-ext";
+import Ember from 'ember';
+import getTagDescendant from '../utils/get-tag-descendant';
+import nextFrame from '../utils/next-frame';
+import Scheduler from '../utils/backburner-ext';
+import jQuery from 'jquery';
+import layout from '../templates/components/vertical-collection';
 
 const {
   get: get,
@@ -10,8 +12,6 @@ const {
   on,
   observer,
 } = Ember;
-
-const jQuery = Ember.$;
 
 const actionContextCacheKeys = {
   'topReached': '_lastTopSent',
@@ -26,6 +26,8 @@ function valueForIndex(arr, index) {
 }
 
 export default Component.extend({
+
+  layout: layout,
 
   //–––––––––––––– Required Settings
 
@@ -75,15 +77,15 @@ export default Component.extend({
   containerHeight: null,
 
   /**!
-   * Defaults to `div`.
+   * Defaults to `vertical-collection`.
    *
-   * If itemTagName is blank or null, the `occlusion-collection` will [tag match](../addon/utils/get-tag-descendant.js)
-   * with the `OcclusionItem`.
+   * If itemTagName is blank or null, the `vertical-collection` will [tag match](../addon/utils/get-tag-descendant.js)
+   * with the `vertical-item`.
    */
-  tagName: 'occlusion-collection',
+  tagName: 'vertical-collection',
 
   /**!
-   * Used if you want to explicitly set the tagName of `OcclusionItem`s
+   * Used if you want to explicitly set the tagName of `vertical-item`s
    */
   itemTagName: '',
 

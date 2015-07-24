@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import StateMapMixin from '../mixins/state-map';
+import layout from '../templates/components/vertical-item';
 
 /**
  A vertical-item is one that intelligently removes
@@ -11,7 +12,8 @@ import StateMapMixin from '../mixins/state-map';
  **/
 export default Ember.Component.extend(StateMapMixin, {
 
-  tagName: 'occlusion-item',
+  layout: layout,
+  tagName: 'vertical-item',
 
   classNameBindings: ['viewStateClass'],
   collection: null,

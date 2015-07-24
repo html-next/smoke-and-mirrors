@@ -1,3 +1,6 @@
+/*
+  EXPERIMENTAL AND UNFINISHED
+ */
 import Ember from 'ember';
 import OcclusionCollectionMixin from '../mixins/occlusion-collection';
 
