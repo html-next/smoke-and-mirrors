@@ -37,13 +37,13 @@
     "ember-data": "1.13.5",
     "ember-disable-proxy-controllers": "^1.0.0",
     "ember-export-application-global": "^1.0.2",
-    "ember-disable-prototype-extensions": "^1.0.0",
+    "ember-try": "0.0.6",
     "grunt": "0.4.5",
     "grunt-bump": "0.0.16",
     "grunt-cli": "0.1.13",
     "jit-grunt": "0.9.0",
-    "time-grunt": "1.0.0",
-    "ember-try": "0.0.6"
+    "liquid-fire": "^0.19.5",
+    "time-grunt": "1.0.0"
   },
   "keywords": [
     "ember-addon",
@@ -56,8 +56,7 @@
   ],
   "dependencies": {
     "ember-cli-babel": "^5.0.0",
-    "ember-cli-htmlbars": "0.7.9",
-    "ember-cli-stylus": "^1.0.5"
+    "ember-cli-htmlbars": "0.7.9"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"

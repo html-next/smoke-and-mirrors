@@ -1,3 +1,32 @@
+body {
+
+}
+
+h1 {
+  color: #FF7607;
+  font-size: 3rem;
+  line-height: 2.5em;
+  margin: .25em;
+  padding: 0;
+}
+
+header {
+  background: #323741;
+  border-bottom: 1px solid #222;
+  box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.75);
+}
+
+nav {
+  font-size: 2rem;
+  line-height: 2.5em;
+  color: #333;
+  text-align: center;
+}
+
+nav a {
+  color: #777;
+}
+
 .Query {
   position: relative;
 }
