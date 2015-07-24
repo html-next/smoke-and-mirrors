@@ -4,9 +4,9 @@
             <table class="table table-striped latest-data">
                 <tbody>
                 {{#proxied-each
-                keyForId="id"
-                contentToProxy=model.databases
-                as |db|
+                  keyForId="id"
+                  content=model.databases
+                  as |db|
                 }}
                   {{mdbmon-database db=db.content}}
                 {{/proxied-each}}

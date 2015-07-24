@@ -13,7 +13,7 @@
     "loader.js": "ember-cli/loader.js#3.2.0",
     "animation-frame": "~0.2.4",
     "qunit": "~1.17.1",
-    "ember": "1.12.1"
+    "ember": "1.13.5"
   },
   "devDependencies": {
     "bootstrap": "~3.3.5"

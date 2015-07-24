@@ -1,10 +1,10 @@
 import Ember from 'ember';
-import getData from '../../lib/get-data';
+import getData from 'dummy/lib/get-data';
 
 export default Ember.Route.extend({
 
   model: function() {
-    var controller = this.controllerFor('perf-demo.magic-array');
+    var controller = this.controllerFor('dbmon.proxied');
     return getData(controller.get('numRows'));
   },
 
@@ -14,7 +14,7 @@ export default Ember.Route.extend({
   },
 
   loadSamples: function() {
-    var controller = this.controllerFor('perf-demo.magic-array');
+    var controller = this.controllerFor('dbmon.proxied');
     Ember.run.schedule('afterRender', this, function () {
       controller
         .set('model', getData(controller.get('numRows')));
