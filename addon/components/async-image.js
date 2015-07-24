@@ -1,5 +1,6 @@
-import Ember from "ember";
-import jQuery from "jquery";
+import Ember from 'ember';
+import jQuery from 'jquery';
+import layout from '../templates/components/async-image';
 
 const {
   computed,
@@ -10,6 +11,7 @@ const {
 
 export default Ember.Component.extend({
 
+  layout: layout,
   tagName: 'async-image',
 
   classNames: ['async-image'],
