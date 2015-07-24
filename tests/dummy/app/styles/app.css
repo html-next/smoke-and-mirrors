@@ -21,37 +21,9 @@
   height: 500px;
 }
 
-occlusion-collection,
-occlusion-item {
-  display: block;
-  width: 100%;
-  position: static;
-}
-
 async-image {
-  display: inline-block;
-  position: relative;
-  width: 100%;
-  height: 100%;
   background: #f0f0f0;
 }
-async-image > img {
-  display: none;
-  opacity: 0;
-  transition: opacity 3s ease-in;
-  position: relative;
-}
-async-image.is-appending > img {
-  display: block;
-}
-async-image.is-loaded > img {
-  display: block;
-  opacity: 1;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-}
-
 
 .image-slide {
   width: 350px;
