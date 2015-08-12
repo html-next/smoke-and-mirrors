@@ -3,10 +3,10 @@ body {
 }
 
 h1 {
-  color: #FF7607;
-  font-size: 3rem;
-  line-height: 2.5em;
-  margin: .25em;
+  color: #fff;
+  font-size: 2rem;
+  line-height: 2.1em;
+  margin: .25em auto;
   padding: 0;
 }
 
