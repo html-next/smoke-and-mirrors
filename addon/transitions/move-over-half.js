@@ -53,11 +53,7 @@ export default function moveOverHalf(dimension, direction, opts) {
       animate(overlay, overlayParams, opts),
       animate(this.oldElement, oldParams, opts),
       animate(this.newElement, newParams, opts, 'moving-in')
-    ]).then((infos) => {
-      var view = getRealChildView(this.newView);
-      view.trigger('didAnimateTransition');
-      return infos;
-    });
+    ]);
   });
 }
 
@@ -72,14 +68,4 @@ function biggestSize(context, dimension) {
     sizes.push(parseInt(context.oldElement.parent().css(dimension), 10));
   }
   return Math.max.apply(null, sizes);
-}
-
-function getRealChildView(view) {
-  var maxDepth = 6;
-  var curDepth = 0;
-  view = view._childViews[0];
-  while (view && curDepth++ <= maxDepth && !view.element && view._childViews[0]) {
-    view = view._childViews[0];
-  }
-  return view;
 }
