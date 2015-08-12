@@ -1,1 +1,1 @@
-export { default } from 'smoke-and-mirrors/transitions/exit-left';
+export { default } from 'smoke-and-mirrors/services/exit-left';

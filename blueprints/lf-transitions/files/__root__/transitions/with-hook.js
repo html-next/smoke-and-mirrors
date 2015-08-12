@@ -1,1 +1,1 @@
-export { default } from 'smoke-and-mirrors/transitions/with-hook';
+export { default } from 'smoke-and-mirrors/services/with-hook';

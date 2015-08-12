@@ -1,1 +1,1 @@
-export { default } from 'smoke-and-mirrors/transitions/move-over-half';
+export { default } from 'smoke-and-mirrors/services/move-over-half';
