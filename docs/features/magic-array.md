@@ -16,6 +16,7 @@ set `useDiffing` to true to maintain only stable references to objects based on 
 ## Example with diffing
 
 | input     |  output            | array change |  new output       |
+|-----------|--------------------|--------------|-------------------|
 | [A, B, C] | [1(a), 2(b), 3(c)] | [B, A, C]    | [2(b), 1(a), 3(c)]|
 | [A, B, C] | [1(a), 2(b), 3(c)] | [D, E, C]    | [4(d), 5(e), 3(c)]|
 
