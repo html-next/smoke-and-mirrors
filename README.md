@@ -17,9 +17,14 @@ to help you deliver your ambitions.
 
 ## WIP (pre 1.0.0)
 
-This addon is approaching but has not reached it's first version: 1.0.0,
-so using it means you take the risk of living a little bit on the edge.
-Contributions and bug reports are very appreciated!
+This addon is beta software.
+
+## Features
+
+- [Queues](./docs/features/queues.md)
+- [MagicArray](./docs/features/magic-array.md)
+- [Local Storage](./docs/features/local-storage.md)
+- []
 
 ## Guides
 
