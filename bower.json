@@ -1,6 +1,6 @@
 {
   "name": "smoke-and-mirrors",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "dependencies": {
     "ember-cli-shims": "ember-cli/ember-cli-shims#0.0.3",
     "ember-cli-test-loader": "ember-cli-test-loader#0.1.3",
