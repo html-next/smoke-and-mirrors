@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import jQuery from 'jquery';
+import nextFrame from '../utils/next-frame';
 
 const {
   computed,
@@ -101,12 +102,6 @@ export default Ember.Mixin.create({
    */
   _ov_insert: function() {
     this.setProperties({ contentHidden: true, contentCulled: false, contentInserted: true });
-    run.schedule('afterRender', this, function() {
-      if (!this.get('isDestroyed')) {
-        // allow height to change organically while the element is inDom
-        this.element.style.minHeight = null;
-      }
-    });
   },
 
 
@@ -117,6 +112,7 @@ export default Ember.Mixin.create({
    */
   _ov_reveal: function() {
     this.setProperties({ contentHidden: false, contentVisible: true, contentInserted: true });
+    this.element.style.minHeight = null;
     this.element.style.visibility = 'visible';
   },
 
