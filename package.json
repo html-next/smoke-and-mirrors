@@ -42,7 +42,6 @@
     "grunt-bump": "0.0.16",
     "grunt-cli": "0.1.13",
     "jit-grunt": "0.9.0",
-    "liquid-fire": "^0.19.5",
     "time-grunt": "1.0.0"
   },
   "keywords": [
