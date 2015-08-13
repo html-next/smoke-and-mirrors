@@ -1,24 +1,27 @@
-import Ember from "ember";
+/* global JSON*/
+import Ember from 'ember';
 
-var LS = window.localStorage,
+const {
+  Service
+  } = Ember;
 
-  REGISTER_KEY = 'lsdb_persist_registry',
-
-  ALLOWED_TYPES = [
+const LS = window.localStorage;
+const REGISTER_KEY = 'lsdb_persist_registry';
+const ALLOWED_TYPES = [
     'Number',
     'Boolean',
     'String',
     'Object',
     'Array'
-  ],
+  ];
 
-  getRealType = function (val) {
-    var typeString = Object.prototype.toString.call(val);
-    return typeString.substring(8, typeString.length - 1);
-  };
+function getTypeForVar(val) {
+  let typeString = Object.prototype.toString.call(val);
+  return typeString.substring(8, typeString.length - 1);
+}
 
+export default Ember.Service.extend({
 
-export default Ember.Object.create({
 
   /**
    * @method save
@@ -30,22 +33,21 @@ export default Ember.Object.create({
    *
    * Saving a value that is Null or Undefined will result in the key being removed instead
    */
-  save: function (key, value) {
-
-    var type = getRealType(value);
+  save(key, value) {
+    let type = getTypeForVar(value);
 
     if (ALLOWED_TYPES.indexOf(type) !== -1) {
-      return LS.setItem(key, JSON.stringify({
-        type : type,
-        value : value
-      }));
+      return LS.setItem(key, JSON.stringify(value));
     }
+
     if (type === 'Undefined' || type === 'Null') {
       this.remove(key);
       return null;
     }
+
     throw "Attempted to set key " + key + " with an invalid value of type " + type;
   },
+
 
   saveWithIndeces: function (key, value, namespace, indeces) {
 
@@ -63,29 +65,13 @@ export default Ember.Object.create({
     return status;
   },
 
+
   findIndex(namespace, key, value) {
     var index = 'LSIndex:' + namespace + '::' + key + '::' + value;
     var contentKey = LS.getItem(index);
     return contentKey ? this.find(contentKey) : null;
   },
 
-  /**
-   * @method find
-   * @param key
-   * @returns {*}
-   *
-   * maps to `window.localStorage.getItem
-   */
-  find: function (key) {
-    var data = LS.getItem(key);
-    try {
-      data = JSON.parse(data);
-      return data.value;
-    } catch (e) {
-      this.remove(key);
-      return null;
-    }
-  },
 
   /**
    * @method find
@@ -94,9 +80,30 @@ export default Ember.Object.create({
    *
    * maps to `window.localStorage.getItem
    */
-  remove: function (key) {
+  find(key) {
+    let data = LS.getItem(key);
+
+    try {
+      data = JSON.parse(data);
+      return data;
+    } catch (e) {
+      this.remove(key);
+      return null;
+    }
+  },
+
+
+  /**
+   * @method find
+   * @param key
+   * @returns {*}
+   *
+   * maps to `window.localStorage.getItem
+   */
+  remove(key) {
     return LS.removeItem(key);
   },
+
 
   /**
    * @method persist
@@ -106,52 +113,51 @@ export default Ember.Object.create({
    * saves a key:value pair to local storage and adds the key to a
    * register of keys that get persisted between calls to `clear`
    */
-  persist: function (key, value) {
+  persist(key, value) {
+    let register = this.find(REGISTER_KEY) || [];
 
-    var register = this.find(REGISTER_KEY) || [];
     register.push(key);
     this.save(REGISTER_KEY, register);
-
     return this.save(key, value);
   },
+
 
   /**
    * @method removePersistentKey
    * @param key
    */
-  removePersistentKey: function (key) {
-    var register = this.find(REGISTER_KEY) || [],
-      index = register.indexOf(key);
+  removePersistentKey(key) {
+    let register = this.find(REGISTER_KEY) || [];
+    let index = register.indexOf(key);
+
     if (index !== -1) {
       register.splice(index, 1);
     }
     return this.save(REGISTER_KEY, register);
   },
 
+
   /**
    * @method clear
    *
    * Removes all values from localStorage not saved to localStorage via `persist`
    */
-  clear: function () {
-    var store = this,
-      register = this.find(REGISTER_KEY) || [],
-      data = register.map(function(key) {
-      return { key : key, value : store.find(key) };
+  clear() {
+    let register = this.find(REGISTER_KEY) || [];
+    let data = register.map((key) => {
+      return { key: key, value: this.find(key) };
     });
 
-    LS.clear();
+    this.wipe();
 
-    data.forEach(function (item) {
-      store.save(item.key, item.value);
+    data.forEach((item) => {
+      this.save(item.key, item.value);
     });
 
-    return store.save(REGISTER_KEY, register);
-
+    return this.save(REGISTER_KEY, register);
   },
 
-  wipe: function() {
-    LS.clear();
-  }
+
+  wipe: LS.clear
 
 });
