@@ -63,6 +63,12 @@ export default Mixin.create({
   //TODO implement, also can we do named yield's to make this API better?
   loadingComponentClass: null,
 
+
+  /**!
+   * Used if you want to explicitly set the tagName of collection's items
+   */
+  itemTagName: '',
+
   //–––––––––––––– Performance Tuning
 
   /**!
@@ -365,7 +371,26 @@ export default Mixin.create({
   },
 
   // this method MUST be implemented by the consuming collection
-  _getChildren: null,
+  _children: null,
+  _getChildren: function() {
+    if (IS_GLIMMER) {
+      return this.get('_children');
+    }
+    var eachList = Ember.A(this._childViews[0]);
+    var childViews = [];
+    eachList.forEach(function(virtualView){
+      childViews.push(virtualView._childViews[0]);
+    });
+    return childViews;
+  },
+
+  // used by glimmer to populate _children
+  register: function(child, key) {
+    this.get('_children')[key] = child;
+  },
+  unregister: function(key) {
+    this.get('_children')[key] = null; // don't delete, it leads to too much GC
+  },
 
   childForItem: function(item, index) {
     let key = this.keyForItem(item, index);
@@ -754,6 +779,22 @@ export default Mixin.create({
 
   }),
 
+
+
+  didReceiveAttrs: function(attrs) {
+    var oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
+    var newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
+    if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
+      var addCount = get(newArray, 'length') - get(oldArray, 'length');
+      this.__performViewPrepention(addCount);
+    } else {
+      this._taskrunner.schedule('actions', this, this._cycleViews);
+    }
+  },
+
+
+
+
   /**!
    * Initialize
    */
@@ -781,9 +822,32 @@ export default Mixin.create({
     this._taskrunner = Scheduler.create();
   },
 
+
+  _reflectContentChanges: function() {
+
+    var content = this.get('__content');
+    var self = this;
+
+    content.contentArrayDidChange = function handleArrayChange(items, offset, removeCount, addCount) {
+
+      if (offset <= self.get('_firstVisibleIndex')) {
+        self.__performViewPrepention(addCount);
+      } else {
+        self._taskrunner.schedule('render', self, self._updateChildStates);
+      }
+
+    };
+
+  },
+
   init() {
-    this._super();
+
+    this._super.apply(this, arguments);
     this._prepareComponent();
+    if (!IS_GLIMMER) {
+      this.set('_children', {});
+      this._reflectContentChanges();
+    }
   }
 
 
