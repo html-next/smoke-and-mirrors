@@ -43,12 +43,12 @@ export default Mixin.create(keyMixin, {
 
 
 function mergeDiffedArrays() {
-  var inbound = this.get('content');
-  var outbound = this.get('__content');
-  var cache = this.get('__cache');
-  var newList = {};
-  var staged = Ember.A();
-  var deletions = [];
+  let inbound = this.get('content');
+  let outbound = this.get('__content');
+  let cache = this.get('__cache');
+  let newList = {};
+  let staged = Ember.A();
+  let deletions = [];
 
   this.beginPropertyChanges();
 
@@ -105,12 +105,12 @@ function computeProxiedArray() {
     return mergeDiffedArrays.call(this);
   }
 
-  var inbound = this.get('content');
-  var key = this.get('key');
-  var outbound = this.get('__content');
-  var newLength;
-  var newObjects = Ember.A();
-  var diff;
+  let inbound = this.get('content');
+  let key = this.get('key');
+  let outbound = this.get('__content');
+  let newLength;
+  let newObjects = Ember.A();
+  let diff;
 
   // play nice with arrays that are already proxied
   if (inbound && inbound.get && inbound.get('content')) {
@@ -127,7 +127,7 @@ function computeProxiedArray() {
 
       newLength = Ember.get(inbound, 'length');
       diff = newLength - outbound.get('length');
-      for (var i = 0; i < diff; i++) {
+      for (let i = 0; i < diff; i++) {
         newObjects.push(ObjectProxy.create({content: inbound[i]}));
       }
       if (newObjects.length) {
@@ -137,7 +137,7 @@ function computeProxiedArray() {
       // handle additions and inline changes
     } else {
 
-      inbound.forEach(function(item, index) {
+      inbound.forEach((item, index) => {
         var proxiedObject = outbound.objectAt(index);
         if (proxiedObject) {
           proxiedObject.set('content', item);
