@@ -2,6 +2,8 @@ import Ember from 'ember';
 import StateMapMixin from '../mixins/state-map';
 import layout from '../templates/components/vertical-item';
 
+const IS_GLIMMER = (Ember.VERSION.indexOf('2') === 0 || Ember.VERSION.indexOf('1.13') === 0);
+
 /**
  A vertical-item is one that intelligently removes
  its content when scrolled off the screen vertically.
@@ -23,10 +25,10 @@ export default Ember.Component.extend(StateMapMixin, {
 
   _height: 0,
 
-  willInsertElement: function() {
+  willInsertElement() {
 
-    var _height = this.get('_height');
-    var defaultHeight = this.get('defaultHeight');
+    let _height = this.get('_height');
+    let defaultHeight = this.get('defaultHeight');
     if (typeof defaultHeight === 'number') {
       defaultHeight += 'px';
     }
@@ -37,9 +39,9 @@ export default Ember.Component.extend(StateMapMixin, {
   },
 
   didReceiveAttrs(attrs) {
-    var key = this.get('keyForId');
-    var oldKeyVal = attrs.oldAttrs ? attrs.oldAttrs.content.value[key] : false;
-    var newKeyVal = attrs.oldAttrs ? attrs.newAttrs.content.value[key] : false;
+    let oldKeyVal = this.keyForValue(attrs.oldAttrs.content.value);
+    let newKeyVal = this.keyForValue(attrs.newAttrs.content.value);
+
     if (oldKeyVal && newKeyVal && oldKeyVal !== newKeyVal) {
       this.collection.unregister(oldKeyVal);
       this.collection.register(this, newKeyVal);
@@ -50,15 +52,19 @@ export default Ember.Component.extend(StateMapMixin, {
     this._super();
     this._ov_teardown();
     this.set('viewState', 'culled');
-    var key = this.get('keyForId');
-    var val = this.get('content.' + key);
-    this.collection.unregister(val);
+
+    if (IS_GLIMMER) {
+      let key = this.keyForValue();
+      this.collection.unregister(key);
+    }
   },
 
   init() {
     this._super();
-    var val = this.get('content.' + this.get('keyForId'));
-    this.collection.register(this, val);
+    if (IS_GLIMMER) {
+      let key = this.keyForValue();
+      this.collection.register(this, key);
+    }
   }
 
 });

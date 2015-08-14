@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import MagicArrayMixin from '../mixins/magic-array';
 import OcclusionCollectionMixin from '../mixins/occlusion-collection';
-import layout from '../templates/components/vm-collection';
+import layout from '../templates/components/vertical-collection';
 
 const {
   get: get,
