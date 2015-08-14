@@ -299,7 +299,7 @@ export default Mixin.create({
 
     // trigger a cycle
     if (doRender && _shouldDidChange) {
-      run.next(this, this._updateChildStates);
+      this._taskrunner.next(this, this._updateChildStates);
     }
 
     return doRender;
@@ -313,13 +313,11 @@ export default Mixin.create({
       return;
     }
 
-    var key = this.get('keyForId');
-
     if (actionContextCacheKeys[name]) {
-      if (this.get(actionContextCacheKeys[name]) === get(context.item, key)) {
+      if (this.get(actionContextCacheKeys[name]) === this.keyForItem(context.item)) {
         return;
       } else {
-        this.set(actionContextCacheKeys[name], get(context.item, key));
+        this.set(actionContextCacheKeys[name], this.keyForItem(context.item));
       }
     }
 
@@ -628,13 +626,14 @@ export default Mixin.create({
       this.get('_container').get(0).scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
     }
 
-    this._taskrunner.next(this, function() {
+    this._taskrunner.next(this, () => {
       this.set('__isPrepending', false);
       this.set('__isInitialized', true);
       this._updateChildStates();
     });
 
   },
+
 
   /**!
    * Remove the event handlers for this instance
@@ -645,29 +644,27 @@ export default Mixin.create({
    * scroll position on relaunch.
    */
   _cleanup: on('willDestroyElement', function() {
-
     //cleanup scroll
-    var id = this.get('elementId');
-    var _container = this.get('_container');
+    let id = this.get('elementId');
+    let _container = this.get('_container');
 
     _container.unbind('scroll.occlusion-culling.' + id);
     _container.unbind('touchmove.occlusion-culling.' + id);
     jQuery(window).unbind('resize.occlusion-culling.' + id);
 
     //cache state
-    var storageKey = this.get('storageKey');
+    let storageKey = this.get('storageKey');
     if (storageKey) {
 
-      var keyForId = this.get('keyForId');
-      var cacheAttrs = this.getProperties(
+      let cacheAttrs = this.getProperties(
         'scrollPosition',
         '__dimensions',
         '_firstVisible',
         '_lastVisible'
       );
 
-      cacheAttrs._firstVisible = cacheAttrs._firstVisible.get(keyForId);
-      cacheAttrs._lastVisible = cacheAttrs._lastVisible.get(keyForId);
+      cacheAttrs._firstVisible = this.keyForItem(cacheAttrs._firstVisible);
+      cacheAttrs._lastVisible = this.keyForItem(cacheAttrs._lastVisible);
 
       localStorage.setItem(storageKey, JSON.stringify(cacheAttrs));
     }
@@ -685,11 +682,9 @@ export default Mixin.create({
     var container = this.get('_container').get(0);
     container.scrollTop += addCount * this.__getEstimatedDefaultHeight();
 
-    this._taskrunner.next(this, function() {
+    this._taskrunner.next(this, () => {
       this.set('__isPrepending', false);
-
-      // ensure that visible views are recalculated following an array length change
-      nextFrame(this, this._updateChildStates);
+      nextFrame(this, this._updateChildStates); // TODO do we need nextFrame here anymore?
     });
   },
 
@@ -788,7 +783,7 @@ export default Mixin.create({
       var addCount = get(newArray, 'length') - get(oldArray, 'length');
       this.__performViewPrepention(addCount);
     } else {
-      this._taskrunner.schedule('actions', this, this._cycleViews);
+      this._taskrunner.schedule('actions', this, this._updateChildStates);
     }
   },
 
@@ -798,14 +793,14 @@ export default Mixin.create({
   /**!
    * Initialize
    */
-  _prepareComponent: function() {
+  _prepareComponent() {
+    let prependFn = this.__performViewPrepention.bind(this);
 
-    var prependFn = this.__performViewPrepention.bind(this);
     this.set('__performViewPrepention', prependFn);
     this.set('__shouldRender', this.get('shouldRender'));
 
-    var collectionTagName = (this.get('tagName') || '').toLowerCase();
-    var itemTagName = this.get('itemTagName');
+    let collectionTagName = (this.get('tagName') || '').toLowerCase();
+    let itemTagName = this.get('itemTagName');
 
     if (!itemTagName) {
       if (collectionTagName === 'occlusion-collection') {
@@ -823,26 +818,22 @@ export default Mixin.create({
   },
 
 
-  _reflectContentChanges: function() {
+  _reflectContentChanges() {
+    let content = this.get('_content');
 
-    var content = this.get('__content');
-    var self = this;
-
-    content.contentArrayDidChange = function handleArrayChange(items, offset, removeCount, addCount) {
-
-      if (offset <= self.get('_firstVisibleIndex')) {
-        self.__performViewPrepention(addCount);
+    content.contentArrayDidChange = (items, offset, removeCount, addCount) => {
+      if (offset <= this.get('_firstVisibleIndex')) {
+        this.__performViewPrepention(addCount);
       } else {
-        self._taskrunner.schedule('render', self, self._updateChildStates);
+        this._taskrunner.schedule('render', this, this._updateChildStates);
       }
-
     };
 
   },
 
   init() {
-
     this._super.apply(this, arguments);
+
     this._prepareComponent();
     if (!IS_GLIMMER) {
       this.set('_children', {});
