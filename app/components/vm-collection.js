@@ -1,3 +1,1 @@
-import Component from "smoke-and-mirrors/components/vm-collection";
-
-export default Component;
+export { default } from 'smoke-and-mirrors/components/vertical-collection';
