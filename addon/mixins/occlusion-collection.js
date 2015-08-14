@@ -4,6 +4,8 @@ import nextFrame from '../utils/next-frame';
 import Scheduler from '../utils/backburner-ext';
 import jQuery from 'jquery';
 
+const IS_GLIMMER = (Ember.VERSION.indexOf('2') === 0 || Ember.VERSION.indexOf('1.13') === 0);
+
 /**
  * Investigations: http://jsfiddle.net/sxqnt/73/
  */
@@ -28,17 +30,6 @@ function valueForIndex(arr, index) {
 }
 
 export default Mixin.create({
-
-  //–––––––––––––– Required Settings
-  /**!
-   * The `keyForId` property improves performance when the underlying array is changed but most
-   * of the items remain the same.  It is used by the [MagicArrayMixin](./magic-array.md) pre-glimmer
-   * and by `each` in glimmer.
-   *
-   * If `useLocalStorageCache` is true, it is also used to cache the rendered heights of content in the list
-   */
-  keyForId: null,
-
 
   //–––––––––––––– Optional Settings
 
@@ -376,126 +367,130 @@ export default Mixin.create({
   // this method MUST be implemented by the consuming collection
   _getChildren: null,
 
-  childForItem: function(item) {
-    var val = get(item, this.get('keyForId'));
-    return this._getChildren()[val];
+  childForItem: function(item, index) {
+    let key = this.keyForItem(item, index);
+    return this._getChildren()[key];
   },
 
   /**!
+   *
+   * The big question is can we render from the bottom
+   * without the bottom most item being taken off screen?
+   *
+   * Triggers on scroll.
+   *
+   * @returns {boolean}
    * @private
    */
-  _updateChildStates: function () {
+  _updateChildStates() {
 
-    if (this.get('__isPrepending') || !this.get('canRender')) {
+    if (this.get('__isPrepending') || !this.get('shouldRenderList')) {
       return false;
     }
 
-    var edges = this.get('_edges');
-    var items = this.get('content');
+    let edges = this.get('_edges');
+    let childComponents = this._getChildren();
 
-    var currentViewportBound = edges.viewportTop + this.$().position().top;
-    var currentUpperBound = edges.invisibleTop;
+    let currentViewportBound = edges.viewportTop + this.$().position().top;
+    let currentUpperBound = edges.invisibleTop;
 
     if (currentUpperBound < currentViewportBound) {
       currentUpperBound = currentViewportBound;
     }
 
-    var topViewIndex = this._findTopView(currentUpperBound, edges.viewportTop);
-    var bottomViewIndex = topViewIndex;
-    var lastIndex = get(items, 'length') - 1;
-    var topVisibleSpotted = false;
+    let topComponentIndex = this._findFirstRenderedComponent(currentUpperBound, edges.viewportTop);
+    let bottomComponentIndex = topComponentIndex;
+    let lastIndex = get(childComponents, 'length') - 1;
+    let topVisibleSpotted = false;
 
-    while (bottomViewIndex <= lastIndex) {
+    while (bottomComponentIndex <= lastIndex) {
 
-      var component = this.childForItem(valueForIndex(items, bottomViewIndex));
+      let component = childComponents[bottomComponentIndex];
 
-      var viewTop = component.$().position().top;
-      var viewBottom = viewTop + component.get('_height');
+      let componentTop = component.$().position().top;
+      let componentBottom = componentTop + component.get('_height');
 
-      // end the loop if we've reached the end of views we care about
-      if (viewTop > edges.invisibleBottom) { break; }
+      // end the loop if we've reached the end of components we care about
+      if (componentTop > edges.invisibleBottom) { break; }
 
       //above the upper invisible boundary
-      if (viewBottom < edges.invisibleTop) {
+      if (componentBottom < edges.invisibleTop) {
         component.cull();
 
         //above the upper reveal boundary
-      } else if (viewBottom < edges.visibleTop) {
+      } else if (componentBottom < edges.visibleTop) {
         component.hide();
 
         //above the upper screen boundary
-      } else if (viewBottom < edges.viewportTop) {
+      } else if (componentBottom < edges.viewportTop) {
         component.show();
-        if (bottomViewIndex === 0) {
+        if (bottomComponentIndex === 0) {
           this.sendActionOnce('firstReached', {
-            item: component.get('content'),
-            index: bottomViewIndex
+            item: component.get('content.content'),
+            index: bottomComponentIndex
           });
         }
 
         //above the lower screen boundary
-      } else if(viewTop < edges.viewportBottom) {
+      } else if(componentTop < edges.viewportBottom) {
         component.show();
-        if (bottomViewIndex === 0) {
+        if (bottomComponentIndex === 0) {
           this.sendActionOnce('firstReached', {
-            item: component.get('content'),
-            index: bottomViewIndex
+            item: component.get('content.content'),
+            index: bottomComponentIndex
           });
         }
-        if (bottomViewIndex === lastIndex) {
+        if (bottomComponentIndex === lastIndex) {
           this.sendActionOnce('lastReached', {
-            item: component.get('content'),
-            index: bottomViewIndex
+            item: component.get('content.content'),
+            index: bottomComponentIndex
           });
         }
 
         if (!topVisibleSpotted) {
           topVisibleSpotted = true;
           this.set('_firstVisible', component);
-          this.set('_firstVisibleIndex', bottomViewIndex);
+          this.set('_firstVisibleIndex', bottomComponentIndex);
           this.sendActionOnce('firstVisibleChanged', {
-            item: component.get('content'),
-            index: bottomViewIndex
+            item: component.get('content.content'),
+            index: bottomComponentIndex
           });
         }
         this.set('_lastVisible', component);
         this.sendActionOnce('lastVisibleChanged', {
-          item: component.get('content'),
-          index: bottomViewIndex
+          item: component.get('content.content'),
+          index: bottomComponentIndex
         });
 
         //above the lower reveal boundary
-      } else if (viewTop < edges.visibleBottom) {
+      } else if (componentTop < edges.visibleBottom) {
         component.show();
-        if (bottomViewIndex === lastIndex) {
+        if (bottomComponentIndex === lastIndex) {
           this.sendActionOnce('lastReached', {
-            item: component.get('content'),
-            index: bottomViewIndex
+            item: component.get('content.content'),
+            index: bottomComponentIndex
           });
         }
 
         //above the lower invisible boundary
-      } else { // (viewTop <= edges.invisibleBottom) {
+      } else { // (componentTop <= edges.invisibleBottom) {
         component.hide();
       }
 
-      bottomViewIndex++;
+      bottomComponentIndex++;
     }
 
-    var toCull = (items.slice(0, topViewIndex))
-      .concat(items.slice(bottomViewIndex))
-      .map((item) => {
-        return this.childForItem(item);
-      });
+    let toCull = (childComponents.slice(0, topComponentIndex))
+      .concat(childComponents.slice(bottomComponentIndex));
 
     //cull views
-    toCull.forEach(function (v) { v.cull(); });
+    toCull.forEach((v) => { v.cull(); });
 
     //set scroll
-    if (this.get('__isInitializingFromEnd')) {
-      this._taskrunner.schedule('afterRender', this, function () {
-        var last = this.$().get(0).lastElementChild;
-        this.set('__isInitializingFromEnd', false);
+    if (this.get('__isInitializingFromLast')) {
+      this._taskrunner.schedule('afterRender', this, function() {
+        let last = this.$().get(0).lastElementChild;
+        this.set('__isInitializingFromLast', false);
         if (last) {
           last.scrollIntoView(false);
         }
