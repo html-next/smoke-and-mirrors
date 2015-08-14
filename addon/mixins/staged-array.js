@@ -1,26 +1,13 @@
 import Ember from 'ember';
+import keyMixin from './key-for-item';
 
 const {
   computed,
-  guidFor,
   get: get,
   ObjectProxy
   } = Ember;
 
-function identity(item) {
-  let key;
-  let type = typeof item;
-
-  if (type === 'string' || type === 'number') {
-    key = item;
-  } else {
-    key = guidFor(item);
-  }
-
-  return key;
-}
-
-export default Ember.Mixin.create({
+export default Ember.Mixin.create(keyMixin, {
 
   loadAbove() {
     let index = this.get('endIndex');
@@ -51,33 +38,6 @@ export default Ember.Mixin.create({
     }
 
     return !!index;
-  },
-
-  key: '@identity',
-  keyForValue: function(item, index) {
-    let key;
-    let keyPath = this.get('key');
-
-    switch (keyPath) {
-      case '@index':
-        key = index;
-        break;
-      case '@identity':
-        key = identity(item);
-        break;
-      default:
-        if (keyPath) {
-          key = get(item, keyPath);
-        } else {
-          key = identity(item);
-        }
-    }
-
-    if (typeof key === 'number') {
-      key = String(key);
-    }
-
-    return key;
   },
 
   startIndex: 0,
@@ -138,7 +98,7 @@ export default Ember.Mixin.create({
     inbound = inbound.slice(start, end);
 
     inbound.forEach((item, index) => {
-      let key = this.keyForValue(item, start + index);
+      let key = this.keyForItem(item, start + index);
       let obj = cache[key] || ObjectProxy.create();
       obj.set('content', item);
       let i = newCache[key] = obj;
@@ -147,7 +107,7 @@ export default Ember.Mixin.create({
 
     // prune old objects
     outbound.forEach((item, index) => {
-      let key = get(item, keyForId);
+      let key = this.keyForItem(item, start + index);
       let i = newCache[key];
       if (!i) {
         deletions.push(index);
@@ -160,7 +120,7 @@ export default Ember.Mixin.create({
 
     // insert or move items
     staged.forEach((item, index) => {
-      let key = get(item, keyForId);
+      let key = this.keyForItem(item, start + index);
       let old = cache[key];
       if (outbound.objectAt(index) !== item) {
         // remove

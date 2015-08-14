@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import StateMapMixin from '../mixins/state-map';
 import layout from '../templates/components/vertical-item';
+import keyMixin from '../mixins/key-for-item';
 
 const IS_GLIMMER = (Ember.VERSION.indexOf('2') === 0 || Ember.VERSION.indexOf('1.13') === 0);
 
@@ -12,7 +13,7 @@ const IS_GLIMMER = (Ember.VERSION.indexOf('2') === 0 || Ember.VERSION.indexOf('1
  @extends Ember.Component
  @namespace Ember
  **/
-export default Ember.Component.extend(StateMapMixin, {
+export default Ember.Component.extend(keyMixin, StateMapMixin, {
 
   layout: layout,
   tagName: 'vertical-item',
@@ -21,7 +22,7 @@ export default Ember.Component.extend(StateMapMixin, {
   collection: null,
 
   defaultHeight: 75,
-  keyForId: null,
+  index: null,
 
   _height: 0,
 
@@ -39,9 +40,9 @@ export default Ember.Component.extend(StateMapMixin, {
   },
 
   didReceiveAttrs(attrs) {
-    let oldKeyVal = this.keyForValue(attrs.oldAttrs.content.value);
-    let newKeyVal = this.keyForValue(attrs.newAttrs.content.value);
-
+    let index = this.get('index');
+    let oldKeyVal = this.keyForValue(attrs.oldAttrs.content.value, index);
+    let newKeyVal = this.keyForValue(attrs.newAttrs.content.value, index);
     if (oldKeyVal && newKeyVal && oldKeyVal !== newKeyVal) {
       this.collection.unregister(oldKeyVal);
       this.collection.register(this, newKeyVal);
@@ -54,7 +55,7 @@ export default Ember.Component.extend(StateMapMixin, {
     this.set('viewState', 'culled');
 
     if (IS_GLIMMER) {
-      let key = this.keyForValue();
+      let key = this.keyForItem(this, this.get('index'));
       this.collection.unregister(key);
     }
   },
@@ -62,7 +63,7 @@ export default Ember.Component.extend(StateMapMixin, {
   init() {
     this._super();
     if (IS_GLIMMER) {
-      let key = this.keyForValue();
+      let key = this.keyForItem(this, this.get('index'));
       this.collection.register(this, key);
     }
   }

@@ -1,17 +1,50 @@
-import Ember from "ember";
+import Ember from 'ember';
+import keyMixin from '../mixins/key-for-item';
 
 const {
-  computed,
   ArrayProxy,
-  ObjectProxy,
-  get: get
+  computed,
+  get: get,
+  Mixin,
+  ObjectProxy
   } = Ember;
+
+export default Mixin.create(keyMixin, {
+
+  useDiffing: false,
+
+  content: null,
+  _content: computed('content.[]', computeProxiedArray),
+  __content: null,
+  __cache: null,
+
+  _changeIsPrepend(newArray, proxiedArray, keyPath) {
+    let lengthDifference = proxiedArray.get('length') - get(newArray, 'length');
+
+    // if either array is empty or the new array is not longer, do not treat as prepend
+    if (!proxiedArray.get('length') || !get(newArray, 'length') || lengthDifference >= 0) {
+      return false;
+    }
+
+    // if the object at the right key is the same, this is a prepend
+    let oldKey = this.keyForItem(proxiedArray.objectAt(0), keyPath, 0);
+    let newKey = this.keyForItem(newArray[-lengthDifference], keyPath, 0);
+
+    return oldKey === newKey;
+  },
+
+  init() {
+    this._super.apply(this, arguments);
+    this.set('__content', ArrayProxy.create({ content: Ember.A() }));
+    this.set('__cache', {});
+  }
+
+});
 
 
 function mergeDiffedArrays() {
   var inbound = this.get('content');
-  var outbound = this.get('__proxyContent');
-  var keyForId = this.get('keyForId');
+  var outbound = this.get('__content');
   var cache = this.get('__cache');
   var newList = {};
   var staged = Ember.A();
@@ -23,8 +56,8 @@ function mergeDiffedArrays() {
     return outbound;
   }
 
-  inbound.forEach((item) => {
-    let key = get(item, keyForId);
+  inbound.forEach((item, index) => {
+    let key = this.keyForItem(item, index);
     let obj = cache[key] || ObjectProxy.create();
     obj.set('content', item);
     let i = newList[key] = obj;
@@ -33,7 +66,7 @@ function mergeDiffedArrays() {
 
   // prune old objects
   outbound.forEach((item, index) => {
-    let key = get(item, keyForId);
+    let key = this.keyForItem(item, index);
     let i = newList[key];
     if (!i) {
       deletions.push(index);
@@ -46,7 +79,7 @@ function mergeDiffedArrays() {
 
   // insert or move items
   staged.forEach((item, index) => {
-    let key = get(item, keyForId);
+    let key = this.keyForItem(item, index);
     let old = cache[key];
     if (outbound.objectAt(index) !== item) {
       // remove
@@ -73,8 +106,8 @@ function computeProxiedArray() {
   }
 
   var inbound = this.get('content');
-  var key = this.get('keyForId');
-  var outbound = this.get('__proxyContent');
+  var key = this.get('key');
+  var outbound = this.get('__content');
   var newLength;
   var newObjects = Ember.A();
   var diff;
@@ -135,50 +168,3 @@ function computeProxiedArray() {
 }
 
 
-
-var Mixin = Ember.Mixin.create({
-
-  keyForId: null,
-
-  content: null,
-
-  useDiffing: false,
-
-  _proxyContentTo: '__content',
-
-  __proxyContent: null,
-
-  __cache: null,
-
-  _changeIsPrepend: function(newArray, proxiedArray, key) {
-
-    var lengthDifference = proxiedArray.get('length') - Ember.get(newArray, 'length');
-
-    // if either array is empty or the new array is not longer, do not treat as prepend
-    if (!proxiedArray.get('length') || !Ember.get(newArray, 'length') || lengthDifference >= 0) {
-      return false;
-    }
-
-    // if the object at the right key is the same, this is a prepend
-    var oldInitialItem = proxiedArray.objectAt(0).get('__key');
-
-    var newInitialItem = Ember.get(newArray[-lengthDifference], key);
-    return oldInitialItem === newInitialItem;
-
-  },
-
-  _initializeMagicArray: function() {
-    var dest = this.get('_proxyContentTo');
-    this.set('__proxyContent', ArrayProxy.create({ content: Ember.A() }));
-    this.set(dest, computed('content.[]', computeProxiedArray));
-  },
-
-  init: function() {
-    this._super.apply(this, arguments);
-    this.set('__cache', {});
-    this._initializeMagicArray();
-  }
-
-});
-
-export default Mixin;
