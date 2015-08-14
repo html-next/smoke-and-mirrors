@@ -8,6 +8,7 @@ export default Ember.Component.extend({
 
   tagName: 'tr',
 
+<<<<<<< HEAD:tests/dummy/app/screens/examples/dbmon/components/dbmon-row/component.js
   queries: computed('db', function() {
     var queries = this.get('db.queries');
     return queries;
@@ -16,6 +17,17 @@ export default Ember.Component.extend({
   topFiveQueries: computed('queries', function() {
     var queries = this.get('queries');
     var topFiveQueries = queries.slice(0, 5);
+=======
+  queries: computed('attrs.db', function() {
+    console.log('queries');
+    return this.get('db.queries');
+  }),
+
+  topFiveQueries: computed('queries', function() {
+    console.log('topFiveQueries');
+    let queries = this.get('queries');
+    let topFiveQueries = queries.slice(0, 5);
+>>>>>>> more fixes:tests/dummy/app/components/mdbmon-database.js
 
     while (topFiveQueries.length < 5) {
       topFiveQueries.push({ query: "" });
@@ -33,8 +45,8 @@ export default Ember.Component.extend({
   }),
 
   countClassName: computed('queries', function() {
-    var queries = this.get('queries');
-    var countClassName = "label";
+    let queries = this.get('queries');
+    let countClassName = "label";
 
     if (queries.length >= 20) {
       countClassName += " label-important";

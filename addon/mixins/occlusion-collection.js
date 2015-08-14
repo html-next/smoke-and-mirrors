@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import getTagDescendant from '../utils/get-tag-descendant';
+import MagicArray from '../mixins/magic-array';
 import nextFrame from '../utils/next-frame';
 import Scheduler from '../utils/backburner-ext';
 import jQuery from 'jquery';
@@ -29,7 +30,7 @@ function valueForIndex(arr, index) {
   return arr.objectAt ? arr.objectAt(index) : arr[index];
 }
 
-export default Mixin.create({
+export default Mixin.create(MagicArray, {
 
   //–––––––––––––– Optional Settings
 
@@ -775,7 +776,7 @@ export default Mixin.create({
   }),
 
 
-
+/*
   didReceiveAttrs: function(attrs) {
     var oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
     var newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
@@ -783,10 +784,14 @@ export default Mixin.create({
       var addCount = get(newArray, 'length') - get(oldArray, 'length');
       this.__performViewPrepention(addCount);
     } else {
-      this._taskrunner.schedule('actions', this, this._updateChildStates);
+      if (this._taskrunner) {
+        this._taskrunner.schedule('actions', this, this._updateChildStates);
+      } else {
+        run.schedule('actions', this, this._updateChildStates);
+      }
     }
   },
-
+*/
 
 
 
@@ -809,10 +814,7 @@ export default Mixin.create({
         itemTagName = getTagDescendant(collectionTagName);
       }
     }
-
     this.set('itemTagName', itemTagName);
-
-    assert('You must supply a key for the view', this.get('keyForId'));
 
     this._taskrunner = Scheduler.create();
   },
@@ -835,10 +837,8 @@ export default Mixin.create({
     this._super.apply(this, arguments);
 
     this._prepareComponent();
-    if (!IS_GLIMMER) {
-      this.set('_children', {});
-      this._reflectContentChanges();
-    }
+    this.set('_children', {});
+    this._reflectContentChanges();
   }
 
 

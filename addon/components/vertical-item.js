@@ -41,11 +41,14 @@ export default Ember.Component.extend(keyMixin, StateMapMixin, {
 
   didReceiveAttrs(attrs) {
     let index = this.get('index');
-    let oldKeyVal = this.keyForValue(attrs.oldAttrs.content.value, index);
-    let newKeyVal = this.keyForValue(attrs.newAttrs.content.value, index);
-    if (oldKeyVal && newKeyVal && oldKeyVal !== newKeyVal) {
-      this.collection.unregister(oldKeyVal);
-      this.collection.register(this, newKeyVal);
+
+    if (attrs.oldAttrs && attrs.newAttrs) {
+      let oldKeyVal = this.keyForValue(attrs.oldAttrs.content.value, index);
+      let newKeyVal = this.keyForValue(attrs.newAttrs.content.value, index);
+      if (oldKeyVal !== newKeyVal) {
+        this.collection.unregister(oldKeyVal);
+        this.collection.register(this, newKeyVal);
+      }
     }
   },
 
