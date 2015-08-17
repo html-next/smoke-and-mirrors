@@ -20,9 +20,8 @@ to help you deliver your ambitions.
 This addon is beta software.
 
 ## Features
-
 - [Queues](./docs/features/queues.md)
-- [MagicArray](./docs/features/magic-array.md)
+- [Performance Minded Arrays](./docs/features/performant-arrays.md)
 - [Local Storage](./docs/features/local-storage.md)
 - []
 
