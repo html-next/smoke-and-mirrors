@@ -10,7 +10,7 @@ export default Ember.Object.extend({
 
   deactivated: false,
 
-  debounce: function() {
+  debounce() {
     if (this.deactivated) {
       return false;
     }
@@ -19,7 +19,7 @@ export default Ember.Object.extend({
     return ref;
   },
 
-  throttle: function() {
+  throttle() {
     if (this.deactivated) {
       return false;
     }
@@ -28,7 +28,7 @@ export default Ember.Object.extend({
     return ref;
   },
 
-  schedule: function() {
+  schedule() {
     if (this.deactivated) {
       return false;
     }
@@ -37,7 +37,7 @@ export default Ember.Object.extend({
     return ref;
   },
 
-  scheduleOnce: function() {
+  scheduleOnce(context, ...args) {
     if (this.deactivated) {
       return false;
     }
@@ -46,7 +46,7 @@ export default Ember.Object.extend({
     return ref;
   },
 
-  later: function() {
+  later() {
     if (this.deactivated) {
       return false;
     }
@@ -82,11 +82,12 @@ export default Ember.Object.extend({
   },
 
   willDestroy: function() {
-    this._super();
     this.deactivate();
+    this._super();
   },
 
-  init: function() {
+  init() {
+    this._super();
     this.__queue = Ember.A();
   }
 

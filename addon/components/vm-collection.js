@@ -203,14 +203,8 @@ export default Component.extend(MagicArrayMixin, OcclusionCollectionMixin, {
   },
 
 
-
-
-
   //–––––––––––––– Setup/Teardown
-
-
-  _reflectContentChanges: function() {
-
+  _reflectContentChanges() {
     var content = this.get('__content');
     var self = this;
 
@@ -227,7 +221,7 @@ export default Component.extend(MagicArrayMixin, OcclusionCollectionMixin, {
   },
 
 
-  init: function() {
+  init() {
     this._super();
     this._reflectContentChanges();
   }

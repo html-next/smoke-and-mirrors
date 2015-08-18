@@ -786,9 +786,9 @@ export default Mixin.create({
     this._taskrunner = Scheduler.create();
   },
 
-  init: function() {
-    this._prepareComponent();
+  init() {
     this._super();
+    this._prepareComponent();
   }
 
 

@@ -24,7 +24,7 @@ export default Ember.Component.extend(StateMapMixin, {
   _height: 0,
 
   willInsertElement() {
-
+    this._super();
     var _height = this.get('_height');
     var defaultHeight = this.get('defaultHeight');
     if (typeof defaultHeight === 'number') {
@@ -33,10 +33,9 @@ export default Ember.Component.extend(StateMapMixin, {
 
     this.element.style.visibility = 'hidden';
     this.element.style.minHeight = _height ? _height + 'px' : defaultHeight;
-
   },
 
-  willDestroy() {
+  willDestroyElement() {
     this._super();
     this._ov_teardown();
     this.set('viewState', 'culled');

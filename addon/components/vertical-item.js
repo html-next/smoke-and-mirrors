@@ -46,7 +46,7 @@ export default Ember.Component.extend(StateMapMixin, {
     }
   },
 
-  willDestroy() {
+  willDestroyElement() {
     this._super();
     this._ov_teardown();
     this.set('viewState', 'culled');

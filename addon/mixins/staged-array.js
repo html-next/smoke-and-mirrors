@@ -135,7 +135,7 @@ export default Ember.Mixin.create({
 
     this.beginPropertyChanges();
 
-    let inbound = inbound.slice(start, end);
+    inbound = inbound.slice(start, end);
 
     inbound.forEach((item, index) => {
       let key = this.keyForValue(item, start + index);
