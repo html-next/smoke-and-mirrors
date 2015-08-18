@@ -36,7 +36,7 @@ export default Ember.Component.extend(StateMapMixin, {
 
   },
 
-  didReceiveAttrs: function(attrs) {
+  didReceiveAttrs(attrs) {
     var key = this.get('keyForId');
     var oldKeyVal = attrs.oldAttrs ? attrs.oldAttrs.content.value[key] : false;
     var newKeyVal = attrs.oldAttrs ? attrs.newAttrs.content.value[key] : false;
@@ -46,7 +46,8 @@ export default Ember.Component.extend(StateMapMixin, {
     }
   },
 
-  willDestroy: function() {
+  willDestroy() {
+    this._super();
     this._ov_teardown();
     this.set('viewState', 'culled');
     var key = this.get('keyForId');
@@ -54,10 +55,10 @@ export default Ember.Component.extend(StateMapMixin, {
     this.collection.unregister(val);
   },
 
-  init: function() {
+  init() {
+    this._super();
     var val = this.get('content.' + this.get('keyForId'));
     this.collection.register(this, val);
-    this._super();
   }
 
 });

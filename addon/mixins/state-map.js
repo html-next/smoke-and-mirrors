@@ -34,19 +34,19 @@ export default Ember.Mixin.create({
     return 'state-' + this.get('viewState');
   }),
 
-  show: function () {
+  show() {
     this._setState('visible');
   },
 
-  hide: function () {
+  hide() {
     this._setState('hidden');
   },
 
-  cull: function () {
+  cull() {
     this._setState('culled');
   },
 
-  _setState: function (toState) {
+  _setState(toState) {
 
     var fromState = this.get('viewState');
     var currentState = fromState;
@@ -87,7 +87,7 @@ export default Ember.Mixin.create({
    *
    * @private
    */
-  _ov_teardown: function() {
+  _ov_teardown() {
     if (this.get('contentInserted') && this.element) {
       this.element.style.minHeight = jQuery(this.element).height() + 'px';
     }
@@ -100,7 +100,7 @@ export default Ember.Mixin.create({
    *
    * @private
    */
-  _ov_insert: function() {
+  _ov_insert() {
     this.setProperties({ contentHidden: true, contentCulled: false, contentInserted: true });
   },
 
@@ -110,7 +110,7 @@ export default Ember.Mixin.create({
    *
    * @private
    */
-  _ov_reveal: function() {
+  _ov_reveal() {
     this.setProperties({ contentHidden: false, contentVisible: true, contentInserted: true });
     this.element.style.minHeight = null;
     this.element.style.visibility = 'visible';
@@ -122,7 +122,7 @@ export default Ember.Mixin.create({
    *
    * @private
    */
-  _ov_obscure: function() {
+  _ov_obscure() {
     this.setProperties({ contentHidden: true, contentVisible: false, contentInserted: true });
     this.element.style.visibility = 'hidden';
   }
