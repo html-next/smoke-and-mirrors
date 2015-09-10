@@ -6,6 +6,7 @@ module.exports = function(environment) {
 
   var ENV = {
     modulePrefix: 'dummy',
+    podModulePrefix: 'dummy/screens',
     environment: environment,
     baseURL: '/',
     locationType: 'hash',

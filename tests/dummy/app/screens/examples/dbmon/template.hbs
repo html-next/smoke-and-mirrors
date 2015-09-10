@@ -1,0 +1,38 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-7">
+          {{!- BEGIN-SNIPPET dbmon-example }}
+            <div class="table-wrapper">
+                <table class="table table-striped latest-data">
+                  {{#vertical-collection
+                    tagName="tbody"
+                    content=model.databases
+                    defaultHeight=37
+                    alwaysUseDefaultHeight=true
+                    invisibleBuffer=0.25
+                    visibleBuffer=0.25
+                    containerSelector=".table-wrapper"
+                    keyForId="id"
+                    as |db|
+                  }}
+                    {{examples/dbmon/components/dbmon-row tagName="" db=db}}
+                  {{/vertical-collection}}
+                </table>
+            </div>
+          {{!- END-SNIPPET }}
+        </div>
+        <div class="col-sm-5">
+            <h3>Vertical Collection</h3>
+            <p>
+                The Vertical Collection not only proxies it's content to avoid unnecessarily
+                destroying views, but also smartly hides and removes off screen content.
+            </p>
+            <p>
+                This makes building high frame-rate or render expensive components easier by
+                focusing only on what's on screen now.
+            </p>
+            <h4>Code for Demo</h4>
+          {{code-snippet name="dbmon-example.hbs"}}
+        </div>
+    </div>
+</div>

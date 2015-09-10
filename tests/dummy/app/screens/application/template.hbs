@@ -1,0 +1,25 @@
+<header class="container-fluid">
+    <div class="row">
+        <h1 class="col-xs-12">
+            <img src="./logo.svg" style="width: 2em; height: 2em;">
+            Smoke And Mirrors
+        </h1>
+    </div>
+</header>
+<nav class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12">
+          {{#link-to "examples"}}Examples{{/link-to}} /
+          {{#link-to "features"}}Features{{/link-to}} /
+          {{#link-to "available-components"}}Components{{/link-to}}
+        </div>
+    </div>
+</nav>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12">
+          {{outlet}}
+        </div>
+    </div>
+</div>
+
