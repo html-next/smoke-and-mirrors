@@ -1,3 +1,4 @@
+/*global Array, parseFloat, Math */
 import Ember from 'ember';
 import getTagDescendant from '../utils/get-tag-descendant';
 import MagicArray from '../mixins/magic-array';
@@ -82,19 +83,19 @@ export default Mixin.create(MagicArray, {
    * visible area, it doesn't make sense to set the throttle
    * to 16ms my default.
    */
-  scrollThrottle: 16,
+  scrollThrottle: 12,
 
   /**!
    * how much extra room to keep visible on
    * either side of the visible area
    */
-  visibleBuffer: 0.5,
+  visibleBuffer: .5,
 
   /**!
    * how much extra room to keep in DOM but
    * with `visible:false` set.
    */
-  invisibleBuffer: 0.5,
+  invisibleBuffer: .5,
 
 
   //–––––––––––––– Animations
@@ -307,18 +308,17 @@ export default Mixin.create(MagicArray, {
   }),
 
   //–––––––––––––– Helper Functions
-  sendActionOnce: function(name, context) {
-
+  sendActionOnce(name, context) {
     // don't trigger during a prepend
     if (this.get('__isPrepending')) {
       return;
     }
 
     if (actionContextCacheKeys[name]) {
-      if (this.get(actionContextCacheKeys[name]) === this.keyForItem(context.item)) {
+      if (this.get(actionContextCacheKeys[name]) === this.keyForItem(context.item, context.index)) {
         return;
       } else {
-        this.set(actionContextCacheKeys[name], this.keyForItem(context.item));
+        this.set(actionContextCacheKeys[name], this.keyForItem(context.item, context.index));
       }
     }
 
@@ -336,28 +336,24 @@ export default Mixin.create(MagicArray, {
    @Param {Number} height adjustment TODO wtf is this
    @returns {Number} the index into childViews of the first view to render
    **/
-  _findFirstRenderedComponent: function(viewportStart, adj) {
-
+  _findFirstRenderedComponent(viewportStart, adj) {
     // adjust viewportStart to prevent the randomized coin toss
     // from not finding a view when the pixels are off by < 1
     viewportStart -= 1;
 
-    // GLIMMER: var items = this.get('content');
-    var childComponents = this._getChildren();
-    var maxIndex = get(childComponents, 'length') - 1;
-    var minIndex = 0;
-    var midIndex;
+    let childComponents = this.get('children');
+    let maxIndex = get(childComponents, 'length') - 1;
+    let minIndex = 0;
+    let midIndex;
 
     if (maxIndex < 0) { return 0; }
 
     while(maxIndex > minIndex){
-
       midIndex = Math.floor((minIndex + maxIndex) / 2);
 
       // in case of not full-window scrolling
-      // GLIMMER: var component = this.childForItem(valueForIndex(items, midIndex));
-      var component = childComponents[midIndex];
-      var componentBottom = component.$().position().top + component.get('_height') + adj;
+      let component = childComponents.objectAt(midIndex);
+      let componentBottom = component.$().position().top + component.get('_height') + adj;
 
       if (componentBottom > viewportStart) {
         maxIndex = midIndex - 1;
@@ -369,31 +365,24 @@ export default Mixin.create(MagicArray, {
     return minIndex;
   },
 
-  // this method MUST be implemented by the consuming collection
   _children: null,
-  _getChildren: function() {
-    if (IS_GLIMMER) {
-      return this.get('_children');
-    }
-    var eachList = Ember.A(this._childViews[0]);
-    var childViews = [];
-    eachList.forEach(function(virtualView){
-      childViews.push(virtualView._childViews[0]);
+  children: computed('_children.@each.index', function() {
+    let children = this.get('_children');
+    let output = new Array(get(children, 'length'));
+    children.forEach((item) => {
+      let index = get(item, 'index');
+      output[index] = item;
     });
-    return childViews;
-  },
+    return output;
+  }),
 
-  // used by glimmer to populate _children
-  register: function(child, key) {
-    this.get('_children')[key] = child;
+  register(child) {
+    this.get('_children').addObject(child);
+    this._taskrunner.scheduleOnce('actions', this, this._updateChildStates);
   },
-  unregister: function(key) {
-    this.get('_children')[key] = null; // don't delete, it leads to too much GC
-  },
-
-  childForItem: function(item, index) {
-    let key = this.keyForItem(item, index);
-    return this._getChildren()[key];
+  unregister(child) {
+    this.get('_children').removeObject(child);
+    this._taskrunner.scheduleOnce('actions', this, this._updateChildStates);
   },
 
   /**!
@@ -407,13 +396,12 @@ export default Mixin.create(MagicArray, {
    * @private
    */
   _updateChildStates() {
-
     if (this.get('__isPrepending') || !this.get('shouldRenderList')) {
       return false;
     }
 
     let edges = this.get('_edges');
-    let childComponents = this._getChildren();
+    let childComponents = this.get('children');
 
     let currentViewportBound = edges.viewportTop + this.$().position().top;
     let currentUpperBound = edges.invisibleTop;
@@ -429,13 +417,15 @@ export default Mixin.create(MagicArray, {
 
     while (bottomComponentIndex <= lastIndex) {
 
-      let component = childComponents[bottomComponentIndex];
+      let component = childComponents.objectAt(bottomComponentIndex);
 
       let componentTop = component.$().position().top;
       let componentBottom = componentTop + component.get('_height');
 
       // end the loop if we've reached the end of components we care about
-      if (componentTop > edges.invisibleBottom) { break; }
+      if (componentTop > edges.invisibleBottom) {
+        break;
+      }
 
       //above the upper invisible boundary
       if (componentBottom < edges.invisibleTop) {
@@ -520,37 +510,52 @@ export default Mixin.create(MagicArray, {
         }
       });
     }
-
   },
 
 
-  _scheduleOcclusion: function() {
-
+  _lastTarget: null,
+  scrollTarget: null,
+  _scheduleOcclusion(target, isMomentumFill) {
     // cache the scroll offset, and discard the cycle if
     // movement is within (x) threshold
     // TODO make this work horizontally too
     var scrollTop = this.get('_container').get(0).scrollTop;
     var _scrollTop = this.get('scrollPosition');
     var defaultHeight = this.__getEstimatedDefaultHeight();
+    let throttle = this.get('scrollThrottle');
 
     this._taskrunner.cancel(this.get('_cleanupScrollThrottle'));
     this.set(
       '_cleanupScrollThrottle',
-      this._taskrunner.debounce(this, this._updateChildStates, this.get('scrollThrottle'))
+      this._taskrunner.debounce(this, this._updateChildStates, throttle)
     );
 
+    if (this.get('_lastTarget') !== target) {
+      this.set('_lastTarget', target);
+      this.set('scrollTarget', jQuery(target).closest('.vertical-item').get(0));
+    }
+
+
+/*
+    if (scrollTop !== _scrollTop) {
+      if (isMomentumFill) {
+        Ember.Logger.error('Momentum Fill!');
+      }
+
+      // ensure we check again
+      this._taskrunner.later(this, this._scheduleOcclusion, true, throttle);
+    }
+*/
     if (Math.abs(scrollTop - _scrollTop) >= defaultHeight / 2) {
       this.set('scrollPosition', scrollTop);
       this._taskrunner.scheduleOnce('actions', this, this._updateChildStates);
     }
-
   },
 
 
 
   //–––––––––––––– Setup/Teardown
-  setupContainer: function() {
-
+  setupContainer() {
     var id = this.get('elementId');
     var scrollThrottle = this.get('scrollThrottle');
     var containerSelector = this.get('containerSelector');
@@ -573,11 +578,11 @@ export default Mixin.create(MagicArray, {
       });
     }
 
-    var onScrollMethod = function onScrollMethod() {
+    var onScrollMethod = function onScrollMethod(e) {
       if (this.get('__isPrepending') || !this.get('__isInitialized')) {
         return false;
       }
-      this._taskrunner.throttle(this, this._scheduleOcclusion, scrollThrottle);
+      this._taskrunner.throttle(this, this._scheduleOcclusion, e.target, scrollThrottle);
     }.bind(this);
 
     var onResizeMethod = function onResizeMethod() {
@@ -587,20 +592,19 @@ export default Mixin.create(MagicArray, {
     _container.bind('scroll.occlusion-culling.' + id, onScrollMethod);
     _container.bind('touchmove.occlusion-culling.' + id, onScrollMethod);
     jQuery(window).bind('resize.occlusion-culling.' + id, onResizeMethod);
-
   },
 
-  _allowRendering: on('didInsertElement', function() {
+
+  didInsertElement() {
+    this._super();
     this.setupContainer();
     this.set('canRender', true);
     //draw initial boundaries
     this._initializeScrollState();
+  },
 
-  }),
 
-
-  _initializeScrollState: function() {
-
+  _initializeScrollState() {
     this.set('__isPrepending', true);
 
     var scrollPosition = this.get('scrollPosition');
@@ -644,7 +648,7 @@ export default Mixin.create(MagicArray, {
    * state in order to quickly reboot to the same
    * scroll position on relaunch.
    */
-  _cleanup: on('willDestroyElement', function() {
+  willDestroyElement() {
     //cleanup scroll
     let id = this.get('elementId');
     let _container = this.get('_container');
@@ -673,20 +677,20 @@ export default Mixin.create(MagicArray, {
     //clean up scheduled tasks
     this._taskrunner.cancelAll();
     this._taskrunner.destroy();
+  },
 
-  }),
+  __performViewPrepention(addCount) {
+    if (this.get('canRender')) {
+      this.set('__isPrepending', true);
 
-  __performViewPrepention: function(addCount) {
+      var container = this.get('_container').get(0);
+      container.scrollTop += addCount * this.__getEstimatedDefaultHeight();
 
-    this.set('__isPrepending', true);
-
-    var container = this.get('_container').get(0);
-    container.scrollTop += addCount * this.__getEstimatedDefaultHeight();
-
-    this._taskrunner.next(this, () => {
-      this.set('__isPrepending', false);
-      nextFrame(this, this._updateChildStates); // TODO do we need nextFrame here anymore?
-    });
+      this._taskrunner.next(this, () => {
+        this.set('__isPrepending', false);
+        nextFrame(this, this._updateChildStates); // TODO do we need nextFrame here anymore?
+      });
+    }
   },
 
 
@@ -776,24 +780,6 @@ export default Mixin.create(MagicArray, {
   }),
 
 
-/*
-  didReceiveAttrs: function(attrs) {
-    var oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
-    var newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
-    if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
-      var addCount = get(newArray, 'length') - get(oldArray, 'length');
-      this.__performViewPrepention(addCount);
-    } else {
-      if (this._taskrunner) {
-        this._taskrunner.schedule('actions', this, this._updateChildStates);
-      } else {
-        run.schedule('actions', this, this._updateChildStates);
-      }
-    }
-  },
-*/
-
-
 
   /**!
    * Initialize
@@ -837,8 +823,9 @@ export default Mixin.create(MagicArray, {
     this._super.apply(this, arguments);
 
     this._prepareComponent();
-    this.set('_children', {});
+    this.set('_children', Ember.A());
     this._reflectContentChanges();
+
   }
 
 

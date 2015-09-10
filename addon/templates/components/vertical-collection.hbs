@@ -1,8 +1,9 @@
-{{#each __content key="@identity" as |item index|}}
+{{#each _content key="@identity" as |item index|}}
   {{#vertical-item
     defaultHeight=defaultHeight
-    tagName=itemTagName
+    itemTagName=itemTagName
     content=item
+    scrollTarget=scrollTarget
     index=index
     alwaysUseDefaultHeight=alwaysUseDefaultHeight
     keyForId=keyForId

@@ -10,12 +10,15 @@ const {
 export default Mixin.create({
 
   key: '@identity',
-  keyForItem: function(item, index) {
+  keyForItem(item, index) {
     let key;
     let keyPath = this.get('key');
 
     switch (keyPath) {
       case '@index':
+        if (!index) {
+          throw "No index was supplied to keyForItem";
+        }
         key = index;
         break;
       case '@identity':

@@ -43,7 +43,11 @@ export default Ember.Mixin.create({
   },
 
   cull() {
-    this._setState('culled');
+    if (!this.get('isScrollTarget')) {
+      this._setState('culled');
+    } else {
+      Ember.Logger.error('preventing culling because item is scroll target');
+    }
   },
 
   _setState(toState) {
@@ -88,8 +92,9 @@ export default Ember.Mixin.create({
    * @private
    */
   _ov_teardown() {
+    let heightProp = this.get('heightProperty');
     if (this.get('contentInserted') && this.element) {
-      this.element.style.minHeight = jQuery(this.element).height() + 'px';
+      this.element.style[heightProp] = jQuery(this.element).height() + 'px';
     }
     this.setProperties({ contentCulled: true, contentHidden: false, contentInserted: false });
   },
@@ -111,8 +116,9 @@ export default Ember.Mixin.create({
    * @private
    */
   _ov_reveal() {
+    let heightProp = this.get('heightProperty');
     this.setProperties({ contentHidden: false, contentVisible: true, contentInserted: true });
-    this.element.style.minHeight = null;
+    this.element.style[heightProp] = null;
     this.element.style.visibility = 'visible';
   },
 

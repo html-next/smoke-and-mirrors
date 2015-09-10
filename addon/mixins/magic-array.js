@@ -18,7 +18,7 @@ export default Mixin.create(keyMixin, {
   __content: null,
   __cache: null,
 
-  _changeIsPrepend(newArray, proxiedArray, keyPath) {
+  _changeIsPrepend(newArray, proxiedArray) {
     let lengthDifference = proxiedArray.get('length') - get(newArray, 'length');
 
     // if either array is empty or the new array is not longer, do not treat as prepend
@@ -27,8 +27,8 @@ export default Mixin.create(keyMixin, {
     }
 
     // if the object at the right key is the same, this is a prepend
-    let oldKey = this.keyForItem(proxiedArray.objectAt(0), keyPath, 0);
-    let newKey = this.keyForItem(newArray[-lengthDifference], keyPath, 0);
+    let oldKey = this.keyForItem(proxiedArray.objectAt(0), 0);
+    let newKey = this.keyForItem(newArray[-lengthDifference], 0);
 
     return oldKey === newKey;
   },

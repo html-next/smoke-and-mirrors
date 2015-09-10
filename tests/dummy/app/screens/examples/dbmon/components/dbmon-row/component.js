@@ -8,13 +8,9 @@ export default Ember.Component.extend({
 
   tagName: 'tr',
 
-  queries: computed('attrs.db', function() {
-    console.log('queries');
-    return this.get('db.queries');
-  }),
+  queries: computed.alias('db.queries'),
 
   topFiveQueries: computed('queries', function() {
-    console.log('topFiveQueries');
     let queries = this.get('queries');
     let topFiveQueries = queries.slice(0, 5);
 

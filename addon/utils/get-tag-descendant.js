@@ -3,6 +3,10 @@
  */
 export default function getTagDescendant(tag) {
   switch (tag) {
+    case 'vertical-collection':
+      return 'vertical-item';
+    case 'horizontal-collection':
+      return 'horizontal-item';
     case 'tbody':
     case 'table':
     case 'thead':

@@ -1,9 +1,13 @@
 import Ember from 'ember';
 import StateMapMixin from '../mixins/state-map';
 import layout from '../templates/components/vertical-item';
-import keyMixin from '../mixins/key-for-item';
 
 const IS_GLIMMER = (Ember.VERSION.indexOf('2') === 0 || Ember.VERSION.indexOf('1.13') === 0);
+
+const {
+  Component,
+  computed
+  } = Ember;
 
 /**
  A vertical-item is one that intelligently removes
@@ -13,11 +17,28 @@ const IS_GLIMMER = (Ember.VERSION.indexOf('2') === 0 || Ember.VERSION.indexOf('1
  @extends Ember.Component
  @namespace Ember
  **/
-export default Ember.Component.extend(keyMixin, StateMapMixin, {
+export default Component.extend(StateMapMixin, {
 
   layout: layout,
   tagName: 'vertical-item',
+  itemTagName: 'vertical-item',
 
+  isTableChild: computed('itemTagName', function() {
+    let tag = this.get('itemTagName').toLowerCase();
+    return tag === 'tr' || tag === 'td' || tag === 'th';
+  }),
+
+  // table children don't respect min-height :'(
+  heightProperty: computed('isTableChild', function() {
+    return this.get('isTableChild') ? 'height' : 'minHeight';
+  }),
+
+  scrollTarget: null,
+  isScrollTarget: computed('scrollTarget', function() {
+    return this.element && this.element === this.get('scrollTarget');
+  }),
+
+  classNames: ['vertical-item'],
   classNameBindings: ['viewStateClass'],
   collection: null,
 
@@ -27,48 +48,33 @@ export default Ember.Component.extend(keyMixin, StateMapMixin, {
   _height: 0,
 
   willInsertElement() {
-
+    this._super();
     let _height = this.get('_height');
+    let heightProp = this.get('heightProperty');
     let defaultHeight = this.get('defaultHeight');
     if (typeof defaultHeight === 'number') {
       defaultHeight += 'px';
     }
 
     this.element.style.visibility = 'hidden';
-    this.element.style.minHeight = _height ? _height + 'px' : defaultHeight;
-
-  },
-
-  didReceiveAttrs(attrs) {
-    let index = this.get('index');
-
-    if (attrs.oldAttrs && attrs.newAttrs) {
-      let oldKeyVal = this.keyForValue(attrs.oldAttrs.content.value, index);
-      let newKeyVal = this.keyForValue(attrs.newAttrs.content.value, index);
-      if (oldKeyVal !== newKeyVal) {
-        this.collection.unregister(oldKeyVal);
-        this.collection.register(this, newKeyVal);
-      }
-    }
+    this.element.style[heightProp] = _height ? _height + 'px' : defaultHeight;
   },
 
   willDestroyElement() {
     this._super();
     this._ov_teardown();
     this.set('viewState', 'culled');
+  },
 
-    if (IS_GLIMMER) {
-      let key = this.keyForItem(this, this.get('index'));
-      this.collection.unregister(key);
-    }
+  willDestroy() {
+    this._super();
+    this.collection.unregister(this);
   },
 
   init() {
     this._super();
-    if (IS_GLIMMER) {
-      let key = this.keyForItem(this, this.get('index'));
-      this.collection.register(this, key);
-    }
+    this.set('tagName', this.get('itemTagName'));
+    this.collection.register(this);
   }
 
 });

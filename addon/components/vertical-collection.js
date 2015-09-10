@@ -1,12 +1,12 @@
 import Ember from 'ember';
-import OcclusionCollectionMixin from '../mixins/occlusion-collection';
+import OcclusionMixin from '../mixins/occlusion-collection';
 import layout from '../templates/components/vertical-collection';
 
 const {
   Component
 } = Ember;
 
-export default Component.extend(OcclusionCollectionMixin, {
+export default Component.extend(OcclusionMixin, {
 
 
   layout: layout,

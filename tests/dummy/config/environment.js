@@ -2,7 +2,7 @@
 
 module.exports = function(environment) {
 
-  var DEBUG = true;
+  var DEBUG = false;
 
   var ENV = {
     modulePrefix: 'dummy',
