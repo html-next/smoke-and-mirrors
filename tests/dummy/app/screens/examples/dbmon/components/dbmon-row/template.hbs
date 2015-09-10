@@ -6,18 +6,13 @@
     {{queries.length}}
   </span>
 </td>
-<<<<<<< HEAD:tests/dummy/app/screens/examples/dbmon/components/dbmon-row/template.hbs
-{{#each topFiveQueries key="key" as |query|
-}}
-=======
 {{#proxied-each
   key="key"
   content=topFiveQueries
   as |query|}}
->>>>>>> more fixes:tests/dummy/app/templates/components/mdbmon-database.hbs
   <td>{{query.elapsed}}</td>
   <div class="popover bottom">
       <div class="popover-content">{{query.query}}</div>
       <div class="arrow"></div>
   </div>
-{{/each}}
+{{/proxied-each}}
