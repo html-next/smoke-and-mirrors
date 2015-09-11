@@ -43,11 +43,7 @@ export default Ember.Mixin.create({
   },
 
   cull() {
-    if (!this.get('isScrollTarget')) {
-      this._setState('culled');
-    } else {
-      Ember.Logger.error('preventing culling because item is scroll target');
-    }
+    this._setState('culled');
   },
 
   _setState(toState) {

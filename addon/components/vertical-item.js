@@ -33,11 +33,6 @@ export default Component.extend(StateMapMixin, {
     return this.get('isTableChild') ? 'height' : 'minHeight';
   }),
 
-  scrollTarget: null,
-  isScrollTarget: computed('scrollTarget', function() {
-    return this.element && this.element === this.get('scrollTarget');
-  }),
-
   classNames: ['vertical-item'],
   classNameBindings: ['viewStateClass'],
   collection: null,

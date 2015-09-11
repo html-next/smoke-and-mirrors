@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import getData from 'dummy/lib/get-data';
 
-let TIMEOUT = 1000;
+let TIMEOUT = 0;
 
 const {
   Route,
