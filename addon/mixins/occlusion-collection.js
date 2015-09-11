@@ -83,7 +83,7 @@ export default Mixin.create(MagicArray, {
    * visible area, it doesn't make sense to set the throttle
    * to 16ms my default.
    */
-  scrollThrottle: 12,
+  scrollThrottle: 16,
 
   /**!
    * how much extra room to keep visible on
@@ -342,7 +342,7 @@ export default Mixin.create(MagicArray, {
     viewportStart -= 1;
 
     let childComponents = this.get('children');
-    let maxIndex = get(childComponents, 'length') - 1;
+    let maxIndex = childComponents.length - 1;
     let minIndex = 0;
     let midIndex;
 
@@ -352,7 +352,7 @@ export default Mixin.create(MagicArray, {
       midIndex = Math.floor((minIndex + maxIndex) / 2);
 
       // in case of not full-window scrolling
-      let component = childComponents.objectAt(midIndex);
+      let component = childComponents[midIndex];
       let componentBottom = component.$().position().top + component.get('_height') + adj;
 
       if (componentBottom > viewportStart) {
@@ -386,6 +386,7 @@ export default Mixin.create(MagicArray, {
   },
 
   _removeComponents(toCull, toHide) {
+    Ember.Logger.error('Cleanup!');
     toCull.forEach((v) => { v.cull(); });
     toHide.forEach((v) => { v.hide(); });
   },
@@ -417,7 +418,7 @@ export default Mixin.create(MagicArray, {
 
     let topComponentIndex = this._findFirstRenderedComponent(currentUpperBound, edges.viewportTop);
     let bottomComponentIndex = topComponentIndex;
-    let lastIndex = get(childComponents, 'length') - 1;
+    let lastIndex = childComponents.length - 1;
     let topVisibleSpotted = false;
     let toCull = [];
     let toHide = [];
@@ -425,7 +426,7 @@ export default Mixin.create(MagicArray, {
 
     while (bottomComponentIndex <= lastIndex) {
 
-      let component = childComponents.objectAt(bottomComponentIndex);
+      let component = childComponents[bottomComponentIndex];
 
       let componentTop = component.$().position().top;
       let componentBottom = componentTop + component.get('_height');
@@ -526,6 +527,7 @@ export default Mixin.create(MagicArray, {
   scrollTarget: null,
 
   _scheduleOcclusion(target) {
+    Ember.Logger.error('Schedule!');
     // cache the scroll offset, and discard the cycle if
     // movement is within (x) threshold
     // TODO make this work horizontally too
@@ -580,6 +582,7 @@ export default Mixin.create(MagicArray, {
     }
 
     let onScrollMethod = (e) => {
+      Ember.Logger.error('Scroll!');
       run.join(this, this.didScroll, e);
       return true;
     };
