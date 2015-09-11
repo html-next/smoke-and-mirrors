@@ -386,7 +386,6 @@ export default Mixin.create(MagicArray, {
   },
 
   _removeComponents(toCull, toHide) {
-    Ember.Logger.error('Cleanup!');
     toCull.forEach((v) => { v.cull(); });
     toHide.forEach((v) => { v.hide(); });
   },
@@ -527,7 +526,6 @@ export default Mixin.create(MagicArray, {
   scrollTarget: null,
 
   _scheduleOcclusion(target) {
-    Ember.Logger.error('Schedule!');
     // cache the scroll offset, and discard the cycle if
     // movement is within (x) threshold
     // TODO make this work horizontally too
@@ -547,14 +545,6 @@ export default Mixin.create(MagicArray, {
       this.set('scrollPosition', scrollTop);
       this._updateChildStates();
     }
-  },
-
-
-  didScroll(e) {
-    if (this.get('__isPrepending') || !this.get('__isInitialized')) {
-      return;
-    }
-    this._taskrunner.throttle(this, this._scheduleOcclusion, e.target, this.get('scrollThrottle'));
   },
 
   //–––––––––––––– Setup/Teardown
@@ -582,9 +572,10 @@ export default Mixin.create(MagicArray, {
     }
 
     let onScrollMethod = (e) => {
-      Ember.Logger.error('Scroll!');
-      run.join(this, this.didScroll, e);
-      return true;
+      if (this.get('__isPrepending') || !this.get('__isInitialized')) {
+        return;
+      }
+      this._taskrunner.throttle(this, this._scheduleOcclusion, e.target, this.get('scrollThrottle'));
     };
 
     let onResizeMethod = () => {
