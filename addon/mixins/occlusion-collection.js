@@ -599,10 +599,12 @@ export default Mixin.create(MagicArray, {
 
   didInsertElement() {
     this._super();
-    this.setupContainer();
-    this.set('canRender', true);
-    //draw initial boundaries
-    this._initializeScrollState();
+    run.next(() => {
+      this.setupContainer();
+      this.set('canRender', true);
+      //draw initial boundaries
+      this._initializeScrollState();
+    });
   },
 
 
