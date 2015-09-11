@@ -39,8 +39,10 @@ let Satellite = Object.extend({
     }
     let position = this.getRelativePosition(rect, parentRect);
 
-    this.set('position', position);
-    this.set('component._position', position);
+    this.setProperties({
+      'position': position,
+      'component._position': position
+    });
   },
 
   getRelativePosition(rect, parentRect) {

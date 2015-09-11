@@ -108,9 +108,7 @@ export default Mixin.create(MagicArray, {
    * will add the attribute `hidden` to the `occluded-item` when ever it's content is hidden, cached, or
    * culled.
    */
-  //TODO enable this feature.
-  //TODO find better prop name
-  useHiddenAttr: false,
+  exposeAttributeState: false,
 
 
   //–––––––––––––– Initial State
@@ -527,7 +525,7 @@ export default Mixin.create(MagicArray, {
   _lastTarget: null,
   scrollTarget: null,
 
-  _scheduleOcclusion(target) {
+  _scheduleOcclusion() {
     // cache the scroll offset, and discard the cycle if
     // movement is within (x) threshold
     // TODO make this work horizontally too
@@ -537,11 +535,6 @@ export default Mixin.create(MagicArray, {
     let throttle = this.get('scrollThrottle');
 
     this._taskrunner.debounce(this, this._updateChildStates, 4 * throttle);
-
-    if (this.get('_lastTarget') !== target) {
-      this.set('_lastTarget', target);
-      this.set('scrollTarget', jQuery(target).closest('.vertical-item').get(0));
-    }
 
     if (Math.abs(scrollTop - _scrollTop) >= defaultHeight / 2) {
       this.set('scrollPosition', scrollTop);
@@ -573,11 +566,11 @@ export default Mixin.create(MagicArray, {
       });
     }
 
-    let onScrollMethod = (e) => {
+    let onScrollMethod = () => {
       if (this.get('__isPrepending') || !this.get('__isInitialized')) {
         return;
       }
-      this._taskrunner.throttle(this, this._scheduleOcclusion, e.target, this.get('scrollThrottle'));
+      this._taskrunner.throttle(this, this._scheduleOcclusion, this.get('scrollThrottle'));
     };
 
     let onResizeMethod = () => {

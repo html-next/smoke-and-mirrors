@@ -1,10 +1,8 @@
 import Ember from 'ember';
-import jQuery from 'jquery';
-import nextFrame from '../utils/next-frame';
 
 const {
   computed,
-  run
+  Mixin
   } = Ember;
 
 const STATE_LIST = ['culled', 'hidden', 'visible'];
@@ -21,7 +19,7 @@ const STATE_TRANSITIONS_DOWN = [
   { state: 'culled', method: '_ov_teardown' }
   ];
 
-export default Ember.Mixin.create({
+export default Mixin.create({
 
   viewState: 'culled',
 
@@ -29,10 +27,6 @@ export default Ember.Mixin.create({
   contentHidden: false,
   contentInserted: false,
   contentCulled: false,
-
-  viewStateClass: computed('viewState', function() {
-    return 'state-' + this.get('viewState');
-  }),
 
   show() {
     this._setState('visible');
@@ -47,7 +41,6 @@ export default Ember.Mixin.create({
   },
 
   _setState(toState) {
-
     var fromState = this.get('viewState');
     var currentState = fromState;
 
@@ -90,7 +83,7 @@ export default Ember.Mixin.create({
   _ov_teardown() {
     let heightProp = this.get('heightProperty');
     if (this.get('contentInserted') && this.element) {
-      this.element.style[heightProp] = jQuery(this.element).height() + 'px';
+      this.element.style[heightProp] = this.get('_position.rect.height') + 'px';
     }
     this.setProperties({ contentCulled: true, contentHidden: false, contentInserted: false });
   },

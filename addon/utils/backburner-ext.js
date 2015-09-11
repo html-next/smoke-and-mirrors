@@ -37,7 +37,7 @@ export default Ember.Object.extend({
     return ref;
   },
 
-  scheduleOnce(context, ...args) {
+  scheduleOnce() {
     if (this.deactivated) {
       return false;
     }
@@ -55,7 +55,7 @@ export default Ember.Object.extend({
     return ref;
   },
 
-  next: function() {
+  next() {
     if (this.deactivated) {
       return false;
     }

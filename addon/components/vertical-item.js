@@ -33,13 +33,14 @@ export default Component.extend(StateMapMixin, {
     return this.get('isTableChild') ? 'height' : 'minHeight';
   }),
 
+  attributeBindings: ['viewState'],
   classNames: ['vertical-item'],
-  classNameBindings: ['viewStateClass'],
   collection: null,
 
   defaultHeight: 75,
   index: null,
 
+  _position: null,
   _positionTracker: null,
 
   _height: 0,
