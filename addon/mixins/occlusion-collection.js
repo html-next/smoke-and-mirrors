@@ -385,6 +385,11 @@ export default Mixin.create(MagicArray, {
     this._taskrunner.scheduleOnce('actions', this, this._updateChildStates);
   },
 
+  _removeComponents(toCull, toHide) {
+    toCull.forEach((v) => { v.cull(); });
+    toHide.forEach((v) => { v.hide(); });
+  },
+
   /**!
    *
    * The big question is can we render from the bottom
@@ -414,6 +419,9 @@ export default Mixin.create(MagicArray, {
     let bottomComponentIndex = topComponentIndex;
     let lastIndex = get(childComponents, 'length') - 1;
     let topVisibleSpotted = false;
+    let toCull = [];
+    let toHide = [];
+    let toShow = [];
 
     while (bottomComponentIndex <= lastIndex) {
 
@@ -429,15 +437,15 @@ export default Mixin.create(MagicArray, {
 
       //above the upper invisible boundary
       if (componentBottom < edges.invisibleTop) {
-        component.cull();
+        toCull.push(component);
 
         //above the upper reveal boundary
       } else if (componentBottom < edges.visibleTop) {
-        component.hide();
+        toHide.push(component);
 
         //above the upper screen boundary
       } else if (componentBottom < edges.viewportTop) {
-        component.show();
+        toShow.push(component);
         if (bottomComponentIndex === 0) {
           this.sendActionOnce('firstReached', {
             item: component.get('content.content'),
@@ -447,7 +455,7 @@ export default Mixin.create(MagicArray, {
 
         //above the lower screen boundary
       } else if(componentTop < edges.viewportBottom) {
-        component.show();
+        toShow.push(component);
         if (bottomComponentIndex === 0) {
           this.sendActionOnce('firstReached', {
             item: component.get('content.content'),
@@ -478,7 +486,7 @@ export default Mixin.create(MagicArray, {
 
         //above the lower reveal boundary
       } else if (componentTop < edges.visibleBottom) {
-        component.show();
+        toShow.push(component);
         if (bottomComponentIndex === lastIndex) {
           this.sendActionOnce('lastReached', {
             item: component.get('content.content'),
@@ -488,17 +496,18 @@ export default Mixin.create(MagicArray, {
 
         //above the lower invisible boundary
       } else { // (componentTop <= edges.invisibleBottom) {
-        component.hide();
+        toHide.push(component);
       }
 
       bottomComponentIndex++;
     }
 
-    let toCull = (childComponents.slice(0, topComponentIndex))
+    toCull = toCull
+      .concat((childComponents.slice(0, topComponentIndex)))
       .concat(childComponents.slice(bottomComponentIndex));
 
-    //cull views
-    toCull.forEach((v) => { v.cull(); });
+    this._taskrunner.debounce(this, this._removeComponents, toCull, toHide, this.get('scrollThrottle') * 6);
+    toShow.forEach((i) => { i.show(); });
 
     //set scroll
     if (this.get('__isInitializingFromLast')) {
@@ -515,7 +524,8 @@ export default Mixin.create(MagicArray, {
 
   _lastTarget: null,
   scrollTarget: null,
-  _scheduleOcclusion(target, isMomentumFill) {
+
+  _scheduleOcclusion(target) {
     // cache the scroll offset, and discard the cycle if
     // movement is within (x) threshold
     // TODO make this work horizontally too
@@ -524,35 +534,26 @@ export default Mixin.create(MagicArray, {
     var defaultHeight = this.__getEstimatedDefaultHeight();
     let throttle = this.get('scrollThrottle');
 
-    this._taskrunner.cancel(this.get('_cleanupScrollThrottle'));
-    this.set(
-      '_cleanupScrollThrottle',
-      this._taskrunner.debounce(this, this._updateChildStates, throttle)
-    );
+    this._taskrunner.debounce(this, this._updateChildStates, 4 * throttle);
 
     if (this.get('_lastTarget') !== target) {
       this.set('_lastTarget', target);
       this.set('scrollTarget', jQuery(target).closest('.vertical-item').get(0));
     }
 
-
-/*
-    if (scrollTop !== _scrollTop) {
-      if (isMomentumFill) {
-        Ember.Logger.error('Momentum Fill!');
-      }
-
-      // ensure we check again
-      this._taskrunner.later(this, this._scheduleOcclusion, true, throttle);
-    }
-*/
     if (Math.abs(scrollTop - _scrollTop) >= defaultHeight / 2) {
       this.set('scrollPosition', scrollTop);
-      this._taskrunner.scheduleOnce('actions', this, this._updateChildStates);
+      this._updateChildStates();
     }
   },
 
 
+  didScroll(e) {
+    if (this.get('__isPrepending') || !this.get('__isInitialized')) {
+      return;
+    }
+    this._taskrunner.throttle(this, this._scheduleOcclusion, e.target, this.get('scrollThrottle'));
+  },
 
   //–––––––––––––– Setup/Teardown
   setupContainer() {
@@ -578,19 +579,20 @@ export default Mixin.create(MagicArray, {
       });
     }
 
-    var onScrollMethod = function onScrollMethod(e) {
-      if (this.get('__isPrepending') || !this.get('__isInitialized')) {
-        return false;
-      }
-      this._taskrunner.throttle(this, this._scheduleOcclusion, e.target, scrollThrottle);
-    }.bind(this);
+    let onScrollMethod = (e) => {
+      run.join(this, this.didScroll, e);
+      return true;
+    };
 
-    var onResizeMethod = function onResizeMethod() {
+    let onResizeMethod = () => {
       this._taskrunner.debounce(this, this.notifyPropertyChange, '_edges', scrollThrottle, false);
-    }.bind(this);
+    };
 
-    _container.bind('scroll.occlusion-culling.' + id, onScrollMethod);
-    _container.bind('touchmove.occlusion-culling.' + id, onScrollMethod);
+    //_container.bind('mousewheel.occlusion-culling.' + id, onScrollMethod);
+    let element = _container.get(0);
+    element.addEventListener('scroll', onScrollMethod, true);
+    element.addEventListener('touchmove', onScrollMethod, true);
+
     jQuery(window).bind('resize.occlusion-culling.' + id, onResizeMethod);
   },
 
@@ -801,14 +803,12 @@ export default Mixin.create(MagicArray, {
       }
     }
     this.set('itemTagName', itemTagName);
-
     this._taskrunner = Scheduler.create();
   },
 
 
   _reflectContentChanges() {
     let content = this.get('_content');
-
     content.contentArrayDidChange = (items, offset, removeCount, addCount) => {
       if (offset <= this.get('_firstVisibleIndex')) {
         this.__performViewPrepention(addCount);
@@ -816,7 +816,6 @@ export default Mixin.create(MagicArray, {
         this._taskrunner.schedule('render', this, this._updateChildStates);
       }
     };
-
   },
 
   init() {
