@@ -605,6 +605,7 @@ export default Mixin.create(MagicArray, {
       //draw initial boundaries
       this._initializeScrollState();
       this.get('_positionTracker').register(this);
+      this.notifyPropertyChange('_edges');
     });
   },
 
