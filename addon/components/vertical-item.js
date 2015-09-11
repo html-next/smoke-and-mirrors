@@ -40,7 +40,14 @@ export default Component.extend(StateMapMixin, {
   defaultHeight: 75,
   index: null,
 
+  _positionTracker: null,
+
   _height: 0,
+
+  didInsertElement() {
+    this._super();
+    this.get('_positionTracker').register(this);
+  },
 
   willInsertElement() {
     this._super();
@@ -59,6 +66,7 @@ export default Component.extend(StateMapMixin, {
     this._super();
     this._ov_teardown();
     this.set('viewState', 'culled');
+    this.get('_positionTracker').unregister(this);
   },
 
   willDestroy() {

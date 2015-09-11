@@ -5,6 +5,7 @@ import MagicArray from '../mixins/magic-array';
 import nextFrame from '../utils/next-frame';
 import Scheduler from '../utils/backburner-ext';
 import jQuery from 'jquery';
+import PositionTracker from '../utils/position-tracker';
 
 const IS_GLIMMER = (Ember.VERSION.indexOf('2') === 0 || Ember.VERSION.indexOf('1.13') === 0);
 
@@ -353,7 +354,7 @@ export default Mixin.create(MagicArray, {
 
       // in case of not full-window scrolling
       let component = childComponents[midIndex];
-      let componentBottom = component.$().position().top + component.get('_height') + adj;
+      let componentBottom = component.get('_position.rect').bottom + adj;
 
       if (componentBottom > viewportStart) {
         maxIndex = midIndex - 1;
@@ -404,11 +405,12 @@ export default Mixin.create(MagicArray, {
     if (this.get('__isPrepending') || !this.get('shouldRenderList')) {
       return false;
     }
+    this.get('_positionTracker').scroll();
 
     let edges = this.get('_edges');
     let childComponents = this.get('children');
 
-    let currentViewportBound = edges.viewportTop + this.$().position().top;
+    let currentViewportBound = edges.viewportTop + this.get('_position.rect').top;
     let currentUpperBound = edges.invisibleTop;
 
     if (currentUpperBound < currentViewportBound) {
@@ -427,8 +429,8 @@ export default Mixin.create(MagicArray, {
 
       let component = childComponents[bottomComponentIndex];
 
-      let componentTop = component.$().position().top;
-      let componentBottom = componentTop + component.get('_height');
+      let componentTop = component.get('_position.rect').top;
+      let componentBottom = component.get('_position.rect').bottom;
 
       // end the loop if we've reached the end of components we care about
       if (componentTop > edges.invisibleBottom) {
@@ -588,6 +590,10 @@ export default Mixin.create(MagicArray, {
     element.addEventListener('touchmove', onScrollMethod, true);
 
     jQuery(window).bind('resize.occlusion-culling.' + id, onResizeMethod);
+
+    let position = this.get('_positionTracker');
+    position.set('element', element);
+    position.getBoundaries();
   },
 
 
@@ -598,6 +604,7 @@ export default Mixin.create(MagicArray, {
       this.set('canRender', true);
       //draw initial boundaries
       this._initializeScrollState();
+      this.get('_positionTracker').register(this);
     });
   },
 
@@ -762,7 +769,7 @@ export default Mixin.create(MagicArray, {
     var _invisibleBufferHeight = Math.round(viewportHeight * this.get('invisibleBuffer'));
 
     // segment top break points
-    edges.viewportTop = _container.position().top;
+    edges.viewportTop = this.get('_position.rect').top;
     edges.visibleTop = edges.viewportTop - _visibleBufferHeight;
     edges.invisibleTop = edges.visibleTop - _invisibleBufferHeight;
 
@@ -777,7 +784,8 @@ export default Mixin.create(MagicArray, {
 
   }),
 
-
+  _position: null,
+  _positionTracker: null,
 
   /**!
    * Initialize
@@ -800,6 +808,8 @@ export default Mixin.create(MagicArray, {
     }
     this.set('itemTagName', itemTagName);
     this._taskrunner = Scheduler.create();
+
+    this.set('_positionTracker', PositionTracker.create({}));
   },
 
 
@@ -820,7 +830,6 @@ export default Mixin.create(MagicArray, {
     this._prepareComponent();
     this.set('_children', Ember.A());
     this._reflectContentChanges();
-
   }
 
 
