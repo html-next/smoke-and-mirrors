@@ -59,6 +59,7 @@ export default Ember.Component.extend({
       this.set('_image', $image);
       $image.on('load', function () {
         self.set('isLoaded', true);
+        jQuery('img:not(:last-child)', $view).remove();
         $view.append($image);
       });
     }
