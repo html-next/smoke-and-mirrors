@@ -1,11 +1,12 @@
 /*global Array, parseFloat, Math */
 import Ember from 'ember';
 import getTagDescendant from '../utils/get-tag-descendant';
-import MagicArray from '../mixins/magic-array';
 import nextFrame from '../utils/next-frame';
 import Scheduler from '../utils/backburner-ext';
+import keyForItem from '../mixins/key-for-item';
 import jQuery from 'jquery';
 import PositionTracker from '../utils/position-tracker';
+import proxied from '../computed/proxied-array';
 
 const IS_GLIMMER = (Ember.VERSION.indexOf('2') === 0 || Ember.VERSION.indexOf('1.13') === 0);
 
@@ -32,7 +33,7 @@ function valueForIndex(arr, index) {
   return arr.objectAt ? arr.objectAt(index) : arr[index];
 }
 
-export default Mixin.create(MagicArray, {
+export default Mixin.create(keyForItem, {
 
   //–––––––––––––– Optional Settings
 
@@ -98,6 +99,10 @@ export default Mixin.create(MagicArray, {
    */
   invisibleBuffer: .5,
 
+  /**!
+   * useContentProxy
+   */
+  useContentProxy: false,
 
   //–––––––––––––– Animations
   /**!
@@ -236,6 +241,7 @@ export default Mixin.create(MagicArray, {
    */
   lastVisibleChanged: null,
 
+  _content: null,
 
   //–––––––––––––– Private Internals
   _firstVisible: null,
@@ -678,17 +684,24 @@ export default Mixin.create(MagicArray, {
     this._taskrunner.destroy();
   },
 
-  __performViewPrepention(addCount) {
+  __prependComponents(addCount) {
     if (this.get('canRender')) {
       this.set('__isPrepending', true);
 
       var container = this.get('_container').get(0);
       container.scrollTop += addCount * this.__getEstimatedDefaultHeight();
 
-      this._taskrunner.next(this, () => {
-        this.set('__isPrepending', false);
-        nextFrame(this, this._updateChildStates); // TODO do we need nextFrame here anymore?
-      });
+      if (IS_GLIMMER) {
+        this._taskrunner.next(this, () => {
+          this.set('__isPrepending', false);
+          this._updateChildStates();
+        });
+      } else {
+        this._taskrunner.next(this, () => {
+          this.set('__isPrepending', false);
+          nextFrame(this, this._updateChildStates);
+        });
+      }
     }
   },
 
@@ -785,9 +798,9 @@ export default Mixin.create(MagicArray, {
    * Initialize
    */
   _prepareComponent() {
-    let prependFn = this.__performViewPrepention.bind(this);
+    let prependFn = this.__prependComponents.bind(this);
 
-    this.set('__performViewPrepention', prependFn);
+    this.set('__prependComponents', prependFn);
     this.set('__shouldRender', this.get('shouldRender'));
 
     let collectionTagName = (this.get('tagName') || '').toLowerCase();
@@ -806,24 +819,59 @@ export default Mixin.create(MagicArray, {
     this.set('_positionTracker', PositionTracker.create({}));
   },
 
-
   _reflectContentChanges() {
     let content = this.get('_content');
     content.contentArrayDidChange = (items, offset, removeCount, addCount) => {
       if (offset <= this.get('_firstVisibleIndex')) {
-        this.__performViewPrepention(addCount);
+        this.__prependComponents(addCount);
       } else {
         this._taskrunner.schedule('render', this, this._updateChildStates);
       }
     };
   },
 
+  _didReceiveAttrs(attrs) {
+    var oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
+    var newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
+    if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
+      var addCount = get(newArray, 'length') - get(oldArray, 'length');
+      this.__prependComponents(addCount);
+    } else {
+      //this._taskrunner.throttle(this, this._updateChildStates, this.get('scrollThrottle'));
+    }
+  },
+
+  _changeIsPrepend(oldArray, newArray) {
+    var lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
+    var key = this.get('keyForId');
+
+    // if either array is empty or the new array is not longer, do not treat as prepend
+    if (!get(newArray, 'length') || !get(oldArray, 'length') || lengthDifference <= 0) {
+      return false;
+    }
+
+    // if the keys at the correct indexes are the same, this is a prepend
+    var oldInitialItem = oldArray.objectAt ? get(oldArray.objectAt(0), key) : get(oldArray[0], key);
+    var newInitialItem = newArray.objectAt ? get(newArray.objectAt(lengthDifference), key) : get(newArray[lengthDifference], key);
+
+    return oldInitialItem === newInitialItem;
+  },
+
+  didReceiveAttrs() {},
+
   init() {
     this._super.apply(this, arguments);
 
     this._prepareComponent();
     this.set('_children', Ember.A());
-    this._reflectContentChanges();
+
+    if (this.get('useContentProxy')) {
+      this.set('_content', proxied.call(this, 'content'));
+      this._reflectContentChanges();
+    } else {
+      this.set('_content', computed.alias('content'));
+      this.set('didReceiveAttrs', this._didReceiveAttrs);
+    }
   }
 
 

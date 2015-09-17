@@ -1,0 +1,1 @@
+export { default } from 'smoke-and-mirrors/components/v2-c';
