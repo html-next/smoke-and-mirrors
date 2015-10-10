@@ -138,8 +138,8 @@ export default Mixin.create(keyForItem, {
    * so that their dimensions can be correctly
    * determined
    */
-  // TODO enable this feature
   renderAllInitially: false,
+  _isFirstRender: true,
 
   /**!
    *
@@ -293,14 +293,42 @@ export default Mixin.create(keyForItem, {
    */
   __isInitialized: false,
 
+  /**!
+   * Set this to false to prevent addition of styles which
+   * cause GPU acceleration of the list.  GPU accleration
+   * is recommended, especially on mobile, unless you are
+   * doing your own acceleration styles.  GPU accleration
+   * causes bugs with fixed position content, making it
+   * behave as absolutely positioned content.
+   */
   shouldGPUAccelerate: true,
+
+  /**!
+   * Set this to false to prevent rendering entirely.
+   * Useful for situations in which rendering is
+   * expensive enough that it interferes with a
+   * transition animation.
+   *
+   * In such cases, set this to false, and switch it
+   * to true once animation has completed.
+   */
   shouldRender: true,
-  canRender: false,
+
+  /**!
+   * Internal boolean used to track whether the component
+   * has been inserted into the DOM and DOM related setup
+   * has occurred.
+   *
+   * TODO can we eliminate this?
+   *
+   * @private
+   */
+  _sm_canRender: false,
 
   __shouldRender: true,
-  shouldRenderList: computed('shouldRender', 'canRender', function() {
+  shouldRenderList: computed('shouldRender', '_sm_canRender', function() {
     let shouldRender = this.get('shouldRender');
-    let canRender = this.get('canRender');
+    let canRender = this.get('_sm_canRender');
     let doRender = shouldRender && canRender;
     let _shouldDidChange = this.get('__shouldRender') !== shouldRender;
 
@@ -371,6 +399,8 @@ export default Mixin.create(keyForItem, {
   },
 
   _children: null,
+
+  // TODO can we do this with `_children.[]` instead?
   children: computed('_children.@each.index', function() {
     let children = this.get('_children');
     let output = new Array(get(children, 'length'));
@@ -402,17 +432,37 @@ export default Mixin.create(keyForItem, {
    *
    * Triggers on scroll.
    *
-   * @returns {boolean}
    * @private
    */
   _updateChildStates() {
     if (this.get('__isPrepending') || !this.get('shouldRenderList')) {
-      return false;
+      return;
     }
     this.get('_positionTracker').scroll();
 
     let edges = this.get('_edges');
     let childComponents = this.get('children');
+
+    if (this._isFirstRender) {
+      this._isFirstRender = false;
+      if (this.get('renderAllInitially')) {
+        childComponents.forEach((i) => { i.show(); });
+
+        //set scroll
+        if (this.get('__isInitializingFromLast')) {
+          this._taskrunner.schedule('afterRender', this, function() {
+            let last = this.$().get(0).lastElementChild;
+            this.set('__isInitializingFromLast', false);
+            if (last) {
+              last.scrollIntoView(false);
+            }
+          });
+        }
+
+        return;
+      }
+
+    }
 
     let currentViewportBound = edges.viewportTop + this.get('_position.rect').top;
     let currentUpperBound = edges.invisibleTop;
@@ -600,7 +650,7 @@ export default Mixin.create(keyForItem, {
     this._super();
     run.next(() => {
       this.setupContainer();
-      this.set('canRender', true);
+      this.set('_sm_canRender', true);
       //draw initial boundaries
       this._initializeScrollState();
       this.get('_positionTracker').register(this);
@@ -685,7 +735,7 @@ export default Mixin.create(keyForItem, {
   },
 
   __prependComponents(addCount) {
-    if (this.get('canRender')) {
+    if (this.get('_sm_canRender')) {
       this.set('__isPrepending', true);
 
       var container = this.get('_container').get(0);
