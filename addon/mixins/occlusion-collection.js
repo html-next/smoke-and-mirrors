@@ -164,6 +164,7 @@ export default Mixin.create(keyForItem, {
 
 
   //–––––––––––––– Actions
+  key: '@index',
 
   /**!
    * Specify an action to fire when the last item is reached.
