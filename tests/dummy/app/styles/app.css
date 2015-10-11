@@ -51,16 +51,20 @@ nav a {
 }
 
 async-image {
-  background: #f0f0f0;
+  background: #f8f8f8;
 }
 
 .image-slide {
-  width: 350px;
-  height: 350px;
-  margin: 10px auto;
+  width: 250px;
+  height: 250px;
+  margin: 0 auto;
   position: relative;
   border: 1px solid #bbb;
-  box-shadow: 1px 1px 5px 0px #d0d0d0;
+  box-shadow: 1px 1px 5px 0 #d0d0d0;
+}
+
+vertical-item {
+  margin: 10px 0;
 }
 
 .image-slide .loading-spinner {

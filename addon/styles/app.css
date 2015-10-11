@@ -33,3 +33,13 @@ vertical-item {
   width: 100%;
   position: static;
   }
+
+vertical-item::after {
+  display: block;
+  content: ' ';
+  width: 100%;
+  height: 0;
+  float: none;
+  clear: both;
+  position: relative;
+}

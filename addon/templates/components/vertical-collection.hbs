@@ -1,4 +1,4 @@
-{{#each _content key="@index" as |item index|}}
+{{#each _content key='@index' as |item index|}}
   {{#vertical-item
     defaultHeight=defaultHeight
     itemTagName=itemTagName
@@ -7,7 +7,7 @@
     exposeAttributeState=exposeAttributeState
     index=index
     alwaysUseDefaultHeight=alwaysUseDefaultHeight
-    keyForId=keyForId
+    keyForId=key
     collection=this
     as |wrapper|
   }}

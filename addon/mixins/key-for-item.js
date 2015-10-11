@@ -16,7 +16,8 @@ export default Mixin.create({
 
     switch (keyPath) {
       case '@index':
-        if (!index) {
+        // allow 0 index
+        if (!index && index !== 0) {
           throw "No index was supplied to keyForItem";
         }
         key = index;

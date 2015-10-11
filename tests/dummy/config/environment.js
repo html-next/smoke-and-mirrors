@@ -15,7 +15,7 @@ module.exports = function(environment) {
       EXTEND_PROTOTYPES : true
     },
 
-    VERSION: "0.2.2",
+    VERSION: "0.3.1",
 
     APP: {
       // Here you can pass flags/options to your application instance
@@ -69,7 +69,7 @@ module.exports = function(environment) {
   }
 
   if (environment === 'production') {
-    ENV.baseURL = '/smoke-and-mirrors';
+    //ENV.baseURL = '/smoke-and-mirrors';
   }
 
   return ENV;

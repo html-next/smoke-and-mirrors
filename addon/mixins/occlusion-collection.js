@@ -33,6 +33,11 @@ function valueForIndex(arr, index) {
   return arr.objectAt ? arr.objectAt(index) : arr[index];
 }
 
+function getContent(obj, isProxied) {
+  let key = isProxied? 'content.content' : 'content';
+  return get(obj, key);
+}
+
 export default Mixin.create(keyForItem, {
 
   //–––––––––––––– Optional Settings
@@ -72,6 +77,7 @@ export default Mixin.create(keyForItem, {
    * Used if you want to explicitly set the tagName of collection's items
    */
   itemTagName: '',
+
 
   //–––––––––––––– Performance Tuning
 
@@ -164,7 +170,7 @@ export default Mixin.create(keyForItem, {
 
 
   //–––––––––––––– Actions
-  key: '@index',
+  key: '@identity',
 
   /**!
    * Specify an action to fire when the last item is reached.
@@ -343,8 +349,8 @@ export default Mixin.create(keyForItem, {
 
   //–––––––––––––– Helper Functions
   sendActionOnce(name, context) {
-    // don't trigger during a prepend
-    if (this.get('__isPrepending')) {
+    // don't trigger during a prepend or initial render
+    if (this.get('__isPrepending') || this._isFirstRender) {
       return;
     }
 
@@ -401,7 +407,6 @@ export default Mixin.create(keyForItem, {
 
   _children: null,
 
-  // TODO can we do this with `_children.[]` instead?
   children: computed('_children.@each.index', function() {
     let children = this.get('_children');
     let output = new Array(get(children, 'length'));
@@ -443,9 +448,9 @@ export default Mixin.create(keyForItem, {
 
     let edges = this.get('_edges');
     let childComponents = this.get('children');
+    let isProxied = this.get('useContentProxy');
 
     if (this._isFirstRender) {
-      this._isFirstRender = false;
       if (this.get('renderAllInitially')) {
         childComponents.forEach((i) => { i.show(); });
 
@@ -460,6 +465,7 @@ export default Mixin.create(keyForItem, {
           });
         }
 
+        this._isFirstRender = false;
         return;
       }
 
@@ -505,7 +511,7 @@ export default Mixin.create(keyForItem, {
         toShow.push(component);
         if (bottomComponentIndex === 0) {
           this.sendActionOnce('firstReached', {
-            item: component.get('content.content'),
+            item: getContent(component, isProxied),
             index: bottomComponentIndex
           });
         }
@@ -515,7 +521,7 @@ export default Mixin.create(keyForItem, {
         toShow.push(component);
         if (bottomComponentIndex === 0) {
           this.sendActionOnce('firstReached', {
-            item: component.get('content.content'),
+            item: getContent(component, isProxied),
             index: bottomComponentIndex
           });
         }
@@ -531,7 +537,7 @@ export default Mixin.create(keyForItem, {
           this.set('_firstVisible', component);
           this.set('_firstVisibleIndex', bottomComponentIndex);
           this.sendActionOnce('firstVisibleChanged', {
-            item: component.get('content.content'),
+            item: getContent(component, isProxied),
             index: bottomComponentIndex
           });
         }
@@ -546,7 +552,7 @@ export default Mixin.create(keyForItem, {
         toShow.push(component);
         if (bottomComponentIndex === lastIndex) {
           this.sendActionOnce('lastReached', {
-            item: component.get('content.content'),
+            item: getContent(component, isProxied),
             index: bottomComponentIndex
           });
         }
@@ -575,6 +581,10 @@ export default Mixin.create(keyForItem, {
           last.scrollIntoView(false);
         }
       });
+    }
+
+    if (this._isFirstRender) {
+      this._isFirstRender = false;
     }
   },
 
@@ -665,7 +675,6 @@ export default Mixin.create(keyForItem, {
 
     var scrollPosition = this.get('scrollPosition');
     var idForFirstItem = this.get('idForFirstItem');
-    var key = this.get('keyForId');
 
     if (scrollPosition) {
       this.get('_container').get(0).scrollTop = scrollPosition;
@@ -679,8 +688,8 @@ export default Mixin.create(keyForItem, {
       var content = this.get('content');
       var firstVisibleIndex;
 
-      for (let i = 0; i < content.get('length'); i++) {
-        if (idForFirstItem === get(valueForIndex(content, i), key)) {
+      for (let i = 0; i < get(content, 'length'); i++) {
+        if (idForFirstItem === this.keyForItem(valueForIndex(content, i), i)) {
           firstVisibleIndex = i;
         }
       }
@@ -741,6 +750,7 @@ export default Mixin.create(keyForItem, {
 
       var container = this.get('_container').get(0);
       container.scrollTop += addCount * this.__getEstimatedDefaultHeight();
+      this.set('scrollPosition', container.scrollTop);
 
       if (IS_GLIMMER) {
         this._taskrunner.next(this, () => {
@@ -809,7 +819,6 @@ export default Mixin.create(keyForItem, {
    */
   __edges: null,
   _edges: computed('_container', 'containerHeight', 'shouldRenderList', function calculateViewStateBoundaries() {
-
     if (!this.get('shouldRenderList') && this.get('__edges')) {
       return this.get('__edges');
     }
@@ -838,8 +847,8 @@ export default Mixin.create(keyForItem, {
     edges.invisibleBottom = edges.visibleBottom + _invisibleBufferHeight;
 
     this.set('__edges', edges);
-    return edges;
 
+    return edges;
   }),
 
   _position: null,
@@ -893,8 +902,7 @@ export default Mixin.create(keyForItem, {
   },
 
   _changeIsPrepend(oldArray, newArray) {
-    var lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
-    var key = this.get('keyForId');
+    let lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
 
     // if either array is empty or the new array is not longer, do not treat as prepend
     if (!get(newArray, 'length') || !get(oldArray, 'length') || lengthDifference <= 0) {
@@ -902,8 +910,8 @@ export default Mixin.create(keyForItem, {
     }
 
     // if the keys at the correct indexes are the same, this is a prepend
-    var oldInitialItem = oldArray.objectAt ? get(oldArray.objectAt(0), key) : get(oldArray[0], key);
-    var newInitialItem = newArray.objectAt ? get(newArray.objectAt(lengthDifference), key) : get(newArray[lengthDifference], key);
+    let oldInitialItem = this.keyForItem(valueForIndex(oldArray, 0), 0);
+    let newInitialItem = this.keyForItem(valueForIndex(newArray, lengthDifference), lengthDifference);
 
     return oldInitialItem === newInitialItem;
   },
