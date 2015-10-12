@@ -31,7 +31,7 @@ export default function proxiedArray(arrayKey, keyPath = '@identity') {
     outbound.beginPropertyChanges();
 
     // handle additions to the beginning of the array
-    if(changeIsPrepend(inbound, outbound, keyPath)) {
+    if(changeIsPrepend(outbound, inbound, keyPath)) {
       newLength = get(inbound, 'length');
       diff = newLength - outbound.get('length');
       for (let i = 0; i < diff; i++) {
@@ -65,6 +65,7 @@ export default function proxiedArray(arrayKey, keyPath = '@identity') {
     }
 
     outbound.endPropertyChanges();
+    outbound.notifyPropertyChange('length');
     return outbound;
   };
 
@@ -72,20 +73,23 @@ export default function proxiedArray(arrayKey, keyPath = '@identity') {
   return computed.apply(this, args);
 }
 
-
-
-
-function changeIsPrepend(newArray, proxiedArray, keyPath) {
-  let lengthDifference = proxiedArray.get('length') - get(newArray, 'length');
+function changeIsPrepend(oldArray, newArray, keyPath) {
+  let lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
 
   // if either array is empty or the new array is not longer, do not treat as prepend
-  if (!proxiedArray.get('length') || !get(newArray, 'length') || lengthDifference >= 0) {
+  if (!get(newArray, 'length') || !get(oldArray, 'length') || lengthDifference <= 0) {
     return false;
   }
 
-  // if the object at the right key is the same, this is a prepend
-  let oldKey = keyForItem(proxiedArray.objectAt(0), keyPath, 0);
-  let newKey = keyForItem(newArray[-lengthDifference], keyPath, 0);
+  // if the keys at the correct indexes are the same, this is a prepend
+  let oldInitialItem = get(valueForIndex(oldArray, 0), 'content');
+  let oldInitialKey = keyForItem(oldInitialItem, keyPath, 0);
+  let newInitialItem = valueForIndex(newArray, lengthDifference);
+  let newInitialKey = keyForItem(newInitialItem, keyPath, lengthDifference);
 
-  return oldKey === newKey;
+  return oldInitialKey === newInitialKey;
+}
+
+function valueForIndex(arr, index) {
+  return arr.objectAt ? arr.objectAt(index): arr[index];
 }
