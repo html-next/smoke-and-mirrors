@@ -23,15 +23,7 @@ export default Component.extend(StateMapMixin, {
   tagName: 'vertical-item',
   itemTagName: 'vertical-item',
 
-  isTableChild: computed('itemTagName', function() {
-    let tag = this.get('itemTagName').toLowerCase();
-    return tag === 'tr' || tag === 'td' || tag === 'th';
-  }),
-
-  // table children don't respect min-height :'(
-  heightProperty: computed('isTableChild', function() {
-    return this.get('isTableChild') ? 'height' : 'minHeight';
-  }),
+  heightProperty: 'minHeight',
 
   attributeBindings: ['viewState'],
   classNames: ['vertical-item'],
@@ -77,7 +69,14 @@ export default Component.extend(StateMapMixin, {
 
   init() {
     this._super();
-    this.set('tagName', this.get('itemTagName'));
+
+    let tag = this.get('itemTagName');
+    this.set('tagName', tag);
+    tag = tag.toLowerCase();
+
+    let isTableChild = tag === 'tr' || tag === 'td' || tag === 'th';
+    // table children don't respect min-height :'(
+    this.heightProperty = isTableChild ? 'height' : 'minHeight';
     this.collection.register(this);
   }
 
