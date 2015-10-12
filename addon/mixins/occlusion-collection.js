@@ -1,14 +1,12 @@
 /*global Array, parseFloat, Math */
 import Ember from 'ember';
 import getTagDescendant from '../utils/get-tag-descendant';
-import nextFrame from '../utils/next-frame';
 import Scheduler from '../utils/backburner-ext';
 import keyForItem from '../mixins/key-for-item';
 import jQuery from 'jquery';
 import PositionTracker from '../utils/position-tracker';
 import proxied from '../computed/proxied-array';
-
-const IS_GLIMMER = (Ember.VERSION.indexOf('2') === 0 || Ember.VERSION.indexOf('1.13') === 0);
+import nextFrame from '../utils/next-frame';
 
 /**
  * Investigations: http://jsfiddle.net/sxqnt/73/
@@ -255,8 +253,9 @@ export default Mixin.create(keyForItem, {
   _firstVisibleIndex: 0,
 
   /**!
-   * a cached jQuery reference to the container element
+   * a cached jQuery and element reference to the container element
    */
+  _$container: null,
   _container: null,
 
   /**!
@@ -288,12 +287,6 @@ export default Mixin.create(keyForItem, {
    * to notify `lastVisibleChange` to prevent resending.
    */
   _lastVisibleLastSent: null,
-
-  /**!
-   * If true, views are currently being added above the visible portion of
-   * the screen and scroll/cycle callbacks should be ignored.
-   */
-  __isPrepending: false,
 
   /**!
    * false until the first full setup has completed
@@ -350,7 +343,25 @@ export default Mixin.create(keyForItem, {
   //–––––––––––––– Helper Functions
   sendActionOnce(name, context) {
     // don't trigger during a prepend or initial render
-    if (this.get('__isPrepending') || this._isFirstRender) {
+    if (this._isFirstRender) {
+      return;
+    }
+
+    if (name === 'firstReached') {
+      if (this.get('_scrollIsForward')) {
+        return;
+      }
+    }
+
+    if (name === 'lastReached' && !this.get('_scrollIsForward')) {
+      return;
+    }
+
+
+    let isProxied = this.get('useContentProxy');
+    context.item = getContent(context.item, isProxied);
+
+    if (!context.item) {
       return;
     }
 
@@ -441,14 +452,13 @@ export default Mixin.create(keyForItem, {
    * @private
    */
   _updateChildStates() {
-    if (this.get('__isPrepending') || !this.get('shouldRenderList')) {
+    if (!this.get('shouldRenderList')) {
       return;
     }
     this.get('_positionTracker').scroll();
 
     let edges = this.get('_edges');
     let childComponents = this.get('children');
-    let isProxied = this.get('useContentProxy');
 
     if (this._isFirstRender) {
       if (this.get('renderAllInitially')) {
@@ -511,7 +521,7 @@ export default Mixin.create(keyForItem, {
         toShow.push(component);
         if (bottomComponentIndex === 0) {
           this.sendActionOnce('firstReached', {
-            item: getContent(component, isProxied),
+            item: component,
             index: bottomComponentIndex
           });
         }
@@ -521,13 +531,13 @@ export default Mixin.create(keyForItem, {
         toShow.push(component);
         if (bottomComponentIndex === 0) {
           this.sendActionOnce('firstReached', {
-            item: getContent(component, isProxied),
+            item: component,
             index: bottomComponentIndex
           });
         }
         if (bottomComponentIndex === lastIndex) {
           this.sendActionOnce('lastReached', {
-            item: component.get('content.content'),
+            item: component,
             index: bottomComponentIndex
           });
         }
@@ -537,13 +547,13 @@ export default Mixin.create(keyForItem, {
           this.set('_firstVisible', component);
           this.set('_firstVisibleIndex', bottomComponentIndex);
           this.sendActionOnce('firstVisibleChanged', {
-            item: getContent(component, isProxied),
+            item: component,
             index: bottomComponentIndex
           });
         }
         this.set('_lastVisible', component);
         this.sendActionOnce('lastVisibleChanged', {
-          item: component.get('content.content'),
+          item: component,
           index: bottomComponentIndex
         });
 
@@ -552,7 +562,7 @@ export default Mixin.create(keyForItem, {
         toShow.push(component);
         if (bottomComponentIndex === lastIndex) {
           this.sendActionOnce('lastReached', {
-            item: getContent(component, isProxied),
+            item: component,
             index: bottomComponentIndex
           });
         }
@@ -592,19 +602,22 @@ export default Mixin.create(keyForItem, {
   _lastTarget: null,
   scrollTarget: null,
 
+  /**
+   * forward is true, backwards is false
+   */
+  _scrollIsForward: 0,
+
   _scheduleOcclusion() {
     // cache the scroll offset, and discard the cycle if
     // movement is within (x) threshold
     // TODO make this work horizontally too
-    var scrollTop = this.get('_container').get(0).scrollTop;
-    var _scrollTop = this.get('scrollPosition');
-    var defaultHeight = this.__getEstimatedDefaultHeight();
-    let throttle = this.get('scrollThrottle');
-
-    this._taskrunner.debounce(this, this._updateChildStates, 4 * throttle);
+    let scrollTop = this._container.scrollTop;
+    let _scrollTop = this.scrollPosition;
+    let defaultHeight = this.__getEstimatedDefaultHeight();
 
     if (Math.abs(scrollTop - _scrollTop) >= defaultHeight / 2) {
-      this.set('scrollPosition', scrollTop);
+      this.set('_scrollIsForward', scrollTop > _scrollTop);
+      this.scrollPosition = scrollTop;
       this._updateChildStates();
     }
   },
@@ -614,17 +627,16 @@ export default Mixin.create(keyForItem, {
     var id = this.get('elementId');
     var scrollThrottle = this.get('scrollThrottle');
     var containerSelector = this.get('containerSelector');
-    var _container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
-    this.set('_container', _container);
+    var $container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
+    this._$container = $container;
 
-    // TODO This may need vendor prefix detection
-    _container.css({
+    $container.css({
       '-webkit-overflow-scrolling': 'touch',
       'overflow-scrolling': 'touch'
     });
 
     if (this.get('shouldGPUAccelerate')) {
-      _container.css({
+      $container.css({
         '-webkit-transform' : 'translate3d(0,0,0)',
         '-moz-transform'    : 'translate3d(0,0,0)',
         '-ms-transform'     : 'translate3d(0,0,0)',
@@ -634,18 +646,17 @@ export default Mixin.create(keyForItem, {
     }
 
     let onScrollMethod = () => {
-      if (this.get('__isPrepending') || !this.get('__isInitialized')) {
-        return;
-      }
-      this._taskrunner.throttle(this, this._scheduleOcclusion, this.get('scrollThrottle'));
+      if (!this.__isInitialized) { return; }
+      nextFrame(this, this._scheduleOcclusion);
     };
 
     let onResizeMethod = () => {
       this._taskrunner.debounce(this, this.notifyPropertyChange, '_edges', scrollThrottle, false);
     };
 
-    //_container.bind('mousewheel.occlusion-culling.' + id, onScrollMethod);
-    let element = _container.get(0);
+    let element = $container.get(0);
+    this._container = element;
+    this._sm_scrollListener = onScrollMethod;
     element.addEventListener('scroll', onScrollMethod, true);
     element.addEventListener('touchmove', onScrollMethod, true);
 
@@ -671,13 +682,11 @@ export default Mixin.create(keyForItem, {
 
 
   _initializeScrollState() {
-    this.set('__isPrepending', true);
-
-    var scrollPosition = this.get('scrollPosition');
+    var scrollPosition = this.scrollPosition;
     var idForFirstItem = this.get('idForFirstItem');
 
     if (scrollPosition) {
-      this.get('_container').get(0).scrollTop = scrollPosition;
+      this._container.scrollTop = scrollPosition;
     } else if (this.get('renderFromLast')) {
       var last = this.$().get(0).lastElementChild;
       this.set('__isInitializingFromLast', true);
@@ -693,18 +702,18 @@ export default Mixin.create(keyForItem, {
           firstVisibleIndex = i;
         }
       }
-      this.get('_container').get(0).scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
+      this._container.scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
     }
 
     this._taskrunner.next(this, () => {
-      this.set('__isPrepending', false);
-      this.set('__isInitialized', true);
+      this.__isInitialized = true;
       this._updateChildStates();
     });
 
   },
 
 
+  _sm_scrollListener: null,
   /**!
    * Remove the event handlers for this instance
    * and teardown any temporarily cached data.
@@ -716,13 +725,14 @@ export default Mixin.create(keyForItem, {
   willDestroyElement() {
     //cleanup scroll
     let id = this.get('elementId');
-    let _container = this.get('_container');
+    let _container = this._container;
 
-    _container.unbind('scroll.occlusion-culling.' + id);
-    _container.unbind('touchmove.occlusion-culling.' + id);
+    _container.removeEventListener('scroll', this._sm_scrollListener, true);
+    _container.removeEventListener('touchmove', this._sm_scrollListener, true);
     jQuery(window).unbind('resize.occlusion-culling.' + id);
 
     //cache state
+    /*
     let storageKey = this.get('storageKey');
     if (storageKey) {
 
@@ -738,6 +748,7 @@ export default Mixin.create(keyForItem, {
 
       localStorage.setItem(storageKey, JSON.stringify(cacheAttrs));
     }
+    */
 
     //clean up scheduled tasks
     this._taskrunner.cancelAll();
@@ -746,29 +757,18 @@ export default Mixin.create(keyForItem, {
 
   __prependComponents(addCount) {
     if (this.get('_sm_canRender')) {
-      this.set('__isPrepending', true);
+      this._taskrunner.schedule('sync', this, function() {
+        let container = this._container;
+        container.scrollTop += (addCount * this.__getEstimatedDefaultHeight());
+        this.scrollPosition = container.scrollTop;
+        this._updateChildStates();
+      });
 
-      var container = this.get('_container').get(0);
-      container.scrollTop += addCount * this.__getEstimatedDefaultHeight();
-      this.set('scrollPosition', container.scrollTop);
-
-      if (IS_GLIMMER) {
-        this._taskrunner.next(this, () => {
-          this.set('__isPrepending', false);
-          this._updateChildStates();
-        });
-      } else {
-        this._taskrunner.next(this, () => {
-          this.set('__isPrepending', false);
-          nextFrame(this, this._updateChildStates);
-        });
-      }
     }
   },
 
 
   __getEstimatedDefaultHeight: function() {
-
     var _defaultHeight = this.get('_defaultHeight');
 
     if (_defaultHeight) {
@@ -806,7 +806,6 @@ export default Mixin.create(keyForItem, {
     }
 
     return parseFloat(defaultHeight) * parseFloat(fontSize);
-
   },
 
   /**!
@@ -818,20 +817,20 @@ export default Mixin.create(keyForItem, {
    * @private
    */
   __edges: null,
-  _edges: computed('_container', 'containerHeight', 'shouldRenderList', function calculateViewStateBoundaries() {
+  _edges: computed('containerHeight', 'shouldRenderList', function calculateViewStateBoundaries() {
     if (!this.get('shouldRenderList') && this.get('__edges')) {
       return this.get('__edges');
     }
 
-    var _container = this.get('_container');
-    if (!_container) {
+    let $container = this._$container;
+    if (!$container) {
       return;
     }
     var edges = {};
     var containerHeight = this.get('containerHeight');
 
     // segment heights
-    var viewportHeight = parseInt(containerHeight, 10) || _container.height();
+    var viewportHeight = parseInt(containerHeight, 10) || $container.height();
     var _visibleBufferHeight = Math.round(viewportHeight * this.get('visibleBuffer'));
     var _invisibleBufferHeight = Math.round(viewportHeight * this.get('invisibleBuffer'));
 
@@ -858,9 +857,6 @@ export default Mixin.create(keyForItem, {
    * Initialize
    */
   _prepareComponent() {
-    let prependFn = this.__prependComponents.bind(this);
-
-    this.set('__prependComponents', prependFn);
     this.set('__shouldRender', this.get('shouldRender'));
 
     let collectionTagName = (this.get('tagName') || '').toLowerCase();
@@ -874,7 +870,7 @@ export default Mixin.create(keyForItem, {
       }
     }
     this.set('itemTagName', itemTagName);
-    this._taskrunner = Scheduler.create();
+    this._taskrunner = Scheduler.create({});
 
     this.set('_positionTracker', PositionTracker.create({}));
   },
@@ -891,13 +887,11 @@ export default Mixin.create(keyForItem, {
   },
 
   _didReceiveAttrs(attrs) {
-    var oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
-    var newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
+    let oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
+    let newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
     if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
-      var addCount = get(newArray, 'length') - get(oldArray, 'length');
+      let addCount = get(newArray, 'length') - get(oldArray, 'length');
       this.__prependComponents(addCount);
-    } else {
-      //this._taskrunner.throttle(this, this._updateChildStates, this.get('scrollThrottle'));
     }
   },
 
@@ -910,10 +904,12 @@ export default Mixin.create(keyForItem, {
     }
 
     // if the keys at the correct indexes are the same, this is a prepend
-    let oldInitialItem = this.keyForItem(valueForIndex(oldArray, 0), 0);
-    let newInitialItem = this.keyForItem(valueForIndex(newArray, lengthDifference), lengthDifference);
+    let oldInitialItem = getContent(valueForIndex(oldArray, 0));
+    let oldInitialKey = this.keyForItem(oldInitialItem, 0);
+    let newInitialItem = valueForIndex(newArray, lengthDifference);
+    let newInitialKey = this.keyForItem(newInitialItem, lengthDifference);
 
-    return oldInitialItem === newInitialItem;
+    return oldInitialKey === newInitialKey;
   },
 
   didReceiveAttrs() {},
@@ -925,7 +921,7 @@ export default Mixin.create(keyForItem, {
     this.set('_children', Ember.A());
 
     if (this.get('useContentProxy')) {
-      this.set('_content', proxied.call(this, 'content'));
+      this.set('_content', proxied.call(this, 'content', this.get('key')));
       this._reflectContentChanges();
     } else {
       this.set('_content', computed.alias('content'));
