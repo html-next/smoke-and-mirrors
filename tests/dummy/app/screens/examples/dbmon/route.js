@@ -1,6 +1,6 @@
 import Ember from 'ember';
 import getData from 'dummy/lib/get-data';
-
+import nextFrame from 'smoke-and-mirrors/utils/next-frame';
 let TIMEOUT = 0;
 
 const {
@@ -13,7 +13,7 @@ export default Route.extend({
   numRows: 100,
 
   model() {
-    return getData(this.get('numRows'));
+    return getData(this.numRows);
   },
 
   afterModel() {
@@ -21,20 +21,19 @@ export default Route.extend({
   },
 
   loadSamples() {
-    run.schedule('afterRender', this, function () {
-      this.controller.set('model', getData(this.get('numRows')));
-    });
-    run.later(this, this.loadSamples, TIMEOUT);
+    this.controller.set('model', getData(this.numRows));
+    nextFrame(this, this.loadSamples);
+    //run.later(this, this.loadSamples, TIMEOUT);
   },
 
   actions: {
 
     addRow() {
-      this.incrementProperty('numRows');
+      this.numRows++;
     },
 
     removeRow() {
-      this.decrementProperty('numRows');
+      this.numRows--;
     }
 
   }
