@@ -2,10 +2,12 @@
 import Ember from 'ember';
 
 const {
+  computed,
   Object,
   guidFor,
   A,
-  run
+  run,
+  get: get
   } = Ember;
 
 function getBoundaries(element) {
@@ -26,9 +28,10 @@ let Satellite = Object.extend({
   key:        null,
   rect:       null,
   position:   null,
+  tracker: null,
 
   shift(dX, dY, parentRect) {
-    let rect = this.get('rect');
+    let rect = this.rect;
     if (dX) {
       rect.left += dX;
       rect.right += dX;
@@ -37,12 +40,7 @@ let Satellite = Object.extend({
       rect.bottom += dY;
       rect.top += dY;
     }
-    let position = this.getRelativePosition(rect, parentRect);
-
-    this.setProperties({
-      'position': position,
-      'component._position': position
-    });
+    this.component._position = this.getRelativePosition(rect, parentRect);
   },
 
   getRelativePosition(rect, parentRect) {
@@ -87,32 +85,53 @@ let Satellite = Object.extend({
   },
 
   resize() {
-    this.set('rect', getBoundaries(this.get('component.element')));
+    let oldRect = this.rect;
+    this.rect = getBoundaries(this.component.element);
+
+    // if the height's don't match, we need to update
+    // the positions of elements below ours
+    if (oldRect && oldRect.height !== this.rect.height) {
+      let adjustment = this.rect.height - oldRect.height;
+      this.tracker.adjustPositions(this.component.get('index'), adjustment);
+    }
   },
 
   init() {
     this._super();
     this.resize();
-    this.set('key', guidFor(this.get('component')));
+    this.set('key', guidFor(this.component));
   }
 });
 
+
+
+
 export default Object.extend({
-  components: null,
+
+  _satellites: null,
+  satellites: computed('_satellites.@each.index', function() {
+    let satellites = this._satellites;
+    let output = new Array(get(satellites, 'length'));
+    satellites.forEach((item) => {
+      let index = get(item, 'index');
+      output[index] = item;
+    });
+    return output;
+  }),
 
   position: 0,
   rect: null,
   element: null,
 
   resize() {
-    this.get('components').forEach((c) => {
+    this._satellites.forEach((c) => {
       c.resize();
     });
   },
 
   scroll() {
-    let element = this.get('element');
-    let lastPosition = this.get('position');
+    let element = this.element;
+    let lastPosition = this.position;
     let newPosition = {
       x: element.scrollLeft,
       y: element.scrollTop
@@ -120,39 +139,46 @@ export default Object.extend({
     let dX = lastPosition.x - newPosition.x;
     let dY = lastPosition.y - newPosition.y;
 
-    this.set('position', newPosition);
+    this.position = newPosition;
     this.shift(dX, dY);
   },
 
+  adjustPositions(index, amount) {
+    let satellites = this.get('satellites');
+    for( let i = index + 1; i < satellites.length; i++) {
+      satellites[i].shift(0, amount, this.rect);
+    }
+  },
+
   shift(dX, dY) {
-    let rect = this.get('rect');
-    this.get('components').forEach((c) => {
+    let rect = this.rect;
+    this._satellites.forEach((c) => {
       c.shift(dX, dY, rect);
     });
   },
 
   getBoundaries() {
-    this.set('rect', getBoundaries(this.get('element')));
+    this.rect = getBoundaries(this.element);
   },
 
   register(component) {
-    this.get('components').pushObject(Satellite.create({ component: component }));
+    this._satellites.pushObject(Satellite.create({ component: component, tracker: this }));
   },
 
   unregister(component) {
     let key = guidFor(component);
-    let components = this.get('components');
-    let satellite = components.find((item) => {
+    let satellites = this._satellites;
+    let satellite = satellites.find((item) => {
       return item.get('key') === key;
     });
     if (satellite) {
-      components.removeObject(satellite);
+      satellites.removeObject(satellite);
     }
   },
 
   init() {
     this._super();
-    this.set('components', A());
+    this._satellites = A();
   }
 
 });
