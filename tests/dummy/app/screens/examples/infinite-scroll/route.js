@@ -8,7 +8,7 @@ const {
 export default Route.extend({
 
   model() {
-    return { images: getImages(50) };
+    return { images: getImages(10) };
   }
 
 });
