@@ -1,4 +1,4 @@
-import Ember from "ember";
+import Ember from 'ember';
 
 const {
   run
@@ -14,7 +14,13 @@ export default Ember.Object.extend({
     if (this.deactivated) {
       return false;
     }
-    var ref = run.debounce.apply(null, arguments);
+
+    let args = [];
+    for (let i = 0; i < arguments.length; i++) {
+      args[i] = arguments[i];
+    }
+
+    var ref = run.debounce.apply(null, args);
     this.__queue.addObject(ref);
     return ref;
   },
@@ -23,7 +29,13 @@ export default Ember.Object.extend({
     if (this.deactivated) {
       return false;
     }
-    var ref = run.throttle.apply(null, arguments);
+
+    let args = [];
+    for (let i = 0; i < arguments.length; i++) {
+      args[i] = arguments[i];
+    }
+
+    let ref = run.throttle.apply(null, args);
     this.__queue.addObject(ref);
     return ref;
   },
@@ -32,7 +44,13 @@ export default Ember.Object.extend({
     if (this.deactivated) {
       return false;
     }
-    var ref = run.schedule.apply(null, arguments);
+
+    let args = [];
+    for (let i = 0; i < arguments.length; i++) {
+      args[i] = arguments[i];
+    }
+
+    let ref = run.schedule.apply(null, args);
     this.__queue.addObject(ref);
     return ref;
   },
@@ -41,7 +59,13 @@ export default Ember.Object.extend({
     if (this.deactivated) {
       return false;
     }
-    var ref = run.scheduleOnce.apply(null, arguments);
+
+    let args = [];
+    for (let i = 0; i < arguments.length; i++) {
+      args[i] = arguments[i];
+    }
+
+    let ref = run.scheduleOnce.apply(null, args);
     this.__queue.addObject(ref);
     return ref;
   },
@@ -50,7 +74,13 @@ export default Ember.Object.extend({
     if (this.deactivated) {
       return false;
     }
-    var ref = run.later.apply(null, arguments);
+
+    let args = [];
+    for (let i = 0; i < arguments.length; i++) {
+      args[i] = arguments[i];
+    }
+
+    let ref = run.later.apply(null, args);
     this.__queue.addObject(ref);
     return ref;
   },
@@ -59,7 +89,13 @@ export default Ember.Object.extend({
     if (this.deactivated) {
       return false;
     }
-    var ref = run.next.apply(null, arguments);
+
+    let args = [];
+    for (let i = 0; i < arguments.length; i++) {
+      args[i] = arguments[i];
+    }
+
+    var ref = run.next.apply(null, args);
     this.__queue.addObject(ref);
     return ref;
   },
