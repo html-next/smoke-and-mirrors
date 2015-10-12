@@ -1,6 +1,6 @@
 {
   "name": "smoke-and-mirrors",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "dependencies": {
     "animation-frame": "~0.2.4",
     "ember": "2.1.0-beta.4",
