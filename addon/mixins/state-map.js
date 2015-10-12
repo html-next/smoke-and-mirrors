@@ -28,6 +28,8 @@ export default Mixin.create({
   contentInserted: false,
   contentCulled: false,
 
+  heightProperty: 'minHeight',
+
   show() {
     this._setState('visible');
   },
@@ -81,8 +83,11 @@ export default Mixin.create({
    * @private
    */
   _ov_teardown() {
-    let heightProp = this.get('heightProperty');
+    let heightProp = this.heightProperty;
     if (this.get('contentInserted') && this.element) {
+      if (!this.get('alwaysUseDefaultHeight')) {
+        this.get('_position._satellite').resize();
+      }
       this.element.style[heightProp] = this.get('_position.rect.height') + 'px';
     }
     this.setProperties({ contentCulled: true, contentHidden: false, contentInserted: false });
@@ -105,7 +110,7 @@ export default Mixin.create({
    * @private
    */
   _ov_reveal() {
-    let heightProp = this.get('heightProperty');
+    let heightProp = this.heightProperty;
     this.setProperties({ contentHidden: false, contentVisible: true, contentInserted: true });
     this.element.style[heightProp] = null;
     this.element.style.visibility = 'visible';
