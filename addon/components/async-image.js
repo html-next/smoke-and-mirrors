@@ -18,17 +18,16 @@ export default Ember.Component.extend({
   classNameBindings: ['imgState'],
 
   src: '',
+  _src: '',
 
-  imgState: computed('isLoaded', 'isLoading', 'isFailed', 'isEmpty', 'isAppending', function () {
+  imgState: computed('isLoaded', 'isLoading', 'isFailed', 'isEmpty', function () {
     if (this.get('isFailed')) { return 'is-failed'; }
     if (this.get('isLoaded')) { return 'is-loaded'; }
-    if (this.get('isAppending')) { return 'is-appending'; }
     if (this.get('isLoading')) { return 'is-loading'; }
     if (this.get('isEmpty')) { return 'is-empty'; }
     return 'unknown';
   }),
 
-  isAppending: false,
   isLoaded: false,
   isLoading: false,
   isFailed: false,
@@ -36,32 +35,24 @@ export default Ember.Component.extend({
 
   _image: null,
 
-  _onInsert: on('didInsertElement', function() {
-    if (this.get('isLoaded')) {
-      var $image = jQuery('<img src="' + Image.src + '">');
-      this.$().html($image);
-    }
-  }),
+  willDestroy() {
+    let loaded = this._loaded;
+    let Img = this._image;
+    Img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
-  _onRemove: on('willDestroyElement', function() {
-    var $image = this.get('_image');
-    if ($image) {
-      $image.off('load');
+    if (Img.attachEvent) {
+      Img.detachEvent('onload', loaded);
+    } else {
+      Img.removeEventListener('load', loaded);
     }
-  }),
 
-  _onload: function (Image) {
+    this._image = null;
+  },
+
+  _onload(Image) {
     if (!(this.get('isDestroyed') || this.get('isDestroying'))) {
-      this.set('isAppending', true);
-      var self = this;
-      var $view = this.$();
-      var $image = jQuery('<img src="' + Image.src + '">');
-      this.set('_image', $image);
-      $image.on('load', function () {
-        self.set('isLoaded', true);
-        jQuery('img:not(:last-child)', $view).remove();
-        $view.append($image);
-      });
+      this.set('_src', Image.src);
+      this.set('isLoaded', true);
     }
   },
 
@@ -76,21 +67,19 @@ export default Ember.Component.extend({
       isEmpty: true
     });
 
-    var src = this.get('src');
-    var Img;
+    let src = this.get('src');
+    let Img;
 
-    //debounce the load callback to ensure it only fires once
-    var loaded = function loaded() {
-      if (!(this.get('isDestroyed') || this.get('isDestroying'))) {
-        run.debounce(this, this._onload, Img, 10);
-      }
-    }.bind(this);
+    let loaded = () => {
+      run.scheduleOnce('actions', this, this._onload, Img);
+    };
+    this._loaded = loaded;
 
     if (src) {
-
       this.set('isLoading', true);
 
       Img = new Image();
+      this._image = Img;
 
       if (Img.attachEvent) {
         Img.attachEvent('onload', loaded);

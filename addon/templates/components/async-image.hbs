@@ -1,7 +1,3 @@
-{{!--
-{{#unless isLoaded}}
-    <div class="loading-spinner"></div>
-{{else}}
-    <img src="{{src}}">
-{{/unless}}
---}}
+{{#if isLoaded}}
+    <img src="{{_src}}">
+{{/if}}
