@@ -1,7 +1,8 @@
 import Ember from 'ember';
 
 const {
-  compare
+  compare,
+  get: get
   } = Ember;
 
 export default function(array, sortKeys) {

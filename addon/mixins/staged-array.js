@@ -3,7 +3,6 @@ import keyMixin from './key-for-item';
 
 const {
   computed,
-  get: get,
   ObjectProxy
   } = Ember;
 

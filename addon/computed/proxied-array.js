@@ -3,7 +3,6 @@ import keyForItem from '../utils/key-for-item';
 
 const {
   computed,
-  A,
   ArrayProxy,
   ObjectProxy,
   get: get
@@ -11,7 +10,7 @@ const {
 
 export default function proxiedArray(arrayKey, keyPath = '@identity') {
   // create the value cache for the array
-  let outbound = ArrayProxy.create({ content: A() });
+  let outbound = ArrayProxy.create({ content: Ember.A() });
 
   // create the computed args array
   let args = [];
@@ -25,7 +24,7 @@ export default function proxiedArray(arrayKey, keyPath = '@identity') {
       return outbound;
     }
     let newLength;
-    let newObjects = A();
+    let newObjects = Ember.A();
     let diff;
 
     outbound.beginPropertyChanges();

@@ -1,16 +1,12 @@
 import Ember from 'ember';
-import keyForItem from '../utils/key-for-item';
 import sortArray from '../lib/sort-array';
 import replaceArray from '../lib/replace-array';
 
 const {
-  computed,
-  A,
-  ArrayProxy,
-  ObjectProxy
+  computed
   } = Ember;
 
-export default function stableArrayProperty(arrayKey, sort, keyPath = '@identity') {
+export default function stableArrayProperty(arrayKey, sort) {
   // create the value cache for the array
   let outbound = [];
 

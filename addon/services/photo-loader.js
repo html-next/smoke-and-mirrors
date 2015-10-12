@@ -1,6 +1,7 @@
-import Ember from 'ember';
+//import Ember from 'ember';
 import Queue from './queue';
 
+/*
 const {
   RSVP
   } = Ember;
@@ -8,12 +9,12 @@ const {
 const {
   Promise
   } = RSVP;
-
+*/
 export default Queue.extend({
 
   _photos: null,
 
-  process(item) {
+  process(/*item*/) {
 
   },
 

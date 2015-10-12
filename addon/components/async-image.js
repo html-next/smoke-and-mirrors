@@ -1,15 +1,14 @@
 import Ember from 'ember';
-import jQuery from 'jquery';
 import layout from '../templates/components/async-image';
 
 const {
+  Component,
   computed,
   observer,
-  run,
-  on
+  run
   } = Ember;
 
-export default Ember.Component.extend({
+export default Component.extend({
 
   layout: layout,
   tagName: 'async-image',
@@ -96,9 +95,9 @@ export default Ember.Component.extend({
     }
   }),
 
-  init: function() {
-    this._loadImage();
+  init() {
     this._super();
+    this._loadImage();
   }
 
 });

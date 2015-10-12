@@ -14,10 +14,8 @@ import nextFrame from '../utils/next-frame';
 const {
   get: get,
   Mixin,
-  assert,
   computed,
   run,
-  on,
   } = Ember;
 
 const actionContextCacheKeys = {
@@ -95,13 +93,13 @@ export default Mixin.create(keyForItem, {
    * how much extra room to keep visible on
    * either side of the visible area
    */
-  visibleBuffer: .5,
+  visibleBuffer: 0.5,
 
   /**!
    * how much extra room to keep in DOM but
    * with `visible:false` set.
    */
-  invisibleBuffer: .5,
+  invisibleBuffer: 0.5,
 
   /**!
    * useContentProxy

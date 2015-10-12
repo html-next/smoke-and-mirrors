@@ -2,11 +2,8 @@ import Ember from 'ember';
 import StateMapMixin from '../mixins/state-map';
 import layout from '../templates/components/vertical-item';
 
-const IS_GLIMMER = (Ember.VERSION.indexOf('2') === 0 || Ember.VERSION.indexOf('1.13') === 0);
-
 const {
-  Component,
-  computed
+  Component
   } = Ember;
 
 /**

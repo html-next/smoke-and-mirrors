@@ -136,4 +136,4 @@ export default getImages;
 export {
   getImages,
   getDynamicImages
-}
+};

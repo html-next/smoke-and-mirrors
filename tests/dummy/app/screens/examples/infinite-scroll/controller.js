@@ -2,8 +2,7 @@ import Ember from 'ember';
 import getImages from 'dummy/lib/get-images';
 
 const {
-  Controller,
-  Logger
+  Controller
   } = Ember;
 
 export default Controller.extend({

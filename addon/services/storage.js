@@ -20,7 +20,7 @@ function getTypeForVar(val) {
   return typeString.substring(8, typeString.length - 1);
 }
 
-export default Ember.Service.extend({
+export default Service.extend({
 
 
   /**

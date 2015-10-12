@@ -3,14 +3,13 @@ import keyForItem from '../utils/key-for-item';
 
 const {
   computed,
-  A,
   ArrayProxy,
   ObjectProxy
   } = Ember;
 
 export default function diffedArray(arrayKey, keyPath = '@identity') {
   // create the value cache for the array
-  let outbound = ArrayProxy.create({ content: A() });
+  let outbound = ArrayProxy.create({ content: Ember.A() });
   let cache = {};
 
   // create the computed args array
@@ -20,7 +19,7 @@ export default function diffedArray(arrayKey, keyPath = '@identity') {
   let fn = () => {
     let inbound = this.get(arrayKey);
     let newList = {};
-    let staged = A();
+    let staged = Ember.A();
     let deletions = [];
 
     if (!inbound) {

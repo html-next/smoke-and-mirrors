@@ -3,7 +3,8 @@ import Ember from 'ember';
 const {
   computed,
   defineProperty,
-  Service
+  Service,
+  inject
   } = Ember;
 
 const SERVICE_IDENTIFIER = 'sync_service:';

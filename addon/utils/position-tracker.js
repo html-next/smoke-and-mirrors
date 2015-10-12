@@ -1,12 +1,9 @@
-/* global window, document, Math */
+/* global Math */
 import Ember from 'ember';
 
 const {
   computed,
-  Object,
   guidFor,
-  A,
-  run,
   get: get
   } = Ember;
 
@@ -23,7 +20,7 @@ function getBoundaries(element) {
 }
 
 
-let Satellite = Object.extend({
+let Satellite = Ember.Object.extend({
   component: null,
   key:        null,
   rect:       null,
@@ -106,7 +103,7 @@ let Satellite = Object.extend({
 
 
 
-export default Object.extend({
+export default Ember.Object.extend({
 
   _satellites: null,
   satellites: computed('_satellites.@each.index', function() {
@@ -178,7 +175,7 @@ export default Object.extend({
 
   init() {
     this._super();
-    this._satellites = A();
+    this._satellites = Ember.A();
   }
 
 });
