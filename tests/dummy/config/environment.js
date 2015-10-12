@@ -28,9 +28,9 @@ module.exports = function(environment) {
     'script-src': "'self' 'unsafe-inline' 'unsafe-eval'",
     'font-src': "'self'",
     'connect-src': "'self'",
-    'img-src': "'self' http://lorempixel.com",
+    'img-src': "'self' data: http://lorempixel.com",
     'style-src': "'self' 'unsafe-inline'",
-    'media-src': "'self' http://lorempixel.com"
+    'media-src': "'self' data: http://lorempixel.com"
   };
 
   //debugging
