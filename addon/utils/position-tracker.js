@@ -81,7 +81,8 @@ let Satellite = Object.extend({
       zoneX: zoneX,
       zoneY: zoneY,
       distanceX: distanceX,
-      distanceY: distanceY
+      distanceY: distanceY,
+      _satellite: this
     };
   },
 
