@@ -142,7 +142,9 @@ export default Ember.Object.extend({
 
   adjustPositions(index, amount) {
     let satellites = this.get('satellites');
+    console.log('adjustPositions', index, satellites.length);
     for( let i = index + 1; i < satellites.length; i++) {
+      console.log('i', i, satellites[i]);
       satellites[i].shift(0, amount, this.rect);
     }
   },

@@ -628,9 +628,16 @@ export default Mixin.create(keyForItem, {
     var $container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
     this._$container = $container;
 
+    // TODO: The container needs well formed CSS
+    // We should probably consider auto adding the following
+    // styles:
+    // - display: block
+    // - height, max-height
+    // - position: relative
     $container.css({
       '-webkit-overflow-scrolling': 'touch',
-      'overflow-scrolling': 'touch'
+      'overflow-scrolling': 'touch',
+      overflow: 'scroll'
     });
 
     if (this.get('shouldGPUAccelerate')) {
