@@ -479,7 +479,7 @@ export default Mixin.create(keyForItem, {
 
     }
 
-    let currentViewportBound = edges.viewportTop + this._positionTracker.rect.top;
+    let currentViewportBound = edges.viewportTop + this._positionTracker.scrollableRect.top;
     let currentUpperBound = edges.invisibleTop;
 
     if (currentUpperBound < currentViewportBound) {
@@ -668,7 +668,8 @@ export default Mixin.create(keyForItem, {
     jQuery(window).bind('resize.occlusion-culling.' + id, onResizeMethod);
 
     let position = this._positionTracker;
-    position.element = element;
+    position.container = element;
+    position.scrollable = this.element;
     position.getBoundaries();
   },
 
@@ -839,7 +840,7 @@ export default Mixin.create(keyForItem, {
     var _invisibleBufferHeight = Math.round(viewportHeight * this.get('invisibleBuffer'));
 
     // segment top break points
-    edges.viewportTop = this._positionTracker.rect.top;
+    edges.viewportTop = this._positionTracker.scrollableRect.top;
     edges.visibleTop = edges.viewportTop - _visibleBufferHeight;
     edges.invisibleTop = edges.visibleTop - _invisibleBufferHeight;
 
