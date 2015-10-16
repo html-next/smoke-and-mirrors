@@ -31,6 +31,8 @@ let Satellite = Ember.Object.extend({
   position:   null,
   tracker: null,
 
+  index: computed.readOnly('component.index'),
+
   shift(dX, dY, parentRect) {
     let rect = this.rect;
     if (dX) {
