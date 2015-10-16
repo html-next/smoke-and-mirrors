@@ -116,7 +116,11 @@ export default Ember.Object.extend({
     satellites.forEach((item) => {
       let index = get(item, 'index');
       output[index] = item;
+      console.log('added item to satellites', index, item);
     });
+    if (!output[0]) {
+      debugger;
+    }
     return output;
   }),
 
