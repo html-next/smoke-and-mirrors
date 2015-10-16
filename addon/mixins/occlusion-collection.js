@@ -402,7 +402,7 @@ export default Mixin.create(keyForItem, {
 
       // in case of not full-window scrolling
       let component = childComponents[midIndex];
-      let componentBottom = component.get('_position.rect').bottom + adj;
+      let componentBottom = component._position.rect.bottom + adj;
 
       if (componentBottom > viewportStart) {
         maxIndex = midIndex - 1;
@@ -453,7 +453,7 @@ export default Mixin.create(keyForItem, {
     if (!this.get('shouldRenderList')) {
       return;
     }
-    this.get('_positionTracker').scroll();
+    this._positionTracker.scroll();
 
     let edges = this.get('_edges');
     let childComponents = this.get('children');
@@ -479,7 +479,7 @@ export default Mixin.create(keyForItem, {
 
     }
 
-    let currentViewportBound = edges.viewportTop + this.get('_position.rect').top;
+    let currentViewportBound = edges.viewportTop + this._positionTracker.rect.top;
     let currentUpperBound = edges.invisibleTop;
 
     if (currentUpperBound < currentViewportBound) {
@@ -498,8 +498,8 @@ export default Mixin.create(keyForItem, {
 
       let component = childComponents[bottomComponentIndex];
 
-      let componentTop = component.get('_position.rect').top;
-      let componentBottom = component.get('_position.rect').bottom;
+      let componentTop = component._position.rect.top;
+      let componentBottom = component._position.rect.bottom;
 
       // end the loop if we've reached the end of components we care about
       if (componentTop > edges.invisibleBottom) {
@@ -667,8 +667,8 @@ export default Mixin.create(keyForItem, {
 
     jQuery(window).bind('resize.occlusion-culling.' + id, onResizeMethod);
 
-    let position = this.get('_positionTracker');
-    position.set('element', element);
+    let position = this._positionTracker;
+    position.element = element;
     position.getBoundaries();
   },
 
@@ -680,7 +680,6 @@ export default Mixin.create(keyForItem, {
       this.set('_sm_canRender', true);
       //draw initial boundaries
       this._initializeScrollState();
-      this.get('_positionTracker').register(this);
       this.notifyPropertyChange('_edges');
     });
   },
@@ -840,7 +839,7 @@ export default Mixin.create(keyForItem, {
     var _invisibleBufferHeight = Math.round(viewportHeight * this.get('invisibleBuffer'));
 
     // segment top break points
-    edges.viewportTop = this.get('_position.rect').top;
+    edges.viewportTop = this._positionTracker.rect.top;
     edges.visibleTop = edges.viewportTop - _visibleBufferHeight;
     edges.invisibleTop = edges.visibleTop - _invisibleBufferHeight;
 
@@ -855,7 +854,6 @@ export default Mixin.create(keyForItem, {
     return edges;
   }),
 
-  _position: null,
   _positionTracker: null,
 
   /**!
@@ -877,7 +875,7 @@ export default Mixin.create(keyForItem, {
     this.set('itemTagName', itemTagName);
     this._taskrunner = Scheduler.create({});
 
-    this.set('_positionTracker', PositionTracker.create({}));
+    this._positionTracker = PositionTracker.create({});
   },
 
   _reflectContentChanges() {

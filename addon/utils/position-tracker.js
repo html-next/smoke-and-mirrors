@@ -118,11 +118,7 @@ export default Ember.Object.extend({
     satellites.forEach((item) => {
       let index = get(item, 'index');
       output[index] = item;
-      console.log('added item to satellites', index, item);
     });
-    if (!output[0]) {
-      debugger;
-    }
     return output;
   }),
 
@@ -153,13 +149,8 @@ export default Ember.Object.extend({
   adjustPositions(index, amount) {
     let satellites = this.get('satellites');
     let length = get(satellites, 'length');
-    console.log('adjustPositions', index, length);
     for( let i = index + 1; i < length; i++) {
       let satellite = valueForIndex(satellites, i);
-      console.log('i', i, satellite);
-      if (!satellite) {
-        debugger;
-      }
       satellite.shift(0, amount, this.rect);
     }
   },
