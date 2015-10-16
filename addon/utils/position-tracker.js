@@ -7,6 +7,10 @@ const {
   get: get
   } = Ember;
 
+function valueForIndex(arr, index) {
+  return arr.objectAt ? arr.objectAt(index) : arr[index];
+}
+
 function getBoundaries(element) {
   let Rect = element.getBoundingClientRect();
   return {
@@ -142,10 +146,15 @@ export default Ember.Object.extend({
 
   adjustPositions(index, amount) {
     let satellites = this.get('satellites');
-    console.log('adjustPositions', index, satellites.length);
-    for( let i = index + 1; i < satellites.length; i++) {
-      console.log('i', i, satellites[i]);
-      satellites[i].shift(0, amount, this.rect);
+    let length = get(satellites, 'length');
+    console.log('adjustPositions', index, length);
+    for( let i = index + 1; i < length; i++) {
+      let satellite = valueForIndex(satellites, i);
+      console.log('i', i, satellite);
+      if (!satellite) {
+        debugger;
+      }
+      satellite.shift(0, amount, this.rect);
     }
   },
 
