@@ -1,0 +1,25 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-7">
+          {{!- BEGIN-SNIPPET scrollable-body-example }}
+          {{#vertical-collection
+            content=model.images
+            defaultHeight=350
+            useContentProxy=true
+            containerSelector="body"
+            lastReached="loadBelow"
+            as |image|
+            }}
+                <div class="image-slide">
+                  {{async-image src=image.small}}
+                </div>
+            {{/vertical-collection}}
+          {{!- END-SNIPPET }}
+        </div>
+        <div class="col-sm-5">
+            <h3>Scrolling based on the whole page.</h3>
+            <h4>Code for Demo</h4>
+          {{code-snippet name="scrollable-body-example.hbs"}}
+        </div>
+    </div>
+</div>

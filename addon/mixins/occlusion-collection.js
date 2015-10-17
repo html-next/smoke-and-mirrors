@@ -93,13 +93,13 @@ export default Mixin.create(keyForItem, {
    * how much extra room to keep visible on
    * either side of the visible area
    */
-  visibleBuffer: 0.5,
+  visibleBuffer: 1,
 
   /**!
    * how much extra room to keep in DOM but
    * with `visible:false` set.
    */
-  invisibleBuffer: 0.5,
+  invisibleBuffer: 1,
 
   /**!
    * useContentProxy
@@ -637,7 +637,7 @@ export default Mixin.create(keyForItem, {
     $container.css({
       '-webkit-overflow-scrolling': 'touch',
       'overflow-scrolling': 'touch',
-      overflow: 'scroll'
+      'overflow-y': 'scroll'
     });
 
     if (this.get('shouldGPUAccelerate')) {

@@ -8,10 +8,6 @@
                     tagName="tbody"
                     content=model.databases
                     defaultHeight=37
-                    alwaysUseDefaultHeight=true
-                    invisibleBuffer=1
-                    visibleBuffer=1
-                    useContentProxy=false
                     containerSelector=".table-wrapper"
                     key="id"
                     as |db|
@@ -25,13 +21,17 @@
         <div class="col-sm-5">
             <h3>Vertical Collection</h3>
             <p>
-                The Vertical Collection not only proxies it's content to avoid unnecessarily
-                destroying views, but also smartly hides and removes off screen content.
+                The Vertical Collection smartly hides and removes off screen content.
             </p>
             <p>
                 This makes building high frame-rate or render expensive components easier by
                 focusing only on what's on screen now.
             </p>
+          <p>
+              If you are on an older version of Ember (pre-glimmer), setting `useContentProxy`
+              to true will give you an equally fast and impressive render time by proxying
+              the contents of the underlying array to avoid unnecessarily destroying views.
+          </p>
             <h4>Code for Demo</h4>
           {{code-snippet name="dbmon-example.hbs"}}
         </div>

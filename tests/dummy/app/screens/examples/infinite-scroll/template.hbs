@@ -6,9 +6,6 @@
               {{#vertical-collection
                 content=model.images
                 defaultHeight=350
-                alwaysUseDefaultHeight=true
-                containerSelector=".table-wrapper"
-                invisibleBuffer=1
                 visibleBuffer=2
                 useContentProxy=true
                 firstReached="loadAbove"
@@ -27,6 +24,15 @@
             <p>
                 The Vertical Collection can be used to quickly build a robust infinite scroll.
             </p>
+          <p>
+              Your infinite scroll can be bi-directional, loading new content above or
+              below.
+          </p>
+          <p>
+              Combined with `idForFirstItem`, this makes it very easy to load a user
+              in-media-res: ideal for caching their position in a long feed for when
+              they return.
+          </p>
             <h4>Code for Demo</h4>
           {{code-snippet name="infinite-scroll-example.hbs"}}
         </div>

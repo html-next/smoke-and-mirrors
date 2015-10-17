@@ -2,9 +2,11 @@
 var EmberApp = require('ember-cli/lib/broccoli/ember-addon');
 
 module.exports = function(defaults) {
+
+  defaults.snippetSearchPaths = ['tests/dummy/app'];
+  defaults.snippetPaths = ['tests/dummy/snippets'];
+
   var app = new EmberApp(defaults, {
-    snippetPaths: ['tests/dummy/snippets'],
-    snippetSearchPaths: ['app', 'tests/dummy/app', 'addon'],
     minifyJS: { enabled: false }
   });
 

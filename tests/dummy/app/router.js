@@ -10,6 +10,7 @@ export default Router.map(function() {
     this.route('dbmon');
     this.route('infinite-scroll');
     this.route('flexible-layout');
+    this.route('scrollable-body');
   });
   this.route('features', function() {
 
