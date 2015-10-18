@@ -15,7 +15,7 @@ const {
   get: get,
   Mixin,
   computed,
-  run,
+  run
   } = Ember;
 
 const actionContextCacheKeys = {
@@ -932,6 +932,4 @@ export default Mixin.create(keyForItem, {
       this.set('didReceiveAttrs', this._didReceiveAttrs);
     }
   }
-
-
 });
