@@ -1,11 +1,12 @@
 <div class="container-fluid">
     <div class="row">
-        <div class="col-sm-7">
+        <div class="col-sm-5">
           {{!- BEGIN-SNIPPET infinite-scroll-example }}
-            <div class="table-wrapper">
+            <div class="table-wrapper dark">
               {{#vertical-collection
                 content=model.images
-                defaultHeight=350
+                defaultHeight=270
+                alwaysUseDefaultHeight=true
                 visibleBuffer=2
                 useContentProxy=true
                 firstReached="loadAbove"
@@ -19,7 +20,7 @@
             </div>
           {{!- END-SNIPPET }}
         </div>
-        <div class="col-sm-5">
+        <div class="col-sm-7">
             <h3>Infinite Scroll</h3>
             <p>
                 The Vertical Collection can be used to quickly build a robust infinite scroll.
