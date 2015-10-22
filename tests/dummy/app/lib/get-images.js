@@ -28,7 +28,7 @@ function getRandomNumber(min, max) {
 }
 
 function getWidth() {
-  return getRandomNumber(1500, 3000);
+  return getRandomNumber(1500, 1920);
 }
 
 
@@ -63,7 +63,7 @@ function generateImageSrc(index) {
   var width = getWidth();
   parts.push(width);
   parts.push(width);
-  var small = 350;
+  var small = 250;
   preview.push(small);
   preview.push(small);
   var cat = CATEGORIES[getCategoryIndex()];

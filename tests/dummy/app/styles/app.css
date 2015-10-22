@@ -46,19 +46,25 @@ nav a {
   position: relative;
 }
 
+.table-wrapper.dark {
+  background: #2f3f40;
+}
+
 .table-wrapper table {
   height: 500px;
 }
 
-async-image {
-  background: #f8f8f8;
+img.async-image {
+  width: 250px;
+  height: 250px;
+  background: #1f2f30;
   border: 1px solid #bbb;
   box-shadow: 1px 1px 5px 0 #d0d0d0;
 }
 
 .image-slide {
-  width: 330px;
-  height: 350px;
+  width: 250px;
+  height: 270px;
   margin: 0 auto;
   padding: 10px 0;
   position: relative;
@@ -71,7 +77,7 @@ async-image {
   position: relative;
 }
 
-.image-slide.flexible async-image {
+.image-slide.flexible .async-image {
   min-height: 200px;
 }
 

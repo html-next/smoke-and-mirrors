@@ -1,5 +1,4 @@
 import Ember from 'ember';
-import layout from '../templates/components/async-image';
 
 const {
   Component,
@@ -8,17 +7,29 @@ const {
   run
   } = Ember;
 
+const TRANSPARENT_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
 export default Component.extend({
+  tagName: 'img',
 
-  layout: layout,
-  tagName: 'async-image',
+  // attributes
+  title: null,
+  alt: null,
+  src: null,
 
+  // image
+  _src: null,
+  _image: null,
+
+  attributeBindings: ['_src:src', 'title', 'alt'],
   classNames: ['async-image'],
   classNameBindings: ['imgState'],
 
-  src: '',
-  _src: '',
-
+  // state
+  isLoaded: false,
+  isLoading: false,
+  isFailed: false,
+  isEmpty: true,
   imgState: computed('isLoaded', 'isLoading', 'isFailed', 'isEmpty', function () {
     if (this.get('isFailed')) { return 'is-failed'; }
     if (this.get('isLoaded')) { return 'is-loaded'; }
@@ -27,17 +38,11 @@ export default Component.extend({
     return 'unknown';
   }),
 
-  isLoaded: false,
-  isLoading: false,
-  isFailed: false,
-  isEmpty: true,
-
-  _image: null,
-
+  _imageLoadHandler: null,
   willDestroy() {
-    let loaded = this._loaded;
+    let loaded = this._imageLoadHandler;
     let Img = this._image;
-    Img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    Img.src = TRANSPARENT_IMAGE;
 
     if (Img.attachEvent) {
       Img.detachEvent('onload', loaded);
@@ -56,28 +61,26 @@ export default Component.extend({
   },
 
   _loadImage: observer('src', function() {
-
     // reset if component's image has been changed
+    if (this.get('_src')) {
+      this.set('_src', TRANSPARENT_IMAGE);
+    }
+
     this.setProperties({
       isAppending: false,
-      isLoaded: false,
-      isLoading: false,
-      isFailed: false,
       isEmpty: true
     });
 
     let src = this.get('src');
-    let Img;
-
-    let loaded = () => {
-      run.scheduleOnce('actions', this, this._onload, Img);
-    };
-    this._loaded = loaded;
 
     if (src) {
       this.set('isLoading', true);
 
-      Img = new Image();
+      let Img = new Image();
+      let loaded = () => {
+        run.scheduleOnce('sync', this, this._onload, Img);
+      };
+      this._imageLoadHandler = loaded;
       this._image = Img;
 
       if (Img.attachEvent) {
