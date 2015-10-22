@@ -29,10 +29,17 @@
                   <h5 class="text-white">Dimensions from last Prerender</h5>
                   <pre><code>{{lastKnownDimensions}}</code></pre>
               </div>
-                <button {{action "render"}}>Render</button>
-                <button {{action "renderInto1"}}>Render Into 1</button>
-                <button {{action "renderInto2"}}>Render Into 2</button>
-                <button {{action "renderFragment"}}>Prepare</button>
+              {{#if shouldRenderIntoElement}}
+                  <button {{action "render"}}>Render into Self</button>
+                  <button {{action "renderInto1"}}>Render Into 1</button>
+                  <button {{action "renderInto2"}}>Render Into 2</button>
+                  <button {{action "renderFragment"}}>Remove</button>
+              {{else}}
+                  <button {{action "render"}}>Prepare for Self</button>
+                  <button {{action "renderInto1"}}>Prepare for 1</button>
+                  <button {{action "renderInto2"}}>Prepare for 2</button>
+                  <button {{action "renderFragment"}}>Render</button>
+              {{/if}}
 
             </div>
           {{code-snippet name="pre-render-usage-example.hbs"}}
