@@ -78,7 +78,7 @@ export default Component.extend({
 
       let Img = new Image();
       let loaded = () => {
-        run.scheduleOnce('sync', this, this._onload, Img);
+        this._onload(Img);
       };
       this._imageLoadHandler = loaded;
       this._image = Img;
