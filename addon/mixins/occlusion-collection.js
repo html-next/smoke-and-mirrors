@@ -4,7 +4,7 @@ import getTagDescendant from '../utils/get-tag-descendant';
 import Scheduler from '../utils/backburner-ext';
 import keyForItem from '../mixins/key-for-item';
 import jQuery from 'jquery';
-import PositionTracker from '../utils/position-tracker';
+import PositionTracker from '../primitives/position-tracker';
 import proxied from '../computed/proxied-array';
 import nextFrame from '../utils/next-frame';
 
