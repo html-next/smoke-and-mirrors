@@ -16,7 +16,7 @@ export default Route.extend({
 
     return RSVP.hash({
       imageTitle: 'Is this Art?',
-      imageSrc: images[0].large,
+      imageSrc: images[0].small,
       imageAlt: 'Artistic License Example',
       imagePlaceholder: ''
     });
