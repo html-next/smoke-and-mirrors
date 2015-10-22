@@ -1,29 +1,3 @@
-async-image {
-  display: inline-block;
-  position: relative;
-  width: 100%;
-  height: 100%;
-  }
-
-async-image > img {
-  display: none;
-  opacity: 0;
-  transition: opacity .25s ease-in;
-  position: relative;
-  }
-
-async-image.is-appending > img {
-  display: block;
-  }
-
-async-image.is-loaded > img {
-  display: block;
-  opacity: 1;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  }
-
 /* includes legacy support for older tagNames */
 occlusion-collection,
 vertical-collection,
