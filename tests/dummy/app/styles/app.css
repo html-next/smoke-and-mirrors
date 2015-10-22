@@ -110,3 +110,12 @@ nav.text-small {
 nav.text-small a {
   margin: 0 .5em;
 }
+
+img.auto-size {
+  width: 100%;
+  height: auto;
+}
+
+.display-inline {
+  display: inline-block;
+}
