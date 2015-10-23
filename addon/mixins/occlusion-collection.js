@@ -356,8 +356,15 @@ export default Mixin.create(keyForItem, {
       return;
     }
 
-
     let isProxied = this.get('useContentProxy');
+
+    if (name === 'didMountCollection') {
+      context.firstVisible.item = getContent(context.firstVisible.item, isProxied);
+      context.lastVisible.item = getContent(context.lastVisible.item, isProxied);
+      this._taskrunner.schedule('afterRender', this, this.sendAction, name, context);
+      return;
+    }
+
     context.item = getContent(context.item, isProxied);
 
     if (!context.item) {
@@ -598,12 +605,12 @@ export default Mixin.create(keyForItem, {
 
     if (this._isFirstRender) {
       this._isFirstRender = false;
+      this.sendActionOnce('didMountCollection', {
+        firstVisible: { item: childComponents[topComponentIndex], index: topComponentIndex },
+        lastVisible: { item: childComponents[bottomComponentIndex - 1], index: bottomComponentIndex - 1}
+      });
     }
   },
-
-
-  _lastTarget: null,
-  scrollTarget: null,
 
 
   _nextUpdate: null,
@@ -619,7 +626,7 @@ export default Mixin.create(keyForItem, {
    * forward is true, backwards is false
    */
   _scrollIsForward: 0,
-  _minimumMovement: 25,
+  minimumMovement: 25,
   _scheduleOcclusion() {
     // cache the scroll offset, and discard the cycle if
     // movement is within (x) threshold
@@ -627,7 +634,7 @@ export default Mixin.create(keyForItem, {
     let scrollTop = this._container.scrollTop;
     let _scrollTop = this.scrollPosition;
 
-    if (Math.abs(scrollTop - _scrollTop) >= this._minimumMovement) {
+    if (Math.abs(scrollTop - _scrollTop) >= this.minimumMovement) {
       this.set('_scrollIsForward', scrollTop > _scrollTop);
       this.scrollPosition = scrollTop;
       this._sm_scheduleUpdate('scroll');
