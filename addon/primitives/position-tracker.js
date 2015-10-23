@@ -36,7 +36,7 @@ export default Ember.Object.extend({
     return output;
   }),
 
-  position: 0,
+  position: null,
   rect: null,
   container: null,
   scrollable: null,
@@ -50,6 +50,7 @@ export default Ember.Object.extend({
   scroll() {
     let element = this.container;
     let lastPosition = this.position;
+
     let newPosition = {
       x: element.scrollLeft,
       y: element.scrollTop
@@ -88,6 +89,10 @@ export default Ember.Object.extend({
   },
 
   getBoundaries() {
+    this.position = {
+      x: this.container.scrollLeft,
+      y: this.container.scrollTop
+    };
     this.rect = getBoundaries(this.container);
     this.scrollableRect = getBoundaries(this.scrollable);
   },

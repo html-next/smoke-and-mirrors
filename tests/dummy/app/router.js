@@ -15,7 +15,7 @@ export default Router.map(function() {
     this.route('html-gl');
   });
 
-  this.route('features', function() {
+  this.route('mixins', function() {
     this.route('queues');
     this.route('photo-loader');
     this.route('scroller');
@@ -26,6 +26,10 @@ export default Router.map(function() {
     this.route('extended-router');
     this.route('stack');
     this.route('html-gl');
+  });
+
+  this.route('services', function() {
+    this.route('in-viewport');
   });
 
   this.route('available-components', function() {

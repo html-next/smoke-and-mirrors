@@ -8,6 +8,8 @@ import PositionTracker from '../primitives/position-tracker';
 import proxied from '../computed/proxied-array';
 import nextFrame from '../utils/next-frame';
 
+let cancelFrame = window.cancelAnimationFrame;
+
 /**
  * Investigations: http://jsfiddle.net/sxqnt/73/
  */
@@ -332,7 +334,7 @@ export default Mixin.create(keyForItem, {
 
     // trigger a cycle
     if (doRender && _shouldDidChange) {
-      this._taskrunner.next(this, this._updateChildStates);
+      this._taskrunner.next(this, this._updateChildStates, 'shouldRenderList');
     }
 
     return doRender;
@@ -341,7 +343,7 @@ export default Mixin.create(keyForItem, {
   //–––––––––––––– Helper Functions
   sendActionOnce(name, context) {
     // don't trigger during a prepend or initial render
-    if (this._isFirstRender) {
+    if (this._isFirstRender || this._isPrepending) {
       return;
     }
 
@@ -428,11 +430,15 @@ export default Mixin.create(keyForItem, {
 
   register(child) {
     this.get('_children').addObject(child);
-    this._taskrunner.scheduleOnce('actions', this, this._updateChildStates);
+    if (this.__isInitialized) {
+      this._sm_scheduleUpdate('register');
+    }
   },
   unregister(child) {
     this.get('_children').removeObject(child);
-    this._taskrunner.scheduleOnce('actions', this, this._updateChildStates);
+    if (this.__isInitialized) {
+      this._sm_scheduleUpdate('unregister');
+    }
   },
 
   _removeComponents(toCull, toHide) {
@@ -449,7 +455,7 @@ export default Mixin.create(keyForItem, {
    *
    * @private
    */
-  _updateChildStates() {
+  _updateChildStates(/*source*/) {
     if (!this.get('shouldRenderList')) {
       return;
     }
@@ -600,23 +606,32 @@ export default Mixin.create(keyForItem, {
   _lastTarget: null,
   scrollTarget: null,
 
+
+  _nextUpdate: null,
+  _sm_scheduleUpdate(source) {
+    if (this._isPrepending) {
+      return;
+    }
+    cancelFrame(this._nextUpdate);
+    this._nextUpdate = nextFrame(this, this._updateChildStates, source);
+  },
+
   /**
    * forward is true, backwards is false
    */
   _scrollIsForward: 0,
-
+  _minimumMovement: 25,
   _scheduleOcclusion() {
     // cache the scroll offset, and discard the cycle if
     // movement is within (x) threshold
     // TODO make this work horizontally too
     let scrollTop = this._container.scrollTop;
     let _scrollTop = this.scrollPosition;
-    let defaultHeight = this.__getEstimatedDefaultHeight();
 
-    if (Math.abs(scrollTop - _scrollTop) >= defaultHeight / 2) {
+    if (Math.abs(scrollTop - _scrollTop) >= this._minimumMovement) {
       this.set('_scrollIsForward', scrollTop > _scrollTop);
       this.scrollPosition = scrollTop;
-      this._updateChildStates();
+      this._sm_scheduleUpdate('scroll');
     }
   },
 
@@ -650,8 +665,8 @@ export default Mixin.create(keyForItem, {
     }
 
     let onScrollMethod = () => {
-      if (!this.__isInitialized) { return; }
-      nextFrame(this, this._scheduleOcclusion);
+      if (!this.__isInitialized || this._isPrepending) { return; }
+      this._scheduleOcclusion();
     };
 
     let onResizeMethod = () => {
@@ -712,7 +727,7 @@ export default Mixin.create(keyForItem, {
 
     this._taskrunner.next(this, () => {
       this.__isInitialized = true;
-      this._updateChildStates();
+      this._updateChildStates('initializeScrollState');
     });
 
   },
@@ -761,15 +776,20 @@ export default Mixin.create(keyForItem, {
     this._taskrunner.destroy();
   },
 
+
+  _isPrepending: false,
   __prependComponents(addCount) {
     if (this.get('_sm_canRender')) {
-      this._taskrunner.schedule('sync', this, function() {
+      this._isPrepending = true;
+      cancelFrame(this._nextUpdate);
+      nextFrame(this, function() {
         let container = this._container;
-        container.scrollTop += (addCount * this.__getEstimatedDefaultHeight());
+        let heightPerItem = this.__getEstimatedDefaultHeight();
+        container.scrollTop += addCount * heightPerItem;
         this.scrollPosition = container.scrollTop;
-        this._updateChildStates();
+        this._updateChildStates('prependComponents');
+        this._isPrepending = false;
       });
-
     }
   },
 
@@ -889,7 +909,7 @@ export default Mixin.create(keyForItem, {
       if (offset <= this.get('_firstVisibleIndex')) {
         this.__prependComponents(addCount);
       } else {
-        this._taskrunner.schedule('render', this, this._updateChildStates);
+        this._sm_scheduleUpdate('reflect changes');
       }
     };
   },
@@ -912,12 +932,13 @@ export default Mixin.create(keyForItem, {
     }
 
     // if the keys at the correct indexes are the same, this is a prepend
-    let oldInitialItem = getContent(valueForIndex(oldArray, 0));
+    let oldInitialItem = valueForIndex(oldArray, 0);
     let oldInitialKey = this.keyForItem(oldInitialItem, 0);
     let newInitialItem = valueForIndex(newArray, lengthDifference);
     let newInitialKey = this.keyForItem(newInitialItem, lengthDifference);
 
-    return oldInitialKey === newInitialKey;
+    let isPrepend = oldInitialKey === newInitialKey;
+    return isPrepend;
   },
 
   didReceiveAttrs() {},
