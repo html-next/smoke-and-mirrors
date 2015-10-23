@@ -622,7 +622,6 @@ export default Mixin.create(keyForItem, {
 
   //–––––––––––––– Setup/Teardown
   setupContainer() {
-    var id = this.get('elementId');
     var scrollThrottle = this.get('scrollThrottle');
     var containerSelector = this.get('containerSelector');
     var $container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
@@ -656,16 +655,17 @@ export default Mixin.create(keyForItem, {
     };
 
     let onResizeMethod = () => {
-      this._taskrunner.debounce(this, this.notifyPropertyChange, '_edges', scrollThrottle, false);
+      this._taskrunner.debounce(this, this.notifyPropertyChange, '_edges', scrollThrottle);
     };
 
     let element = $container.get(0);
     this._container = element;
     this._sm_scrollListener = onScrollMethod;
+    this._sm_resizeListener = onResizeMethod;
     element.addEventListener('scroll', onScrollMethod, true);
     element.addEventListener('touchmove', onScrollMethod, true);
-
-    jQuery(window).bind('resize.occlusion-culling.' + id, onResizeMethod);
+    element.addEventListener('resize', onResizeMethod, true);
+    window.addEventListener('resize', onResizeMethod, true);
 
     let position = this._positionTracker;
     position.container = element;
@@ -719,6 +719,7 @@ export default Mixin.create(keyForItem, {
 
 
   _sm_scrollListener: null,
+  _sm_resizeListener: null,
   /**!
    * Remove the event handlers for this instance
    * and teardown any temporarily cached data.
@@ -729,12 +730,12 @@ export default Mixin.create(keyForItem, {
    */
   willDestroyElement() {
     //cleanup scroll
-    let id = this.get('elementId');
     let _container = this._container;
 
     _container.removeEventListener('scroll', this._sm_scrollListener, true);
     _container.removeEventListener('touchmove', this._sm_scrollListener, true);
-    jQuery(window).unbind('resize.occlusion-culling.' + id);
+    _container.removeEventListener('resize', this._sm_resizeListener, true);
+    window.removeEventListener('resize', this._sm_resizeListener, true);
 
     //cache state
     /*
@@ -831,6 +832,7 @@ export default Mixin.create(keyForItem, {
     if (!$container) {
       return;
     }
+
     var edges = {};
     var containerHeight = this.get('containerHeight');
 
@@ -840,7 +842,9 @@ export default Mixin.create(keyForItem, {
     var _invisibleBufferHeight = Math.round(viewportHeight * this.get('invisibleBuffer'));
 
     // segment top break points
-    edges.viewportTop = this._positionTracker.scrollableRect.top;
+    this._positionTracker.getBoundaries();
+    this._positionTracker.resize();
+    edges.viewportTop = this._positionTracker.rect.top;
     edges.visibleTop = edges.viewportTop - _visibleBufferHeight;
     edges.invisibleTop = edges.visibleTop - _invisibleBufferHeight;
 
