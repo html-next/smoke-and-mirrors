@@ -3,8 +3,7 @@ import Ember from 'ember';
 const {
   Component,
   computed,
-  observer,
-  run
+  observer
   } = Ember;
 
 const TRANSPARENT_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';

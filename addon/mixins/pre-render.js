@@ -165,6 +165,8 @@ function getWidth(dims, withMargins) {
         dims.paddingLeft + dims.paddingRight;
       break;
     case 'content-box':
+      width = dims.width;
+      break;
     default:
       width = dims.width;
       break;
@@ -184,6 +186,8 @@ function getHeight(dims, withMargins) {
         dims.paddingTop + dims.paddingBottom;
       break;
     case 'content-box':
+      height = dims.height;
+      break;
     default:
       height = dims.height;
       break;
@@ -231,11 +235,5 @@ function applyDimensions(element, dimensions) {
     if (dimensions.style.hasOwnProperty(i)) {
       element.style[i] = i === 'boxSizing' ? dimensions.style[i] : dimensions.style[i] + 'px';
     }
-  }
-}
-
-function orphan(element) {
-  if (element.parentNode) {
-    element.parentNode.removeChild(element);
   }
 }

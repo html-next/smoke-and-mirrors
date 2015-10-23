@@ -1,7 +1,7 @@
 export default class Scroller {
 
   constructor(element) {
-
+/*
     this.height = 0;
     this.position = {};
     this.width = 0;
@@ -11,6 +11,7 @@ export default class Scroller {
     let acceleration;
     let mass;
     let resistance;
+    */
   }
 
   deltaForFrame() {

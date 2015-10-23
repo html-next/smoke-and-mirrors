@@ -78,13 +78,11 @@ img.async-image {
 
 .image-slide.flexible {
   height: auto;
-  margin: 0 auto;
-  padding: 10px 0;
-  position: relative;
 }
 
-.image-slide.flexible .async-image {
-  min-height: 200px;
+.image-slide.flexible img.async-image {
+  height: auto;
+  min-height: 250px;
 }
 
 .image-slide .loading-spinner {

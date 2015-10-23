@@ -4,7 +4,6 @@ import Ember from 'ember';
 const {
   computed,
   guidFor,
-  get: get
   } = Ember;
 
 function getBoundaries(element) {

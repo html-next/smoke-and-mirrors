@@ -9,12 +9,11 @@
                 alwaysUseDefaultHeight=false
                 visibleBuffer=2
                 useContentProxy=true
-                firstReached="loadAbove"
                 lastReached="loadBelow"
                 as |image|
               }}
                   <div class="image-slide flexible">
-                    {{async-image src=image.large}}
+                    {{async-image src=image.small}}
                   </div>
               {{/vertical-collection}}
             </div>
@@ -25,6 +24,10 @@
             <p>
                 The Vertical Collection doesn't care if your items are of a uniform
                 size or type.
+            </p>
+            <p>
+                This layout agnostic behavior will improve even more in upcoming releases
+                with integration with the pre-render component.
             </p>
             <h4>Code for Demo</h4>
           {{code-snippet name="flexible-layout-example.hbs"}}

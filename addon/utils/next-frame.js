@@ -1,5 +1,3 @@
-import Ember from "ember";
-
 /**!
  * schedule a task to be run during the next animation frame.  This is similar to calling
  * `Ember.run.next`, more similar to `Ember.run.later(context, method, ...params, 1000 / 16)`,
