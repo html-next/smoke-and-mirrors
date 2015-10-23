@@ -1,0 +1,13 @@
+{{!- BEGIN-SNIPPET vertical-collection-defaults-example }}
+{{#vertical-collection
+  tagName="tbody"
+  content=model.databases
+  defaultHeight=37
+  alwaysUseDefaultHeight=true
+  containerSelector=".table-wrapper"
+  key="id"
+  as |db|
+}}
+  {{examples/dbmon/components/dbmon-row tagName="" db=db}}
+{{/vertical-collection}}
+{{!- END-SNIPPET vertical-collection-defaults-example }}
