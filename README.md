@@ -1,7 +1,6 @@
 Smoke-and-mirrors
 =================
 
-[![Stories in Ready](https://badge.waffle.io/runspired/smoke-and-mirrors.png?label=ready&title=Ready)](https://waffle.io/runspired/smoke-and-mirrors)
 [![npm version](https://badge.fury.io/js/smoke-and-mirrors.svg)](http://badge.fury.io/js/smoke-and-mirrors)
 [![Build Status](https://travis-ci.org/runspired/smoke-and-mirrors.svg?branch=master)](https://travis-ci.org/runspired/smoke-and-mirrors)
 [![Ember Observer Score](http://emberobserver.com/badges/smoke-and-mirrors.svg)](http://emberobserver.com/addons/smoke-and-mirrors)
@@ -11,28 +10,15 @@ Sometimes being "ambitious" gets you in trouble.  When it does, `Smoke-and-mirro
 to put out your `Ember` fire.
 
 `Smoke-and-mirrors` is an `ember-cli-addon` that exposes performance minded `components` and primitives 
-to help you deliver your ambitions.
-
-#### [Changelog](./CHANGELOG.md)
+to help you deliver your ambitions without sacrifice or compromise.
 
 ## WIP (pre 1.0.0)
 
-This addon is beta software.
-
-## Features
-- [Queues](./docs/features/queues.md)
-- [Performance Minded Arrays](./docs/features/performant-arrays.md)
-- [Local Storage](./docs/features/local-storage.md)
-- []
-
-## Guides
-
-This addon provides out-of-the-box support for high quality performant
-tables, selects, lists, each, and bi-directional infinite scrolling.
-
-- [Low hanging fruit: easy optimizations](./docs/optimization.md)
-- [Occlusion: what is it?](./docs/occlusion.md)
+This addon is beta software, but development and testing is ramping up as 1.0 nears.
+Features and APIs will lock with the release of 0.4 and only bug fixes will be performed
+until the 1.0 cycle completes.
 
 ## Documentation
 
-- [Occlusion Collection](./docs/occlusion-collection.md)
+For up-today documentation and demos running the latest release, 
+visit [http://runspired.github.io/smoke-and-mirrors/](http://runspired.github.io/smoke-and-mirrors/)
