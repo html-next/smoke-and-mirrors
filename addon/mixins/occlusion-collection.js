@@ -356,8 +356,15 @@ export default Mixin.create(keyForItem, {
       return;
     }
 
-
     let isProxied = this.get('useContentProxy');
+
+    if (name === 'didMountCollection') {
+      context.firstVisible.item = getContent(context.firstVisible.item, isProxied);
+      context.lastVisible.item = getContent(context.lastVisible.item, isProxied);
+      this._taskrunner.schedule('afterRender', this, this.sendAction, name, context);
+      return;
+    }
+
     context.item = getContent(context.item, isProxied);
 
     if (!context.item) {
@@ -598,6 +605,10 @@ export default Mixin.create(keyForItem, {
 
     if (this._isFirstRender) {
       this._isFirstRender = false;
+      this.sendActionOnce('didMountCollection', {
+        topVisible: { item: childComponents[topComponentIndex], index: topComponentIndex },
+        bottomVisible: { item: childComponents[bottomComponentIndex - 1], index: bottomComponentIndex - 1}
+      });
     }
   },
 
