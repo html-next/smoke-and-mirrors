@@ -613,10 +613,6 @@ export default Mixin.create(keyForItem, {
   },
 
 
-  _lastTarget: null,
-  scrollTarget: null,
-
-
   _nextUpdate: null,
   _sm_scheduleUpdate(source) {
     if (this._isPrepending) {
@@ -630,7 +626,7 @@ export default Mixin.create(keyForItem, {
    * forward is true, backwards is false
    */
   _scrollIsForward: 0,
-  _minimumMovement: 25,
+  minimumMovement: 25,
   _scheduleOcclusion() {
     // cache the scroll offset, and discard the cycle if
     // movement is within (x) threshold
@@ -638,7 +634,7 @@ export default Mixin.create(keyForItem, {
     let scrollTop = this._container.scrollTop;
     let _scrollTop = this.scrollPosition;
 
-    if (Math.abs(scrollTop - _scrollTop) >= this._minimumMovement) {
+    if (Math.abs(scrollTop - _scrollTop) >= this.minimumMovement) {
       this.set('_scrollIsForward', scrollTop > _scrollTop);
       this.scrollPosition = scrollTop;
       this._sm_scheduleUpdate('scroll');
