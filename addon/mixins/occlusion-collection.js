@@ -606,8 +606,8 @@ export default Mixin.create(keyForItem, {
     if (this._isFirstRender) {
       this._isFirstRender = false;
       this.sendActionOnce('didMountCollection', {
-        topVisible: { item: childComponents[topComponentIndex], index: topComponentIndex },
-        bottomVisible: { item: childComponents[bottomComponentIndex - 1], index: bottomComponentIndex - 1}
+        firstVisible: { item: childComponents[topComponentIndex], index: topComponentIndex },
+        lastVisible: { item: childComponents[bottomComponentIndex - 1], index: bottomComponentIndex - 1}
       });
     }
   },
