@@ -36,10 +36,9 @@ export default Ember.Object.extend({
     return output;
   }),
 
-  position: null,
-  rect: null,
+  geography: null,
   container: null,
-  scrollable: null,
+  region: null,
 
   // call this to add your component to the notifier during `didInsertElement`
   register(component, opts) {

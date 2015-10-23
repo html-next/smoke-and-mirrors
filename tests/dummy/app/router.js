@@ -30,6 +30,7 @@ export default Router.map(function() {
 
   this.route('services', function() {
     this.route('in-viewport');
+    this.route('photo-loader');
   });
 
   this.route('available-components', function() {
