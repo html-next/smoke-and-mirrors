@@ -39,10 +39,10 @@ export default class FrameQueue {
 
   static _createItem(queueName, context, method, args) {
     return {
-      context: context,
-      method: method,
-      args: args,
-      queue: queueName
+      context,
+      method,
+      args,
+      queueName
     };
   }
 
@@ -58,7 +58,7 @@ export default class FrameQueue {
 
   _remove(item) {
     this.items.splice(this.items.indexOf(item), 1);
-    let queue = this.queues[item.queueNames];
+    let queue = this.queues[item.queueName];
     queue.splice(queue.indexOf(item), 1);
   }
 
