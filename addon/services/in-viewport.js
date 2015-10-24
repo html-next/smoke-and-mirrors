@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import Satellite from '../models/position-satellite';
+import Satellite from '../primitives/position-satellite';
 import PositionTracker from '../primitives/position-tracker';
 
 const {

@@ -3,9 +3,9 @@ import Ember from 'ember';
 import getTagDescendant from '../utils/get-tag-descendant';
 import Scheduler from '../utils/backburner-ext';
 import keyForItem from '../mixins/key-for-item';
-import PositionTracker from '../primitives/position-tracker';
 import proxied from '../computed/proxied-array';
 import nextFrame from '../utils/next-frame';
+import ListRadar from '../models/list-radar';
 
 let cancelFrame = window.cancelAnimationFrame;
 
@@ -144,12 +144,6 @@ export default Mixin.create(keyForItem, {
   renderAllInitially: false,
   _isFirstRender: true,
 
-  /**!
-   *
-   */
-  //TODO enable this feature.
-  useLocalStorageCache: false,
-
 
   //–––––––––––––– Initial State
 
@@ -256,12 +250,6 @@ export default Mixin.create(keyForItem, {
    */
   _$container: null,
   _container: null,
-
-  /**!
-   * caches the height or width of each item in the list
-   */
-  //TODO enable this feature.
-  __dimensions: null, // TODO since this is a mixin this object {} needs initialized
 
   /**!
    * Cached reference to the last bottom item used
@@ -390,7 +378,7 @@ export default Mixin.create(keyForItem, {
 
    @method _findFirstRenderedComponent
    @param {Number} viewportStart The top/left of the viewport to search against
-   @Param {Number} height adjustment TODO wtf is this
+   @Param {Number} height adjustment
    @returns {Number} the index into childViews of the first view to render
    **/
   _findFirstRenderedComponent(viewportStart, adj) {
@@ -410,7 +398,7 @@ export default Mixin.create(keyForItem, {
 
       // in case of not full-window scrolling
       let component = childComponents[midIndex];
-      let componentBottom = component._position.rect.bottom + adj;
+      let componentBottom = component.satellite.geography.bottom + adj;
 
       if (componentBottom > viewportStart) {
         maxIndex = midIndex - 1;
@@ -423,7 +411,6 @@ export default Mixin.create(keyForItem, {
   },
 
   _children: null,
-
   children: computed('_children.@each.index', function() {
     let children = this.get('_children');
     let output = new Array(get(children, 'length'));
@@ -465,7 +452,6 @@ export default Mixin.create(keyForItem, {
     if (!this.get('shouldRenderList')) {
       return;
     }
-    this._positionTracker.scroll();
 
     let edges = this.get('_edges');
     let childComponents = this.get('children');
@@ -491,7 +477,7 @@ export default Mixin.create(keyForItem, {
 
     }
 
-    let currentViewportBound = edges.viewportTop + this._positionTracker.scrollableRect.top;
+    let currentViewportBound = edges.viewportTop + this.radar.sky.top;
     let currentUpperBound = edges.invisibleTop;
 
     if (currentUpperBound < currentViewportBound) {
@@ -510,8 +496,8 @@ export default Mixin.create(keyForItem, {
 
       let component = childComponents[bottomComponentIndex];
 
-      let componentTop = component._position.rect.top;
-      let componentBottom = component._position.rect.bottom;
+      let componentTop = component.satellite.geography.top;
+      let componentBottom = component.satellite.geography.bottom;
 
       // end the loop if we've reached the end of components we care about
       if (componentTop > edges.invisibleBottom) {
@@ -627,33 +613,21 @@ export default Mixin.create(keyForItem, {
    */
   _scrollIsForward: 0,
   minimumMovement: 25,
-  _scheduleOcclusion() {
-    // cache the scroll offset, and discard the cycle if
-    // movement is within (x) threshold
-    // TODO make this work horizontally too
-    let scrollTop = this._container.scrollTop;
-    let _scrollTop = this.scrollPosition;
-
-    if (Math.abs(scrollTop - _scrollTop) >= this.minimumMovement) {
-      this.set('_scrollIsForward', scrollTop > _scrollTop);
-      this.scrollPosition = scrollTop;
-      this._sm_scheduleUpdate('scroll');
-    }
+  _scheduleOcclusion(dY /*, dX*/) {
+    if (!this.__isInitialized || this._isPrepending) { return; }
+    this.set('_scrollIsForward', dY > 0);
+    this._sm_scheduleUpdate('scroll');
   },
+
 
   //–––––––––––––– Setup/Teardown
   setupContainer() {
-    var scrollThrottle = this.get('scrollThrottle');
+    var resizeDebounce = this.get('scrollThrottle');
     var containerSelector = this.get('containerSelector');
     var $container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
     this._$container = $container;
+    this._container = $container.get(0);
 
-    // TODO: The container needs well formed CSS
-    // We should probably consider auto adding the following
-    // styles:
-    // - display: block
-    // - height, max-height
-    // - position: relative
     $container.css({
       '-webkit-overflow-scrolling': 'touch',
       'overflow-scrolling': 'touch',
@@ -670,28 +644,22 @@ export default Mixin.create(keyForItem, {
       });
     }
 
-    let onScrollMethod = () => {
-      if (!this.__isInitialized || this._isPrepending) { return; }
-      this._scheduleOcclusion();
+    let onScrollMethod = (dY, dX) => {
+      this._scheduleOcclusion(dY, dX);
     };
 
     let onResizeMethod = () => {
-      this._taskrunner.debounce(this, this.notifyPropertyChange, '_edges', scrollThrottle);
+      this.notifyPropertyChange('_edges');
     };
 
-    let element = $container.get(0);
-    this._container = element;
-    this._sm_scrollListener = onScrollMethod;
-    this._sm_resizeListener = onResizeMethod;
-    element.addEventListener('scroll', onScrollMethod, true);
-    element.addEventListener('touchmove', onScrollMethod, true);
-    element.addEventListener('resize', onResizeMethod, true);
-    window.addEventListener('resize', onResizeMethod, true);
-
-    let position = this._positionTracker;
-    position.container = element;
-    position.scrollable = this.element;
-    position.getBoundaries();
+    this.radar.setState({
+      telescope: this._container,
+      resizeDebounce: resizeDebounce,
+      skyline: this.element,
+      minimumMovement: this.minimumMovement
+    });
+    this.radar.didResizeSatellites = onResizeMethod;
+    this.radar.didShiftSatellites = onScrollMethod;
   },
 
 
@@ -751,31 +719,7 @@ export default Mixin.create(keyForItem, {
    */
   willDestroyElement() {
     //cleanup scroll
-    let _container = this._container;
-
-    _container.removeEventListener('scroll', this._sm_scrollListener, true);
-    _container.removeEventListener('touchmove', this._sm_scrollListener, true);
-    _container.removeEventListener('resize', this._sm_resizeListener, true);
-    window.removeEventListener('resize', this._sm_resizeListener, true);
-
-    //cache state
-    /*
-    let storageKey = this.get('storageKey');
-    if (storageKey) {
-
-      let cacheAttrs = this.getProperties(
-        'scrollPosition',
-        '__dimensions',
-        '_firstVisible',
-        '_lastVisible'
-      );
-
-      cacheAttrs._firstVisible = this.keyForItem(cacheAttrs._firstVisible);
-      cacheAttrs._lastVisible = this.keyForItem(cacheAttrs._lastVisible);
-
-      localStorage.setItem(storageKey, JSON.stringify(cacheAttrs));
-    }
-    */
+    this.radar.destroy();
 
     //clean up scheduled tasks
     this._taskrunner.cancelAll();
@@ -789,10 +733,8 @@ export default Mixin.create(keyForItem, {
       this._isPrepending = true;
       cancelFrame(this._nextUpdate);
       nextFrame(this, function() {
-        let container = this._container;
         let heightPerItem = this.__getEstimatedDefaultHeight();
-        container.scrollTop += addCount * heightPerItem;
-        this.scrollPosition = container.scrollTop;
+        this.radar.shiftSatellites(addCount * heightPerItem, 0);
         this._updateChildStates('prependComponents');
         this._isPrepending = false;
       });
@@ -859,18 +801,17 @@ export default Mixin.create(keyForItem, {
       return;
     }
 
+    // segment top break points
+    this.radar.planet.setState();
+
     var edges = {};
-    var containerHeight = this.get('containerHeight');
 
     // segment heights
-    var viewportHeight = parseInt(containerHeight, 10) || $container.height();
+    var viewportHeight = this.radar.planet.height;
     var _visibleBufferHeight = Math.round(viewportHeight * this.get('visibleBuffer'));
     var _invisibleBufferHeight = Math.round(viewportHeight * this.get('invisibleBuffer'));
 
-    // segment top break points
-    this._positionTracker.getBoundaries();
-    this._positionTracker.resize();
-    edges.viewportTop = this._positionTracker.rect.top;
+    edges.viewportTop = this.radar.planet.top;
     edges.visibleTop = edges.viewportTop - _visibleBufferHeight;
     edges.invisibleTop = edges.visibleTop - _invisibleBufferHeight;
 
@@ -881,11 +822,10 @@ export default Mixin.create(keyForItem, {
     edges.invisibleBottom = edges.visibleBottom + _invisibleBufferHeight;
 
     this.set('__edges', edges);
-
     return edges;
   }),
 
-  _positionTracker: null,
+  radar: null,
 
   /**!
    * Initialize
@@ -905,8 +845,7 @@ export default Mixin.create(keyForItem, {
     }
     this.set('itemTagName', itemTagName);
     this._taskrunner = Scheduler.create({});
-
-    this._positionTracker = PositionTracker.create({});
+    this.radar = new ListRadar({});
   },
 
   _reflectContentChanges() {

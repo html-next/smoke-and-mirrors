@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import StateMapMixin from '../mixins/state-map';
 import layout from '../templates/components/vertical-item';
+import LinkedComponentMixin from '../mixins/linked-component-list';
 
 const {
   Component
@@ -14,7 +15,7 @@ const {
  @extends Ember.Component
  @namespace Ember
  **/
-export default Component.extend(StateMapMixin, {
+export default Component.extend(LinkedComponentMixin, StateMapMixin, {
 
   layout: layout,
   tagName: 'vertical-item',
@@ -29,14 +30,17 @@ export default Component.extend(StateMapMixin, {
   defaultHeight: 75,
   index: null,
 
-  _position: null,
-  _positionTracker: null,
+  radar: null,
+  satellite: null,
+  registerSatellite(satellite) {
+    this.satellite = satellite;
+  },
 
   _height: 0,
 
   didInsertElement() {
     this._super();
-    this.get('_positionTracker').register(this);
+    this.get('radar').register(this);
   },
 
   willInsertElement() {
@@ -56,7 +60,7 @@ export default Component.extend(StateMapMixin, {
     this._super();
     this._ov_teardown();
     this.set('viewState', 'culled');
-    this.get('_positionTracker').unregister(this);
+    this.get('radar').unregister(this);
   },
 
   willDestroy() {
