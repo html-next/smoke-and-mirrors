@@ -25,9 +25,9 @@ export default class FrameQueue {
 
   findByMethod(queueName, context, method) {
     return this.items.find((i) => {
-      return i.queueName === queueName
-        && i.method === method
-        && i.context === context;
+      return i.queueName === queueName &&
+        i.method === method &&
+        i.context === context;
     });
   }
 

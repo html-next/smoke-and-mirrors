@@ -1,4 +1,3 @@
-/* global Math */
 import Ember from 'ember';
 import Geography from './geography';
 
