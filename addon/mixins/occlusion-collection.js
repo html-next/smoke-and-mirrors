@@ -686,7 +686,7 @@ export default Mixin.create(keyForItem, {
     var idForFirstItem = this.get('idForFirstItem');
 
     if (scrollPosition) {
-      this._container.scrollTop = scrollPosition;
+      this.radar.scrollContainer.scrollTop = scrollPosition;
     } else if (this.get('renderFromLast')) {
       var last = this.$().get(0).lastElementChild;
       this.set('__isInitializingFromLast', true);
@@ -702,7 +702,7 @@ export default Mixin.create(keyForItem, {
           firstVisibleIndex = i;
         }
       }
-      this._container.scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
+      this.radar.scrollContainer.scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
     }
 
     run.next(this, () => {

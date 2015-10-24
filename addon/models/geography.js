@@ -1,16 +1,13 @@
 function getRect(element) {
   if (element === window) {
-    let rect = {
+    return {
       height: window.innerHeight,
       width: window.innerWidth,
-      top: - document.body.scrollTop,
-      left: - document.body.scrollLeft,
+      top: 0,
+      left: 0,
       right: window.innerWidth,
       bottom: window.innerHeight
     };
-    rect.right += rect.left;
-    rect.bottom += rect.top;
-    return rect;
   } else {
     return element.getBoundingClientRect();
   }
@@ -25,7 +22,6 @@ export default class Geography {
   }
 
   setState(state) {
-    let constrainToViewport = !state && this.element === document.body;
     state = state || getRect(this.element);
     this.top = state.top || 0;
     this.bottom = state.bottom || 0;
@@ -33,9 +29,6 @@ export default class Geography {
     this.right = state.right || 0;
     this.width = state.width || 0;
     this.height = state.height || 0;
-
-
-
   }
 
   getState() {
