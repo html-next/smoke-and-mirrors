@@ -733,7 +733,8 @@ export default Mixin.create(keyForItem, {
       cancelFrame(this._nextUpdate);
       nextFrame(this, function() {
         let heightPerItem = this.__getEstimatedDefaultHeight();
-        this.radar.shiftSatellites(addCount * heightPerItem, 0);
+        this.radar.telescope.scrollTop += (addCount * heightPerItem);
+        this.radar.filterMovement();
         this._updateChildStates('prependComponents');
         this._isPrepending = false;
       });

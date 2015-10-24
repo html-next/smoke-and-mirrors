@@ -106,14 +106,13 @@ export default class Radar {
     this.didShiftSatellites(dY, dX);
   }
 
-  detectMovement() {
+  filterMovement() {
     // cache the scroll offset, and discard the cycle if
     // movement is within (x) threshold
     let scrollY = this.telescope.scrollTop;
     let scrollX = this.telescope.scrollLeft;
     let _scrollY = this.scrollY;
     let _scrollX = this.scrollX;
-
     if (this.isEarthquake(_scrollY, scrollY) || this.isEarthquake(_scrollX, scrollX)) {
       this.scrollY = scrollY;
       this.scrollX = scrollX;
@@ -128,7 +127,7 @@ export default class Radar {
 
     this._scrollHandler = () => {
       if (this.isTracking) {
-        this.detectMovement();
+        this.filterMovement();
       }
     };
     this._resizeHandler = () => {
