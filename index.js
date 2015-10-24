@@ -6,6 +6,10 @@ module.exports = {
 
   included : function (app) {
     app.import(app.bowerDirectory + '/animation-frame/AnimationFrame.min.js');
+
+    if (!/production/.test(app.env)) {
+      app.import('./vendor/debug.css');
+    }
   },
 
   isDevelopingAddon: function() {

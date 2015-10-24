@@ -1,0 +1,30 @@
+/* these classes are used as a visual aid for debugging edge calculations */
+.zoomed-edge-visualization {
+  zoom: 10%;
+  top: 50%;
+  position: fixed;
+}
+
+.highlight-viewport, .highlight-visible, .highlight-invisible {
+  position: absolute;
+  opacity: 0.6;
+  border-color: black;
+  border-width: 2px;
+  border-style: solid; 
+  pointer-events: none;
+}
+
+.highlight-viewport {
+  background-color: #D4A190;
+  z-index: 100002;
+}
+
+.highlight-visible {
+  background-color: #A1D490;
+  z-index: 100001;
+}
+
+.highlight-invisible {
+  background-color: #90C3D4;
+  z-index: 100000;
+}
