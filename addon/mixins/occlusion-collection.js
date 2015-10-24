@@ -1,7 +1,6 @@
 /*global Array, parseFloat, Math */
 import Ember from 'ember';
 import getTagDescendant from '../utils/get-tag-descendant';
-import Scheduler from '../utils/backburner-ext';
 import keyForItem from '../mixins/key-for-item';
 import proxied from '../computed/proxied-array';
 import nextFrame from '../utils/next-frame';
@@ -321,7 +320,7 @@ export default Mixin.create(keyForItem, {
 
     // trigger a cycle
     if (doRender && _shouldDidChange) {
-      this._taskrunner.next(this, this._updateChildStates, 'shouldRenderList');
+      run.next(this, this._updateChildStates, 'shouldRenderList');
     }
 
     return doRender;
@@ -349,7 +348,7 @@ export default Mixin.create(keyForItem, {
     if (name === 'didMountCollection') {
       context.firstVisible.item = getContent(context.firstVisible.item, isProxied);
       context.lastVisible.item = getContent(context.lastVisible.item, isProxied);
-      this._taskrunner.schedule('afterRender', this, this.sendAction, name, context);
+      run.schedule('afterRender', this, this.sendAction, name, context);
       return;
     }
 
@@ -368,7 +367,7 @@ export default Mixin.create(keyForItem, {
     }
 
     // this MUST be async or glimmer will freak
-    this._taskrunner.schedule('afterRender', this, this.sendAction, name, context);
+    run.schedule('afterRender', this, this.sendAction, name, context);
   },
 
   /**
@@ -462,7 +461,7 @@ export default Mixin.create(keyForItem, {
 
         //set scroll
         if (this.get('__isInitializingFromLast')) {
-          this._taskrunner.schedule('afterRender', this, function() {
+          run.schedule('afterRender', this, function() {
             let last = this.$().get(0).lastElementChild;
             this.set('__isInitializingFromLast', false);
             if (last) {
@@ -575,12 +574,12 @@ export default Mixin.create(keyForItem, {
       .concat((childComponents.slice(0, topComponentIndex)))
       .concat(childComponents.slice(bottomComponentIndex));
 
-    this._taskrunner.debounce(this, this._removeComponents, toCull, toHide, this.get('scrollThrottle') * 6);
+    run.debounce(this, this._removeComponents, toCull, toHide, this.get('scrollThrottle') * 6);
     toShow.forEach((i) => { i.show(); });
 
     //set scroll
     if (this.get('__isInitializingFromLast')) {
-      this._taskrunner.schedule('afterRender', this, function() {
+      run.schedule('afterRender', this, function() {
         let last = this.$().get(0).lastElementChild;
         this.set('__isInitializingFromLast', false);
         if (last) {
@@ -699,7 +698,7 @@ export default Mixin.create(keyForItem, {
       this._container.scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
     }
 
-    this._taskrunner.next(this, () => {
+    run.next(this, () => {
       this.__isInitialized = true;
       this._updateChildStates('initializeScrollState');
     });
@@ -721,9 +720,8 @@ export default Mixin.create(keyForItem, {
     //cleanup scroll
     this.radar.destroy();
 
-    //clean up scheduled tasks
-    this._taskrunner.cancelAll();
-    this._taskrunner.destroy();
+    //clean up scheduled tasks in the run loop
+    
   },
 
 
@@ -844,7 +842,6 @@ export default Mixin.create(keyForItem, {
       }
     }
     this.set('itemTagName', itemTagName);
-    this._taskrunner = Scheduler.create({});
     this.radar = new ListRadar({});
   },
 
