@@ -9,14 +9,8 @@ const {
 export default Route.extend({
 
   model() {
-
-    let images = getImages(1);
-
     return RSVP.hash({
-      imageTitle: 'Is this Art?',
-      imageSrc: images[0].small,
-      imageAlt: 'Artistic License Example',
-      imagePlaceholder: ''
+      images: getImages(200)
     });
   },
 

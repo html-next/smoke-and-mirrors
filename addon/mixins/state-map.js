@@ -28,7 +28,7 @@ export default Mixin.create({
   contentCulled: false,
 
   heightProperty: 'minHeight',
-  _position: null,
+  radar: null,
 
   show() {
     this._setState('visible');
@@ -85,7 +85,7 @@ export default Mixin.create({
   _ov_teardown() {
     let heightProp = this.heightProperty;
     if (this.get('contentInserted') && this.element) {
-      this.element.style[heightProp] = this._position.rect.height + 'px';
+      this.element.style[heightProp] = this.satellite.geography.height + 'px';
     }
     this.setProperties({ contentCulled: true, contentHidden: false, contentInserted: false });
   },
@@ -118,7 +118,7 @@ export default Mixin.create({
   _updateHeight() {
     let needsRealHeight = !this.get('alwaysUseDefaultHeight');
     if (needsRealHeight && !this._hasRealHeight) {
-      this._position._satellite.resize();
+      this.satellite.resize();
       this._hasRealHeight = true;
     }
   },

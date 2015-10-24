@@ -1,140 +1,55 @@
-import Ember from "ember";
+import Ember from 'ember';
+import Satellite from '../primitives/position-satellite';
+import PositionTracker from '../primitives/position-tracker';
 
 const {
+  computed,
   guidFor,
-  run
+  get: get,
   } = Ember;
 
-var ViewportDimensions = {
-  height: window.innerHeight,
-  width: window.innerWidth
-};
-var TrackedComponents = Ember.A();
-var ScrollPosition = {
-  x: document.body.scrollLeft,
-  y: document.body.scrollTop
-};
+function valueForIndex(arr, index) {
+  return arr.objectAt ? arr.objectAt(index) : arr[index];
+}
 
-function getViewportPosition(rect /*, zoneRatio*/) {
-
-  // TODO this makes no sense, should swap based on being above or below
-  var distanceX = rect.bottom || rect.top;
-  var distanceY = rect.left || rect.right;
-
-  // TODO Zone Ratio
-  var zoneX = Math.floor( distanceX / ViewportDimensions.height );
-  var zoneY = Math.floor( distanceY / ViewportDimensions.width );
-
+function getBoundaries(element) {
+  let Rect = element.getBoundingClientRect();
   return {
-    zoneX: zoneX,
-    zoneY: zoneY,
-    distanceX: distanceX,
-    distanceY: distanceY
+    width: Rect.width,
+    height: Rect.height,
+    top: Rect.top,
+    bottom: Rect.bottom,
+    left: Rect.left,
+    right: Rect.right
   };
-
 }
 
-function resizeTrackedComponents() {
-  TrackedComponents.forEach((item) => {
-    item.resize();
-  });
-}
-
-function updateTrackedComponents() {
-
-  var lastScrollPosition = {
-    x: ScrollPosition.x,
-    y: ScrollPosition.y
-  };
-
-  ScrollPosition.x = document.body.scrollLeft;
-  ScrollPosition.y = document.body.scrollTop;
-
-  var dX = lastScrollPosition.x - ScrollPosition.x;
-  var dY = lastScrollPosition.y - ScrollPosition.y;
-
-  TrackedComponents.forEach((item) => {
-    item.shift(dX, dY);
-  });
-
-}
-
-function findComponent(key) {
-  return TrackedComponents.find(function(item) {
-    return item.get('key') === key;
-  });
-}
-
-/**!
- * Wrapper Class for the passed in component to
- * cache position and dimensions.
- */
-var TrackedItem = Ember.Object.extend({
-
-  component:  null,
-  key:        null,
-  rect:       null,
-  position:   null,
-  zoneRatio:  1,
-
-  shift: function(dX, dY) {
-    var rect = this.get('rect');
-    var changedZone;
-    if (dX) {
-      rect.left += dX;
-      rect.right += dX;
-      changedZone = 'zoneX';
-    }
-    if (dY) {
-      rect.bottom += dY;
-      rect.top += dY;
-      changedZone = 'zoneY';
-    }
-    var position = getViewportPosition(rect, this.get('zoneRation'));
-
-    this.get('component').send('zoneChange', position[changedZone], position);
-    this.set('position', position);
-  },
-
-  resize: function() {
-    this.getBoundaries();
-  },
-
-  getBoundaries: function() {
-    var Rect = this.get('component.element').getBoundingClientRect();
-    this.set('rect', {
-      width: Rect.width,
-      height: Rect.height,
-      top: Rect.top,
-      bottom: Rect.bottom,
-      left: Rect.left,
-      right: Rect.right
+export default Ember.Object.extend({
+  _satellites: null,
+  satellites: computed('_satellites.@each.index', function() {
+    let satellites = this._satellites;
+    let output = new Array(get(satellites, 'length'));
+    satellites.forEach((item) => {
+      let index = get(item, 'index');
+      output[index] = item;
     });
-    this.set('component._dimensions', this.get('rect'));
-  },
+    return output;
+  }),
 
-  init: function() {
-    let component = this.get('component');
-    this.getBoundaries();
-    this.set('key', guidFor(component));
-    this.shift(0, 0);
-    this._super();
-  }
-
-});
-
-
-export default Ember.Service.extend({
+  position: null,
+  rect: null,
+  container: null,
+  scrollable: null,
 
   // call this to add your component to the notifier during `didInsertElement`
-  register: function(component, opts) {
+  register(component, opts) {
     TrackedComponents.addObject(
       TrackedItem.create({ component: component, opts: opts })
     );
   },
 
   // call this to remove your component during `willDestroyElement`
-  unregister: function(component) {
+  unregister(component) {
     let TrackedItem = findComponent(guidFor(component));
     if (TrackedItem) {
       TrackedComponents.removeObject(TrackedItem);
@@ -149,7 +64,53 @@ export default Ember.Service.extend({
     run.throttle(this, updateTrackedComponents, 16);
   },
 
-  init: function() {
+  _sm_resizeHandler: null,
+  _sm_scrollHandler: null,
+  minimumMovement: 25,
+  isEarthquake(a, b) {
+    return (Math.abs(b - a) >= this.minimumMovement);
+  },
+  scheduleScroll() {
+    // cache the scroll offset, and discard the cycle if
+    // movement is within (x) threshold
+    let scrollTop = this._container.scrollTop;
+    let scrollLeft = this._container.scrollLeft;
+    let _scrollTop = this.scrollTop;
+    let _scrollLeft = this.scrollLeft;
+
+    if (this.isEarthquake(_scrollTop, scrollTop) || this.isEarthquake(_scrollLeft, scrollLeft)) {
+      this.scrollTop = scrollTop;
+      this.scrollLeft = scrollLeft;
+      this._sm_scroll();
+    }
+  },
+
+  resizeThrottle: 64,
+  scheduleResize() {
+    this._taskrunner.debounce(this, this._sm_resize, this.resizeThrottle);
+  },
+
+  setupHandlers() {
+    this._sm_resizeHandler = () => {
+      this.scheduleScroll();
+    };
+    this._sm_scrollHandler = () => {
+      this.scheduleResize();
+    };
+
+
+  },
+  teardownHandlers() {
+
+  },
+
+  init() {
+    this._super(...arguments);
+    this._tracker = PositionTracker.create({
+      container: document.body,
+      scrollable: window
+    });
+    this._tracker.getBoundaries();
 
     ViewportDimensions.height = window.innerHeight;
     ViewportDimensions.width = window.innerWidth;
@@ -171,3 +132,14 @@ export default Ember.Service.extend({
   }
 
 });
+
+
+
+var ViewportDimensions = {
+  height: window.innerHeight,
+  width: window.innerWidth
+};
+var ScrollPosition = {
+  x: document.body.scrollLeft,
+  y: document.body.scrollTop
+};

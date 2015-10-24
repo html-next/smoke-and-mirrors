@@ -1,5 +1,5 @@
 body {
-
+  height: 100%;
 }
 
 h1 {
@@ -58,6 +58,10 @@ nav a {
 
 .table-wrapper table {
   height: 500px;
+}
+
+.table-wrapper table tr {
+  height: 37px;
 }
 
 img.async-image {

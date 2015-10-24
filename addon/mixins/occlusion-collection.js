@@ -1,11 +1,10 @@
 /*global Array, parseFloat, Math */
 import Ember from 'ember';
 import getTagDescendant from '../utils/get-tag-descendant';
-import Scheduler from '../utils/backburner-ext';
 import keyForItem from '../mixins/key-for-item';
-import PositionTracker from '../primitives/position-tracker';
 import proxied from '../computed/proxied-array';
 import nextFrame from '../utils/next-frame';
+import ListRadar from '../models/list-radar';
 
 let cancelFrame = window.cancelAnimationFrame;
 
@@ -144,12 +143,6 @@ export default Mixin.create(keyForItem, {
   renderAllInitially: false,
   _isFirstRender: true,
 
-  /**!
-   *
-   */
-  //TODO enable this feature.
-  useLocalStorageCache: false,
-
 
   //–––––––––––––– Initial State
 
@@ -254,14 +247,7 @@ export default Mixin.create(keyForItem, {
   /**!
    * a cached jQuery and element reference to the container element
    */
-  _$container: null,
   _container: null,
-
-  /**!
-   * caches the height or width of each item in the list
-   */
-  //TODO enable this feature.
-  __dimensions: null, // TODO since this is a mixin this object {} needs initialized
 
   /**!
    * Cached reference to the last bottom item used
@@ -333,7 +319,7 @@ export default Mixin.create(keyForItem, {
 
     // trigger a cycle
     if (doRender && _shouldDidChange) {
-      this._taskrunner.next(this, this._updateChildStates, 'shouldRenderList');
+      run.next(this, this._updateChildStates, 'shouldRenderList');
     }
 
     return doRender;
@@ -361,7 +347,7 @@ export default Mixin.create(keyForItem, {
     if (name === 'didMountCollection') {
       context.firstVisible.item = getContent(context.firstVisible.item, isProxied);
       context.lastVisible.item = getContent(context.lastVisible.item, isProxied);
-      this._taskrunner.schedule('afterRender', this, this.sendAction, name, context);
+      run.schedule('afterRender', this, this.sendAction, name, context);
       return;
     }
 
@@ -380,7 +366,7 @@ export default Mixin.create(keyForItem, {
     }
 
     // this MUST be async or glimmer will freak
-    this._taskrunner.schedule('afterRender', this, this.sendAction, name, context);
+    run.schedule('afterRender', this, this.sendAction, name, context);
   },
 
   /**
@@ -390,7 +376,7 @@ export default Mixin.create(keyForItem, {
 
    @method _findFirstRenderedComponent
    @param {Number} viewportStart The top/left of the viewport to search against
-   @Param {Number} height adjustment TODO wtf is this
+   @Param {Number} height adjustment
    @returns {Number} the index into childViews of the first view to render
    **/
   _findFirstRenderedComponent(viewportStart, adj) {
@@ -410,7 +396,7 @@ export default Mixin.create(keyForItem, {
 
       // in case of not full-window scrolling
       let component = childComponents[midIndex];
-      let componentBottom = component._position.rect.bottom + adj;
+      let componentBottom = component.satellite.geography.bottom + adj;
 
       if (componentBottom > viewportStart) {
         maxIndex = midIndex - 1;
@@ -423,7 +409,6 @@ export default Mixin.create(keyForItem, {
   },
 
   _children: null,
-
   children: computed('_children.@each.index', function() {
     let children = this.get('_children');
     let output = new Array(get(children, 'length'));
@@ -452,6 +437,7 @@ export default Mixin.create(keyForItem, {
     toHide.forEach((v) => { v.hide(); });
   },
 
+
   /**!
    *
    * The big question is can we render from the bottom
@@ -465,7 +451,6 @@ export default Mixin.create(keyForItem, {
     if (!this.get('shouldRenderList')) {
       return;
     }
-    this._positionTracker.scroll();
 
     let edges = this.get('_edges');
     let childComponents = this.get('children');
@@ -476,7 +461,7 @@ export default Mixin.create(keyForItem, {
 
         //set scroll
         if (this.get('__isInitializingFromLast')) {
-          this._taskrunner.schedule('afterRender', this, function() {
+          run.schedule('afterRender', this, function() {
             let last = this.$().get(0).lastElementChild;
             this.set('__isInitializingFromLast', false);
             if (last) {
@@ -491,7 +476,7 @@ export default Mixin.create(keyForItem, {
 
     }
 
-    let currentViewportBound = edges.viewportTop + this._positionTracker.scrollableRect.top;
+    let currentViewportBound = this.radar.sky.top;
     let currentUpperBound = edges.invisibleTop;
 
     if (currentUpperBound < currentViewportBound) {
@@ -510,8 +495,8 @@ export default Mixin.create(keyForItem, {
 
       let component = childComponents[bottomComponentIndex];
 
-      let componentTop = component._position.rect.top;
-      let componentBottom = component._position.rect.bottom;
+      let componentTop = component.satellite.geography.top;
+      let componentBottom = component.satellite.geography.bottom;
 
       // end the loop if we've reached the end of components we care about
       if (componentTop > edges.invisibleBottom) {
@@ -589,12 +574,12 @@ export default Mixin.create(keyForItem, {
       .concat((childComponents.slice(0, topComponentIndex)))
       .concat(childComponents.slice(bottomComponentIndex));
 
-    this._taskrunner.debounce(this, this._removeComponents, toCull, toHide, this.get('scrollThrottle') * 6);
+    run.debounce(this, this._removeComponents, toCull, toHide, 128);
     toShow.forEach((i) => { i.show(); });
 
     //set scroll
     if (this.get('__isInitializingFromLast')) {
-      this._taskrunner.schedule('afterRender', this, function() {
+      run.schedule('afterRender', this, function() {
         let last = this.$().get(0).lastElementChild;
         this.set('__isInitializingFromLast', false);
         if (last) {
@@ -627,71 +612,60 @@ export default Mixin.create(keyForItem, {
    */
   _scrollIsForward: 0,
   minimumMovement: 25,
-  _scheduleOcclusion() {
-    // cache the scroll offset, and discard the cycle if
-    // movement is within (x) threshold
-    // TODO make this work horizontally too
-    let scrollTop = this._container.scrollTop;
-    let _scrollTop = this.scrollPosition;
-
-    if (Math.abs(scrollTop - _scrollTop) >= this.minimumMovement) {
-      this.set('_scrollIsForward', scrollTop > _scrollTop);
-      this.scrollPosition = scrollTop;
-      this._sm_scheduleUpdate('scroll');
-    }
+  _scheduleOcclusion(dY /*, dX*/) {
+    if (!this.__isInitialized || this._isPrepending) { return; }
+    this.set('_scrollIsForward', dY > 0);
+    this._sm_scheduleUpdate('scroll');
   },
+
 
   //–––––––––––––– Setup/Teardown
   setupContainer() {
-    var scrollThrottle = this.get('scrollThrottle');
+    var resizeDebounce = this.get('scrollThrottle');
     var containerSelector = this.get('containerSelector');
-    var $container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
-    this._$container = $container;
 
-    // TODO: The container needs well formed CSS
-    // We should probably consider auto adding the following
-    // styles:
-    // - display: block
-    // - height, max-height
-    // - position: relative
-    $container.css({
-      '-webkit-overflow-scrolling': 'touch',
-      'overflow-scrolling': 'touch',
-      'overflow-y': 'scroll'
-    });
+    let container;
+    if (containerSelector === 'body') {
+      container = window;
+    } else {
+      let $container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
+      container = $container.get(0);
 
-    if (this.get('shouldGPUAccelerate')) {
       $container.css({
-        '-webkit-transform' : 'translate3d(0,0,0)',
-        '-moz-transform'    : 'translate3d(0,0,0)',
-        '-ms-transform'     : 'translate3d(0,0,0)',
-        '-o-transform'      : 'translate3d(0,0,0)',
-        'transform'         : 'translate3d(0,0,0)'
+        '-webkit-overflow-scrolling': 'touch',
+        'overflow-scrolling': 'touch',
+        'overflow-y': 'scroll'
       });
+
+      if (this.get('shouldGPUAccelerate')) {
+        $container.css({
+          '-webkit-transform' : 'translate3d(0,0,0)',
+          '-moz-transform'    : 'translate3d(0,0,0)',
+          '-ms-transform'     : 'translate3d(0,0,0)',
+          '-o-transform'      : 'translate3d(0,0,0)',
+          'transform'         : 'translate3d(0,0,0)'
+        });
+      }
     }
 
-    let onScrollMethod = () => {
-      if (!this.__isInitialized || this._isPrepending) { return; }
-      this._scheduleOcclusion();
+    this._container = container;
+
+    let onScrollMethod = (dY, dX) => {
+      this._scheduleOcclusion(dY, dX);
     };
 
     let onResizeMethod = () => {
-      this._taskrunner.debounce(this, this.notifyPropertyChange, '_edges', scrollThrottle);
+      this.notifyPropertyChange('_edges');
     };
 
-    let element = $container.get(0);
-    this._container = element;
-    this._sm_scrollListener = onScrollMethod;
-    this._sm_resizeListener = onResizeMethod;
-    element.addEventListener('scroll', onScrollMethod, true);
-    element.addEventListener('touchmove', onScrollMethod, true);
-    element.addEventListener('resize', onResizeMethod, true);
-    window.addEventListener('resize', onResizeMethod, true);
-
-    let position = this._positionTracker;
-    position.container = element;
-    position.scrollable = this.element;
-    position.getBoundaries();
+    this.radar.setState({
+      telescope: this._container,
+      resizeDebounce: resizeDebounce,
+      skyline: container === window ? document.body : this.element,
+      minimumMovement: this.minimumMovement
+    });
+    this.radar.didResizeSatellites = onResizeMethod;
+    this.radar.didShiftSatellites = onScrollMethod;
   },
 
 
@@ -712,7 +686,7 @@ export default Mixin.create(keyForItem, {
     var idForFirstItem = this.get('idForFirstItem');
 
     if (scrollPosition) {
-      this._container.scrollTop = scrollPosition;
+      this.radar.scrollContainer.scrollTop = scrollPosition;
     } else if (this.get('renderFromLast')) {
       var last = this.$().get(0).lastElementChild;
       this.set('__isInitializingFromLast', true);
@@ -728,10 +702,10 @@ export default Mixin.create(keyForItem, {
           firstVisibleIndex = i;
         }
       }
-      this._container.scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
+      this.radar.scrollContainer.scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
     }
 
-    this._taskrunner.next(this, () => {
+    run.next(this, () => {
       this.__isInitialized = true;
       this._updateChildStates('initializeScrollState');
     });
@@ -751,35 +725,10 @@ export default Mixin.create(keyForItem, {
    */
   willDestroyElement() {
     //cleanup scroll
-    let _container = this._container;
+    this.radar.destroy();
 
-    _container.removeEventListener('scroll', this._sm_scrollListener, true);
-    _container.removeEventListener('touchmove', this._sm_scrollListener, true);
-    _container.removeEventListener('resize', this._sm_resizeListener, true);
-    window.removeEventListener('resize', this._sm_resizeListener, true);
+    //clean up scheduled tasks in the run loop
 
-    //cache state
-    /*
-    let storageKey = this.get('storageKey');
-    if (storageKey) {
-
-      let cacheAttrs = this.getProperties(
-        'scrollPosition',
-        '__dimensions',
-        '_firstVisible',
-        '_lastVisible'
-      );
-
-      cacheAttrs._firstVisible = this.keyForItem(cacheAttrs._firstVisible);
-      cacheAttrs._lastVisible = this.keyForItem(cacheAttrs._lastVisible);
-
-      localStorage.setItem(storageKey, JSON.stringify(cacheAttrs));
-    }
-    */
-
-    //clean up scheduled tasks
-    this._taskrunner.cancelAll();
-    this._taskrunner.destroy();
   },
 
 
@@ -789,10 +738,9 @@ export default Mixin.create(keyForItem, {
       this._isPrepending = true;
       cancelFrame(this._nextUpdate);
       nextFrame(this, function() {
-        let container = this._container;
         let heightPerItem = this.__getEstimatedDefaultHeight();
-        container.scrollTop += addCount * heightPerItem;
-        this.scrollPosition = container.scrollTop;
+        this.radar.scrollContainer.scrollTop += (addCount * heightPerItem);
+        this.radar.filterMovement();
         this._updateChildStates('prependComponents');
         this._isPrepending = false;
       });
@@ -854,23 +802,22 @@ export default Mixin.create(keyForItem, {
       return this.get('__edges');
     }
 
-    let $container = this._$container;
-    if (!$container) {
+    let container = this._container;
+    if (!container) {
       return;
     }
 
+    // segment top break points
+    this.radar.planet.setState();
+
     var edges = {};
-    var containerHeight = this.get('containerHeight');
 
     // segment heights
-    var viewportHeight = parseInt(containerHeight, 10) || $container.height();
+    var viewportHeight = this.radar.planet.height;
     var _visibleBufferHeight = Math.round(viewportHeight * this.get('visibleBuffer'));
     var _invisibleBufferHeight = Math.round(viewportHeight * this.get('invisibleBuffer'));
 
-    // segment top break points
-    this._positionTracker.getBoundaries();
-    this._positionTracker.resize();
-    edges.viewportTop = this._positionTracker.rect.top;
+    edges.viewportTop = this.radar.planet.top;
     edges.visibleTop = edges.viewportTop - _visibleBufferHeight;
     edges.invisibleTop = edges.visibleTop - _invisibleBufferHeight;
 
@@ -881,11 +828,10 @@ export default Mixin.create(keyForItem, {
     edges.invisibleBottom = edges.visibleBottom + _invisibleBufferHeight;
 
     this.set('__edges', edges);
-
     return edges;
   }),
 
-  _positionTracker: null,
+  radar: null,
 
   /**!
    * Initialize
@@ -904,9 +850,7 @@ export default Mixin.create(keyForItem, {
       }
     }
     this.set('itemTagName', itemTagName);
-    this._taskrunner = Scheduler.create({});
-
-    this._positionTracker = PositionTracker.create({});
+    this.radar = new ListRadar({});
   },
 
   _reflectContentChanges() {
