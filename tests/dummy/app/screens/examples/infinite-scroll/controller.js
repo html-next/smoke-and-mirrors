@@ -12,7 +12,6 @@ export default Controller.extend({
   actions: {
 
     loadAbove() {
-      console.info('LOAD ABOVE');
       let images = getImages(10);
       let model = this.get('model.images');
       let newModel =  images.concat(model);
@@ -20,7 +19,6 @@ export default Controller.extend({
     },
 
     loadBelow() {
-      console.info('LOAD BELOW');
       let images =  getImages(10);
       let model = this.get('model.images');
       let newModel =  model.concat(images);

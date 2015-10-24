@@ -247,7 +247,6 @@ export default Mixin.create(keyForItem, {
   /**!
    * a cached jQuery and element reference to the container element
    */
-  _$container: null,
   _container: null,
 
   /**!
@@ -624,25 +623,32 @@ export default Mixin.create(keyForItem, {
   setupContainer() {
     var resizeDebounce = this.get('scrollThrottle');
     var containerSelector = this.get('containerSelector');
-    var $container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
-    this._$container = $container;
-    this._container = $container.get(0);
 
-    $container.css({
-      '-webkit-overflow-scrolling': 'touch',
-      'overflow-scrolling': 'touch',
-      'overflow-y': 'scroll'
-    });
+    let container;
+    if (containerSelector === 'body') {
+      container = window;
+    } else {
+      let $container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
+      container = $container.get(0);
 
-    if (this.get('shouldGPUAccelerate')) {
       $container.css({
-        '-webkit-transform' : 'translate3d(0,0,0)',
-        '-moz-transform'    : 'translate3d(0,0,0)',
-        '-ms-transform'     : 'translate3d(0,0,0)',
-        '-o-transform'      : 'translate3d(0,0,0)',
-        'transform'         : 'translate3d(0,0,0)'
+        '-webkit-overflow-scrolling': 'touch',
+        'overflow-scrolling': 'touch',
+        'overflow-y': 'scroll'
       });
+
+      if (this.get('shouldGPUAccelerate')) {
+        $container.css({
+          '-webkit-transform' : 'translate3d(0,0,0)',
+          '-moz-transform'    : 'translate3d(0,0,0)',
+          '-ms-transform'     : 'translate3d(0,0,0)',
+          '-o-transform'      : 'translate3d(0,0,0)',
+          'transform'         : 'translate3d(0,0,0)'
+        });
+      }
     }
+
+    this._container = container;
 
     let onScrollMethod = (dY, dX) => {
       this._scheduleOcclusion(dY, dX);
@@ -655,7 +661,7 @@ export default Mixin.create(keyForItem, {
     this.radar.setState({
       telescope: this._container,
       resizeDebounce: resizeDebounce,
-      skyline: this.element,
+      skyline: container === window ? document.body : this.element,
       minimumMovement: this.minimumMovement
     });
     this.radar.didResizeSatellites = onResizeMethod;
@@ -733,7 +739,7 @@ export default Mixin.create(keyForItem, {
       cancelFrame(this._nextUpdate);
       nextFrame(this, function() {
         let heightPerItem = this.__getEstimatedDefaultHeight();
-        this.radar.telescope.scrollTop += (addCount * heightPerItem);
+        this.radar.scrollContainer.scrollTop += (addCount * heightPerItem);
         this.radar.filterMovement();
         this._updateChildStates('prependComponents');
         this._isPrepending = false;
@@ -796,8 +802,8 @@ export default Mixin.create(keyForItem, {
       return this.get('__edges');
     }
 
-    let $container = this._$container;
-    if (!$container) {
+    let container = this._container;
+    if (!container) {
       return;
     }
 
