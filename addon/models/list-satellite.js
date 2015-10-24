@@ -1,4 +1,5 @@
 import Satellite from './satellite';
+import ListRadar from './list-radar';
 
 export default class ListSatellite extends Satellite {
 
@@ -8,15 +9,17 @@ export default class ListSatellite extends Satellite {
   }
 
   heightDidChange(dX) {
-    this.list.adjustSatelliteList(this, { dX: dX, dY: 0 });
+    this.list._adjust(this, { dX: dX, dY: 0 });
   }
 
   next() {
-    return this.component.next();
+    let nextComponent = this.component.next();
+    return nextComponent ? nextComponent.satellite : null;
   }
 
   prev() {
-    return this.component.prev();
+    let prevComponent = this.component.prev();
+    return prevComponent ? prevComponent.satellite : null;
   }
 
 }

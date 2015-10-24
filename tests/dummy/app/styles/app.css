@@ -60,6 +60,10 @@ nav a {
   height: 500px;
 }
 
+.table-wrapper table tr {
+  height: 37px;
+}
+
 img.async-image {
   width: 250px;
   height: 250px;

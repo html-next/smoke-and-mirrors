@@ -438,6 +438,7 @@ export default Mixin.create(keyForItem, {
     toHide.forEach((v) => { v.hide(); });
   },
 
+
   /**!
    *
    * The big question is can we render from the bottom
@@ -476,7 +477,7 @@ export default Mixin.create(keyForItem, {
 
     }
 
-    let currentViewportBound = edges.viewportTop + this.radar.sky.top;
+    let currentViewportBound = this.radar.sky.top;
     let currentUpperBound = edges.invisibleTop;
 
     if (currentUpperBound < currentViewportBound) {
@@ -574,7 +575,7 @@ export default Mixin.create(keyForItem, {
       .concat((childComponents.slice(0, topComponentIndex)))
       .concat(childComponents.slice(bottomComponentIndex));
 
-    run.debounce(this, this._removeComponents, toCull, toHide, this.get('scrollThrottle') * 6);
+    run.debounce(this, this._removeComponents, toCull, toHide, 128);
     toShow.forEach((i) => { i.show(); });
 
     //set scroll
@@ -721,7 +722,7 @@ export default Mixin.create(keyForItem, {
     this.radar.destroy();
 
     //clean up scheduled tasks in the run loop
-    
+
   },
 
 

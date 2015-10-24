@@ -89,16 +89,18 @@ export default class Radar {
 
     // move the sky
     if (dX) {
-      this.sky.left += dX;
-      this.sky.right += dX;
+      this.sky.left -= dX;
+      this.sky.right -= dX;
     }
     if (dY) {
-      this.sky.bottom += dY;
-      this.sky.top += dY;
+      this.sky.bottom -= dY;
+      this.sky.top -= dY;
     }
   }
 
   shiftSatellites(dY, dX) {
+    console.info('SCROLL CHANGE', dY, dX);
+    console.info('SCROLL POSITION', this.scrollY, this.scrollX);
     this.willShiftSatellites(dY, dX);
     this._shift(dY, dX);
     this.didShiftSatellites(dY, dX);
@@ -115,7 +117,7 @@ export default class Radar {
     if (this.isEarthquake(_scrollY, scrollY) || this.isEarthquake(_scrollX, scrollX)) {
       this.scrollY = scrollY;
       this.scrollX = scrollX;
-      this.shiftSatellites(_scrollY - scrollY, _scrollX - scrollX);
+      this.shiftSatellites(scrollY - _scrollY, scrollX - _scrollX);
     }
   }
 
