@@ -1,5 +1,4 @@
 import Satellite from './satellite';
-import ListRadar from './list-radar';
 
 export default class ListSatellite extends Satellite {
 
