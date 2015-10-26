@@ -841,7 +841,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
 
   init() {
-    this._super.apply(...arguments);
+    this._super(...arguments);
 
     this._prepareComponent();
     this.set('_children', Ember.A());

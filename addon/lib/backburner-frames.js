@@ -1,3 +1,4 @@
+/* global self */
 /**!
  * Modifies `window.setTimeout` to use  `requestAnimationFrame`
  */
