@@ -1,4 +1,3 @@
-/* global Math */
 import Ember from 'ember';
 import Geography from './geography';
 
@@ -51,6 +50,14 @@ class Satellite {
       this.geography.bottom -= dY;
       this.geography.top -= dY;
     }
+  }
+
+  destroy() {
+    if (this.component.unregisterSatellite) {
+      this.component.unregisterSatellite();
+    }
+    this.component = null;
+    this.satellite = null;
   }
 
 }

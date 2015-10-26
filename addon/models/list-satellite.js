@@ -21,4 +21,13 @@ export default class ListSatellite extends Satellite {
     return prevComponent ? prevComponent.satellite : null;
   }
 
+  destroy() {
+    if (this.component.unregisterSatellite) {
+      this.component.unregisterSatellite();
+    }
+    this.component = null;
+    this.satellite = null;
+    this.list = null;
+  }
+
 }

@@ -12,6 +12,7 @@ export default Controller.extend({
   actions: {
 
     loadAbove() {
+      // console.info('LOAD ABOVE: ' + (new Date()).getTime());
       let images = getImages(10);
       let model = this.get('model.images');
       let newModel =  images.concat(model);
@@ -19,6 +20,7 @@ export default Controller.extend({
     },
 
     loadBelow() {
+      // console.info('LOAD BELOW: ' + (new Date()).getTime());
       let images =  getImages(10);
       let model = this.get('model.images');
       let newModel =  model.concat(images);

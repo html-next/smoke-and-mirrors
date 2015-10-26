@@ -23,7 +23,7 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
 
   heightProperty: 'minHeight',
 
-  attributeBindings: ['viewState'],
+//  attributeBindings: ['viewState'],
   classNames: ['vertical-item'],
   collection: null,
 
@@ -34,6 +34,9 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
   satellite: null,
   registerSatellite(satellite) {
     this.satellite = satellite;
+  },
+  unregisterSatellite() {
+    this.satellite = null;
   },
 
   _height: 0,
@@ -58,9 +61,12 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
 
   willDestroyElement() {
     this._super();
-    this._ov_teardown();
-    this.set('viewState', 'culled');
-    this.get('radar').unregister(this);
+    this.setProperties({
+      viewState: 'culled',
+      contentCulled: true,
+      contentHidden: false,
+      contentInserted: false });
+    let radar = this.get('radar').unregister(this);
   },
 
   willDestroy() {
@@ -69,7 +75,7 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
   },
 
   init() {
-    this._super();
+    this._super(...arguments);
 
     let tag = this.get('itemTagName');
     this.set('tagName', tag);
