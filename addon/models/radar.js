@@ -119,7 +119,9 @@ export default class Radar {
   }
 
   expandHorizon() {
-    this.sky.getState();
+    if (this.sky) {
+      this.sky.getState();
+    }
   }
 
   filterMovement() {

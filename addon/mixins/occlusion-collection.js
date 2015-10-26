@@ -578,8 +578,6 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
   //–––––––––––––– Setup/Teardown
   setupContainer() {
-    var resizeDebounce = this.resizeDebounce;
-    let scrollThrottle = this.scrollThrottle;
     var containerSelector = this.get('containerSelector');
 
     let container;
@@ -607,7 +605,13 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
     }
 
     this._container = container;
+    this.setupHandlers();
+  },
 
+  setupHandlers() {
+    let resizeDebounce = this.resizeDebounce;
+    let scrollThrottle = this.scrollThrottle;
+    let container = this._container;
     let onScrollMethod = (dY, dX) => {
       this._scheduleOcclusion(dY, dX);
     };

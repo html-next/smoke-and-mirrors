@@ -67,7 +67,7 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
       contentCulled: true,
       contentHidden: false,
       contentInserted: false });
-    let radar = this.get('radar').unregister(this);
+    this.get('radar').unregister(this);
   },
 
   willDestroy() {
