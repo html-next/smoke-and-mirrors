@@ -867,9 +867,6 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 });
 
 
-
-
-
 function valueForIndex(arr, index) {
   return arr.objectAt ? arr.objectAt(index) : arr[index];
 }

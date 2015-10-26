@@ -6,7 +6,7 @@ const {
   Component
 } = Ember;
 
-export default Component.extend(OcclusionMixin, {
+let VerticalCollection = Component.extend(OcclusionMixin, {
   /**!
    * Defaults to `vertical-collection`.
    *
@@ -48,3 +48,81 @@ export default Component.extend(OcclusionMixin, {
   containerSize: null
 
 });
+
+Ember.runInDebug(() => {
+  const {
+    observer,
+    run
+  } = Ember;
+
+  const appendDivs = () => {
+    const appendDebugDiv = cssClass => {
+      return $(`<div class="${cssClass}"></div>`).appendTo('.zoomed-edge-visualization');
+    };
+
+    $zoomContainer = $('<div class="zoomed-edge-visualization"></div>').appendTo('body');
+    $highlightViewport = appendDebugDiv('highlight-viewport');
+    $highlightVisible = appendDebugDiv('highlight-visible');
+    $highlightInvisible = appendDebugDiv('highlight-invisible');
+  };
+
+  const updateEdgeVisuals = (edges, width) => {
+    const updateDebugDiv = ($e, posArgs) => {
+      posArgs.height = (posArgs.bottom - posArgs.top) + 'px';
+      posArgs.top += 'px';
+      posArgs.width = width;
+      $e.css(posArgs);
+    };
+
+    updateDebugDiv($highlightViewport, { top: edges.viewportTop, bottom: edges.viewportBottom });
+    updateDebugDiv($highlightVisible, { top: edges.visibleTop, bottom: edges.visibleBottom });
+    updateDebugDiv($highlightInvisible, { top: edges.invisibleTop, bottom: edges.invisibleBottom });
+  };
+
+  const removeDivs = (edges) => {
+    $zoomContainer.remove();
+
+    $zoomContainer = null;
+    $highlightViewport = null;
+    $highlightVisible = null;
+    $highlightInvisible = null;
+  };
+
+  let $zoomContainer;
+  let $highlightViewport;
+  let $highlightVisible;
+  let $highlightInvisible;
+  let divsAreInDOM = false;
+
+  VerticalCollection.reopen({
+    showEdges: false,
+
+    toggleEdgeVisualization () {
+      this.toggleProperty('showEdges');
+    },
+
+    __edgeVisualizationObserver: observer('showEdges', '_edges', function () {
+      run.scheduleOnce('render', this, '__updateEdgeVisualization');
+    }),
+
+    __updateEdgeVisualization () {
+      if (this.get('showEdges')) {
+        let edges = this.get('_edges');
+        let width = this._$container.width();
+
+        if (divsAreInDOM) {
+          updateEdgeVisuals(edges, width);
+        } else {
+          appendDivs();
+          updateEdgeVisuals(edges, width);
+          divsAreInDOM = true;
+        }
+      } else if (divsAreInDOM) {
+        removeDivs();
+        divsAreInDOM = false;
+      }
+    }
+  });
+});
+
+export default VerticalCollection;
