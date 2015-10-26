@@ -84,7 +84,7 @@ export default Mixin.create({
    */
   _ov_teardown() {
     let heightProp = this.heightProperty;
-    if (this.get('contentInserted') && this.element) {
+    if (!this.alwaysUseDefaultHeight && this.element && this.get('contentInserted')) {
       this.element.style[heightProp] = this.satellite.geography.height + 'px';
     }
     this.setProperties({ contentCulled: true, contentHidden: false, contentInserted: false });
@@ -109,7 +109,9 @@ export default Mixin.create({
   _ov_reveal() {
     let heightProp = this.heightProperty;
     this.setProperties({ contentHidden: false, contentVisible: true, contentInserted: true });
-    this.element.style[heightProp] = null;
+    if (!this.alwaysUseDefaultHeight) {
+      this.element.style[heightProp] = null;
+    }
     this.element.style.visibility = 'visible';
   },
 

@@ -26,6 +26,7 @@ export default Component.extend(OcclusionMixin, {
    * is rendered for the first time.
    */
   defaultHeight: 75,
+  alwaysUseDefaultHeight: false,
 
   /**!
    * Cached value used once default height is
