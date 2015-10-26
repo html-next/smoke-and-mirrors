@@ -3,10 +3,9 @@ import Ember from 'ember';
 import getTagDescendant from '../utils/get-tag-descendant';
 import keyForItem from '../mixins/key-for-item';
 import proxied from '../computed/proxied-array';
-import nextFrame from '../utils/next-frame';
 import ListRadar from '../models/list-radar';
-
-let cancelFrame = window.cancelAnimationFrame;
+import patchSetTimeout from '../lib/backburner-frames';
+import SmartActionsMixin from './smart-actions';
 
 /**
  * Investigations: http://jsfiddle.net/sxqnt/73/
@@ -15,47 +14,24 @@ const {
   get: get,
   Mixin,
   computed,
-  run,
+  run
   } = Ember;
 
-const actionContextCacheKeys = {
-  'firstReached':   '_lastFirstSent',
-  'lastReached':    '_lastLastSent',
-  'firstVisibleChanged':  '_lastVisibleFirstSent',
-  'lastVisibleChanged':   '_lastVisibleLastSent'
-};
 
-function valueForIndex(arr, index) {
-  return arr.objectAt ? arr.objectAt(index) : arr[index];
-}
-
-function getContent(obj, isProxied) {
-  let key = isProxied? 'content.content' : 'content';
-  return get(obj, key);
-}
-
-export default Mixin.create(keyForItem, {
-
+export default Mixin.create(SmartActionsMixin, keyForItem, {
   //–––––––––––––– Optional Settings
-
   /**!
    * A jQuery selector string that will select the element from
    * which to calculate the viewable height and needed offsets.
    *
-   * This element will also have `scroll`, and `touchmove`
-   * events added to it while the `occlusion-collection` component
-   * is `inDOM`.
+   * This element will also have the `scroll` event handler added to it.
    *
    * Usually this element will be the component's immediate parent element,
    * if so, you can leave this null.
    *
-   * The container height is calculated from this selector once.
-   * If you expect height to change, `containerHeight` is observed
-   * and triggers new view boundary calculations.
-   *
+   * Set this to "body" to scroll the entire web page.
    */
   containerSelector: null,
-
 
   /**!
    * The name of the view to render either above or below the existing content when
@@ -73,53 +49,31 @@ export default Mixin.create(keyForItem, {
    * Used if you want to explicitly set the tagName of collection's items
    */
   itemTagName: '',
-
+  key: '@identity',
 
   //–––––––––––––– Performance Tuning
+  /**!
+   * Time (in ms) to debounce layout recalculations when
+   * resizing the window.
+   */
+  resizeDebounce: 128,
 
   /**!
-   * Time (in ms) between attempts at re-rendering during
-   * scrolling.  A new render every ~16ms preserves 60fps.
-   * Most re-renders with occlusion-culling have clocked well
-   * below 1ms.
+   * how much extra room to keep visible and invisible on
+   * either side of the viewport.
    *
-   * Given that in a given scroll most of the movement stays within the
-   * visible area, it doesn't make sense to set the throttle
-   * to 16ms my default.
+   * This used to be two separate values (invisibleBuffer/visibleBuffer)
+   * but these values have been unified to ease a future transition in
+   * the internal mechanics of the collection to utilize DOM recycling.
    */
-  scrollThrottle: 16,
-
-  /**!
-   * how much extra room to keep visible on
-   * either side of the visible area
-   */
-  visibleBuffer: 1,
-
-  /**!
-   * how much extra room to keep in DOM but
-   * with `visible:false` set.
-   */
-  invisibleBuffer: 1,
+  bufferSize: 1,
 
   /**!
    * useContentProxy
    */
   useContentProxy: false,
 
-  //–––––––––––––– Animations
-  /**!
-   * For performance reasons, by default the `occlusion-collection` does not add an extra class or
-   * attribute to the `OccludedView`'s element when hiding or showing the element.
-   *
-   * Should you need access to a state for using CSS animations, setting `useHiddenAttr` to true
-   * will add the attribute `hidden` to the `occluded-item` when ever it's content is hidden, cached, or
-   * culled.
-   */
-  exposeAttributeState: false,
-
-
   //–––––––––––––– Initial State
-
   /**!
    *  If set, this will be used to set
    *  the scroll position at which the
@@ -143,9 +97,6 @@ export default Mixin.create(keyForItem, {
   renderAllInitially: false,
   _isFirstRender: true,
 
-
-  //–––––––––––––– Initial State
-
   /**!
    * If set, upon initialization the scroll
    * position will be set such that the item
@@ -160,8 +111,6 @@ export default Mixin.create(keyForItem, {
 
 
   //–––––––––––––– Actions
-  key: '@identity',
-
   /**!
    * Specify an action to fire when the last item is reached.
    *
@@ -245,7 +194,8 @@ export default Mixin.create(keyForItem, {
   _firstVisibleIndex: 0,
 
   /**!
-   * a cached jQuery and element reference to the container element
+   * a cached element reference to the container "viewport" element
+   * this is known as the "telescope" within the Radar class.
    */
   _container: null,
 
@@ -299,6 +249,22 @@ export default Mixin.create(keyForItem, {
    */
   shouldRender: true,
 
+
+  shouldRenderList: computed('shouldRender', '_sm_canRender', function() {
+    let shouldRender = this.get('shouldRender');
+    let canRender = this.get('_sm_canRender');
+    let doRender = shouldRender && canRender;
+    let _shouldDidChange = this.get('__shouldRender') !== shouldRender;
+
+    // trigger a cycle
+    if (doRender && _shouldDidChange) {
+      run.scheduleOnce('actions', this, this._updateChildStates);
+    }
+
+    return doRender;
+  }),
+
+
   /**!
    * Internal boolean used to track whether the component
    * has been inserted into the DOM and DOM related setup
@@ -311,62 +277,51 @@ export default Mixin.create(keyForItem, {
   _sm_canRender: false,
 
   __shouldRender: true,
-  shouldRenderList: computed('shouldRender', '_sm_canRender', function() {
-    let shouldRender = this.get('shouldRender');
-    let canRender = this.get('_sm_canRender');
-    let doRender = shouldRender && canRender;
-    let _shouldDidChange = this.get('__shouldRender') !== shouldRender;
 
-    // trigger a cycle
-    if (doRender && _shouldDidChange) {
-      run.next(this, this._updateChildStates, 'shouldRenderList');
-    }
+  /**
+   * forward is true, backwards is false
+   */
+  _scrollIsForward: 0,
+  radar: null,
+  minimumMovement: 25,
+  _nextUpdate: null,
+  _sm_scrollListener: null,
+  _sm_resizeListener: null,
+  _isPrepending: false,
+  _children: null,
 
-    return doRender;
-  }),
 
-  //–––––––––––––– Helper Functions
-  sendActionOnce(name, context) {
+  //–––––––––––––– Action Helper Functions
+  canSendActions(name/*, context*/) {
     // don't trigger during a prepend or initial render
     if (this._isFirstRender || this._isPrepending) {
-      return;
+      return false;
     }
 
     if (name === 'firstReached') {
       if (this.get('_scrollIsForward')) {
-        return;
+        return false;
       }
     }
 
-    if (name === 'lastReached' && !this.get('_scrollIsForward')) {
-      return;
-    }
+    return !(name === 'lastReached' && !this.get('_scrollIsForward'));
+  },
 
+  prepareActionContext(name, context) {
     let isProxied = this.get('useContentProxy');
 
     if (name === 'didMountCollection') {
       context.firstVisible.item = getContent(context.firstVisible.item, isProxied);
       context.lastVisible.item = getContent(context.lastVisible.item, isProxied);
-      run.schedule('afterRender', this, this.sendAction, name, context);
-      return;
+      return context;
     }
 
     context.item = getContent(context.item, isProxied);
+    return !context.item ? false : context;
+  },
 
-    if (!context.item) {
-      return;
-    }
-
-    if (actionContextCacheKeys[name]) {
-      if (this.get(actionContextCacheKeys[name]) === this.keyForItem(context.item, context.index)) {
-        return;
-      } else {
-        this.set(actionContextCacheKeys[name], this.keyForItem(context.item, context.index));
-      }
-    }
-
-    // this MUST be async or glimmer will freak
-    run.schedule('afterRender', this, this.sendAction, name, context);
+  keyForContext(context) {
+    return this.keyForItem(context.item, context.index);
   },
 
   /**
@@ -376,7 +331,7 @@ export default Mixin.create(keyForItem, {
 
    @method _findFirstRenderedComponent
    @param {Number} viewportStart The top/left of the viewport to search against
-   @Param {Number} height adjustment
+   @param {Number} adj Height adjustment
    @returns {Number} the index into childViews of the first view to render
    **/
   _findFirstRenderedComponent(viewportStart, adj) {
@@ -408,7 +363,7 @@ export default Mixin.create(keyForItem, {
     return minIndex;
   },
 
-  _children: null,
+
   children: computed('_children.@each.index', function() {
     let children = this.get('_children');
     let output = new Array(get(children, 'length'));
@@ -419,18 +374,22 @@ export default Mixin.create(keyForItem, {
     return output;
   }),
 
+
   register(child) {
     this.get('_children').addObject(child);
     if (this.__isInitialized) {
       this._sm_scheduleUpdate('register');
     }
   },
+
+
   unregister(child) {
     this.get('_children').removeObject(child);
     if (this.__isInitialized) {
       this._sm_scheduleUpdate('unregister');
     }
   },
+
 
   _removeComponents(toCull, toHide) {
     toCull.forEach((v) => { v.cull(); });
@@ -598,20 +557,14 @@ export default Mixin.create(keyForItem, {
   },
 
 
-  _nextUpdate: null,
-  _sm_scheduleUpdate(source) {
+  _sm_scheduleUpdate() {
     if (this._isPrepending) {
       return;
     }
-    cancelFrame(this._nextUpdate);
-    this._nextUpdate = nextFrame(this, this._updateChildStates, source);
+    this._nextUpdate = run.scheduleOnce('actions', this, this._updateChildStates);
   },
 
-  /**
-   * forward is true, backwards is false
-   */
-  _scrollIsForward: 0,
-  minimumMovement: 25,
+
   _scheduleOcclusion(dY /*, dX*/) {
     if (!this.__isInitialized || this._isPrepending) { return; }
     this.set('_scrollIsForward', dY > 0);
@@ -621,7 +574,7 @@ export default Mixin.create(keyForItem, {
 
   //–––––––––––––– Setup/Teardown
   setupContainer() {
-    var resizeDebounce = this.get('scrollThrottle');
+    var resizeDebounce = this.get('resizeDebounce');
     var containerSelector = this.get('containerSelector');
 
     let container;
@@ -713,8 +666,6 @@ export default Mixin.create(keyForItem, {
   },
 
 
-  _sm_scrollListener: null,
-  _sm_resizeListener: null,
   /**!
    * Remove the event handlers for this instance
    * and teardown any temporarily cached data.
@@ -727,17 +678,16 @@ export default Mixin.create(keyForItem, {
     //cleanup scroll
     this.radar.destroy();
 
-    //clean up scheduled tasks in the run loop
+    //clean up scheduled tasks
 
   },
 
 
-  _isPrepending: false,
   __prependComponents(addCount) {
     if (this.get('_sm_canRender')) {
       this._isPrepending = true;
-      cancelFrame(this._nextUpdate);
-      nextFrame(this, function() {
+      run.cancel(this._nextUpdate);
+      this._nextUpdate = run.scheduleOnce('actions', this, function() {
         let heightPerItem = this.__getEstimatedDefaultHeight();
         this.radar.scrollContainer.scrollTop += (addCount * heightPerItem);
         this.radar.filterMovement();
@@ -789,55 +739,48 @@ export default Mixin.create(keyForItem, {
   },
 
   /**!
-   * Calculates visible borders / cache level break points
-   * based on `containerHeight` or `element.height`.
+   * Calculates pixel boundaries between visible, invisible,
+   * and culled content based on the "viewport" height,
+   * and the bufferSize.
    *
-   * debounces a call to `_updateChildStates` afterwards to update what's visible
+   * computes off of `containerSize` although `containerSize`
+   * is never used.  This allows you to force it to recompute
+   * when needed from the outside.
    *
    * @private
    */
-  __edges: null,
-  _edges: computed('containerHeight', 'shouldRenderList', function calculateViewStateBoundaries() {
-    if (!this.get('shouldRenderList') && this.get('__edges')) {
-      return this.get('__edges');
-    }
-
-    let container = this._container;
-    if (!container) {
-      return;
+  _edges: computed('containerSize', function() {
+    if (!this.radar || !this.radar.planet) {
+      return {};
     }
 
     // segment top break points
     this.radar.planet.setState();
 
-    var edges = {};
-
-    // segment heights
-    var viewportHeight = this.radar.planet.height;
-    var _visibleBufferHeight = Math.round(viewportHeight * this.get('visibleBuffer'));
-    var _invisibleBufferHeight = Math.round(viewportHeight * this.get('invisibleBuffer'));
-
-    edges.viewportTop = this.radar.planet.top;
-    edges.visibleTop = edges.viewportTop - _visibleBufferHeight;
-    edges.invisibleTop = edges.visibleTop - _invisibleBufferHeight;
-
-    // segment bottom break points
-    edges.viewportBottom = edges.viewportTop + viewportHeight;
-
-    edges.visibleBottom = edges.viewportBottom + _visibleBufferHeight;
-    edges.invisibleBottom = edges.visibleBottom + _invisibleBufferHeight;
-
-    this.set('__edges', edges);
-    return edges;
+    let bufferSize = this.get('bufferSize');
+    let rect = this.radar.planet;
+    return {
+      viewportTop: rect.top,
+      visibleTop: -1 * bufferSize * rect.top,
+      invisibleTop: -2 * bufferSize * rect.top,
+      viewportBottom: rect.bottom,
+      visibleBottom: bufferSize * rect.bottom,
+      invisibleBottom: 2 * bufferSize * rect.bottom
+    };
   }),
-
-  radar: null,
 
   /**!
    * Initialize
    */
   _prepareComponent() {
     this.set('__shouldRender', this.get('shouldRender'));
+
+    this._sm_actionCache = {
+      firstReached: null,
+      lastReached: null,
+      firstVisibleChanged: null,
+      lastVisibleChanged: null
+    };
 
     let collectionTagName = (this.get('tagName') || '').toLowerCase();
     let itemTagName = this.get('itemTagName');
@@ -853,6 +796,7 @@ export default Mixin.create(keyForItem, {
     this.radar = new ListRadar({});
   },
 
+
   _reflectContentChanges() {
     let content = this.get('_content');
     content.contentArrayDidChange = (items, offset, removeCount, addCount) => {
@@ -864,6 +808,7 @@ export default Mixin.create(keyForItem, {
     };
   },
 
+
   _didReceiveAttrs(attrs) {
     let oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
     let newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
@@ -872,6 +817,7 @@ export default Mixin.create(keyForItem, {
       this.__prependComponents(addCount);
     }
   },
+
 
   _changeIsPrepend(oldArray, newArray) {
     let lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
@@ -887,14 +833,15 @@ export default Mixin.create(keyForItem, {
     let newInitialItem = valueForIndex(newArray, lengthDifference);
     let newInitialKey = this.keyForItem(newInitialItem, lengthDifference);
 
-    let isPrepend = oldInitialKey === newInitialKey;
-    return isPrepend;
+    return oldInitialKey === newInitialKey;
   },
+
 
   didReceiveAttrs() {},
 
+
   init() {
-    this._super.apply(this, arguments);
+    this._super.apply(...arguments);
 
     this._prepareComponent();
     this.set('_children', Ember.A());
@@ -907,6 +854,18 @@ export default Mixin.create(keyForItem, {
       this.set('didReceiveAttrs', this._didReceiveAttrs);
     }
   }
-
-
 });
+
+
+
+
+
+function valueForIndex(arr, index) {
+  return arr.objectAt ? arr.objectAt(index) : arr[index];
+}
+
+
+function getContent(obj, isProxied) {
+  let key = isProxied? 'content.content' : 'content';
+  return get(obj, key);
+}
