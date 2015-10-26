@@ -35,6 +35,9 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
   registerSatellite(satellite) {
     this.satellite = satellite;
   },
+  unregisterSatellite() {
+    this.satellite = null;
+  },
 
   _height: 0,
 
@@ -58,9 +61,12 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
 
   willDestroyElement() {
     this._super();
-    this._ov_teardown();
-    this.set('viewState', 'culled');
-    this.get('radar').unregister(this);
+    this.setProperties({
+      viewState: 'culled',
+      contentCulled: true,
+      contentHidden: false,
+      contentInserted: false });
+    let radar = this.get('radar').unregister(this);
   },
 
   willDestroy() {

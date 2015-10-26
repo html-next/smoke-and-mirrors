@@ -52,6 +52,14 @@ class Satellite {
     }
   }
 
+  destroy() {
+    if (this.component.unregisterSatellite) {
+      this.component.unregisterSatellite();
+    }
+    this.component = null;
+    this.satellite = null;
+  }
+
 }
 
 export default Satellite;

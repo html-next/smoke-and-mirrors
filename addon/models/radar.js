@@ -35,6 +35,7 @@ export default class Radar {
     this.scrollY = this.scrollContainer ? this.scrollContainer.scrollTop : 0;
     this.minimumMovement = state.minimumMovement || 25;
     this.resizeDebounce = state.resizeDebounce || 64;
+    this.scrollThrottle = state.scrollThrottle || 8;
     this.isTracking = state.hasOwnProperty('isTracking') ? state.isTracking : true;
     if (this.telescope && this.skyline) {
       this._teardownHandlers();
@@ -48,12 +49,16 @@ export default class Radar {
 
   unregister(component) {
     let key = guidFor(component);
+    if (!this.satellites) {
+      return;
+    }
     let satellite = this.satellites.find((satellite) => {
       return satellite.key === key;
     });
     if (satellite) {
       let index = this.satellites.indexOf(satellite);
       this.satellites.splice(index, 1);
+      satellite.destroy();
     }
   }
 
@@ -123,10 +128,11 @@ export default class Radar {
     this._resizeHandler = null;
     this._scrollHandler = null;
     this._nextResize = null;
+    this._nextScroll = null;
 
     this._scrollHandler = () => {
       if (this.isTracking) {
-        this.filterMovement();
+        this._nextScroll = run.throttle(this, this.filterMovement, this.scrollThrottle);
       }
     };
     this._resizeHandler = () => {
@@ -139,6 +145,7 @@ export default class Radar {
 
   _teardownHandlers() {
     run.cancel(this._nextResize);
+    run.cancel(this._nextScroll);
     window.removeEventListener('resize', this._resizeHandler, true);
     if (this.telescope) {
       this.telescope.removeEventListener('scroll', this._scrollHandler, true);
@@ -147,8 +154,10 @@ export default class Radar {
 
   destroy() {
     this._teardownHandlers();
-    // TODO, destroy satellites
-    //this.satellites = null;
+    this.satellites.forEach((satellite) => {
+      satellite.destroy();
+    });
+    this.satellites = null;
   }
 
 }

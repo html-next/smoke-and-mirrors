@@ -4,7 +4,7 @@ import getTagDescendant from '../utils/get-tag-descendant';
 import keyForItem from '../mixins/key-for-item';
 import proxied from '../computed/proxied-array';
 import ListRadar from '../models/list-radar';
-import patchSetTimeout from '../lib/backburner-frames';
+// import patchSetTimeout from '../lib/backburner-frames';
 import SmartActionsMixin from './smart-actions';
 
 /**
@@ -57,6 +57,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
    * resizing the window.
    */
   resizeDebounce: 128,
+  scrollThrottle: 8,
 
   /**!
    * how much extra room to keep visible and invisible on
@@ -258,7 +259,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
     // trigger a cycle
     if (doRender && _shouldDidChange) {
-      run.scheduleOnce('actions', this, this._updateChildStates);
+      this._nextUpdate = run.scheduleOnce('actions', this, this._updateChildStates, 'shouldRenderList');
     }
 
     return doRender;
@@ -285,6 +286,8 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
   radar: null,
   minimumMovement: 25,
   _nextUpdate: null,
+  _nextTeardown: null,
+  _nextMaintenance: null,
   _sm_scrollListener: null,
   _sm_resizeListener: null,
   _isPrepending: false,
@@ -385,7 +388,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
   unregister(child) {
     this.get('_children').removeObject(child);
-    if (this.__isInitialized) {
+    if (this.__isInitialized && !this.get('isDestroying') && !this.get('isDestroyed')) {
       this._sm_scheduleUpdate('unregister');
     }
   },
@@ -420,7 +423,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
         //set scroll
         if (this.get('__isInitializingFromLast')) {
-          run.schedule('afterRender', this, function() {
+          this._nextMaintenance = run.schedule('afterRender', this, function() {
             let last = this.$().get(0).lastElementChild;
             this.set('__isInitializingFromLast', false);
             if (last) {
@@ -533,12 +536,12 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
       .concat((childComponents.slice(0, topComponentIndex)))
       .concat(childComponents.slice(bottomComponentIndex));
 
-    run.debounce(this, this._removeComponents, toCull, toHide, 128);
+    this._nextTeardown = run.debounce(this, this._removeComponents, toCull, toHide, 128);
     toShow.forEach((i) => { i.show(); });
 
     //set scroll
     if (this.get('__isInitializingFromLast')) {
-      run.schedule('afterRender', this, function() {
+     this._nextMaintenance = run.schedule('afterRender', this, function() {
         let last = this.$().get(0).lastElementChild;
         this.set('__isInitializingFromLast', false);
         if (last) {
@@ -557,11 +560,11 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
   },
 
 
-  _sm_scheduleUpdate() {
+  _sm_scheduleUpdate(source) {
     if (this._isPrepending) {
       return;
     }
-    this._nextUpdate = run.scheduleOnce('actions', this, this._updateChildStates);
+    this._nextUpdate = run.scheduleOnce('actions', this, this._updateChildStates, source);
   },
 
 
@@ -574,7 +577,8 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
   //–––––––––––––– Setup/Teardown
   setupContainer() {
-    var resizeDebounce = this.get('resizeDebounce');
+    var resizeDebounce = this.resizeDebounce;
+    let scrollThrottle = this.scrollThrottle;
     var containerSelector = this.get('containerSelector');
 
     let container;
@@ -615,7 +619,8 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
       telescope: this._container,
       resizeDebounce: resizeDebounce,
       skyline: container === window ? document.body : this.element,
-      minimumMovement: this.minimumMovement
+      minimumMovement: this.minimumMovement,
+      scrollThrottle: scrollThrottle
     });
     this.radar.didResizeSatellites = onResizeMethod;
     this.radar.didShiftSatellites = onScrollMethod;
@@ -624,7 +629,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
   didInsertElement() {
     this._super();
-    run.next(() => {
+    this._nextMaintenance = run.next(() => {
       this.setupContainer();
       this.set('_sm_canRender', true);
       //draw initial boundaries
@@ -658,7 +663,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
       this.radar.scrollContainer.scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
     }
 
-    run.next(this, () => {
+    this._nextMaintenance = run.next(this, () => {
       this.__isInitialized = true;
       this._updateChildStates('initializeScrollState');
     });
@@ -679,7 +684,9 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
     this.radar.destroy();
 
     //clean up scheduled tasks
-
+    run.cancel(this._nextUpdate);
+    run.cancel(this._nextTeardown);
+    run.cancel(this._nextMaintenance);
   },
 
 
@@ -691,7 +698,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
         let heightPerItem = this.__getEstimatedDefaultHeight();
         this.radar.scrollContainer.scrollTop += (addCount * heightPerItem);
         this.radar.filterMovement();
-        this._updateChildStates('prependComponents');
+        this._updateChildStates('prepend');
         this._isPrepending = false;
       });
     }
