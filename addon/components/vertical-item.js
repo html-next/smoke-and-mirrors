@@ -22,6 +22,7 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
   itemTagName: 'vertical-item',
 
   heightProperty: 'minHeight',
+  alwaysUseDefaultHeight: false,
 
 //  attributeBindings: ['viewState'],
   classNames: ['vertical-item'],
@@ -83,7 +84,7 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
 
     let isTableChild = tag === 'tr' || tag === 'td' || tag === 'th';
     // table children don't respect min-height :'(
-    this.heightProperty = isTableChild ? 'height' : 'minHeight';
+    this.heightProperty = isTableChild || this.alwaysUseDefaultHeight ? 'height' : 'minHeight';
     this.collection.register(this);
   }
 

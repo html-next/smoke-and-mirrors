@@ -409,7 +409,8 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
    *
    * @private
    */
-  _updateChildStates(/*source*/) {
+  _updateChildStates(source) {
+    console.info('UPDATING FROM: ' + source);
     if (!this.get('shouldRenderList')) {
       return;
     }
@@ -696,8 +697,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
       run.cancel(this._nextUpdate);
       this._nextUpdate = run.scheduleOnce('actions', this, function() {
         let heightPerItem = this.__getEstimatedDefaultHeight();
-        this.radar.scrollContainer.scrollTop += (addCount * heightPerItem);
-        this.radar.filterMovement();
+        this.radar.silentNight(addCount * heightPerItem, 0);
         this._updateChildStates('prepend');
         this._isPrepending = false;
       });
@@ -811,6 +811,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
         this.__prependComponents(addCount);
       } else {
         this._sm_scheduleUpdate('reflect changes');
+        run.scheduleOnce('sync', this.radar, this.radar.expandHorizon);
       }
     };
   },
@@ -822,6 +823,8 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
     if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
       let addCount = get(newArray, 'length') - get(oldArray, 'length');
       this.__prependComponents(addCount);
+    } else {
+      run.scheduleOnce('sync', this.radar, this.radar.expandHorizon);
     }
   },
 
