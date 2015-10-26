@@ -23,7 +23,7 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
 
   heightProperty: 'minHeight',
 
-  attributeBindings: ['viewState'],
+//  attributeBindings: ['viewState'],
   classNames: ['vertical-item'],
   collection: null,
 
@@ -69,7 +69,7 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
   },
 
   init() {
-    this._super();
+    this._super(...arguments);
 
     let tag = this.get('itemTagName');
     this.set('tagName', tag);
