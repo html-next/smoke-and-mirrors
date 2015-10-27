@@ -11,9 +11,7 @@
     as |wrapper|
   }}
     {{#if shouldRenderList}}
-      {{#if wrapper.contentInserted}}
-        {{yield item}}
-      {{/if}}
+      {{yield item index}}
     {{/if}}
   {{/vertical-item}}
 {{/each}}

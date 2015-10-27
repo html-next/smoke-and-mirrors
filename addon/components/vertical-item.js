@@ -1,22 +1,13 @@
-import Ember from 'ember';
-import StateMapMixin from '../mixins/state-map';
+import PreRenderStateMapMixin from '../mixins/prerender-state-map';
 import layout from '../templates/components/vertical-item';
 import LinkedComponentMixin from '../mixins/linked-component-list';
-
-const {
-  Component
-  } = Ember;
+import PrerenderComponent from './pre-render';
 
 /**
  A vertical-item is one that intelligently removes
  its content when scrolled off the screen vertically.
-
- @class vertical-item
- @extends Ember.Component
- @namespace Ember
  **/
-export default Component.extend(LinkedComponentMixin, StateMapMixin, {
-
+export default PrerenderComponent.extend(LinkedComponentMixin, PreRenderStateMapMixin, {
   layout: layout,
   tagName: 'vertical-item',
   itemTagName: 'vertical-item',
@@ -24,7 +15,7 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
   heightProperty: 'minHeight',
   alwaysUseDefaultHeight: false,
 
-//  attributeBindings: ['viewState'],
+  attributeBindings: ['viewState'],
   classNames: ['vertical-item'],
   collection: null,
 
@@ -47,8 +38,13 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
     this.get('radar').register(this);
   },
 
+  didPreRender(dimensions) {
+    this.dimensions = dimensions;
+  },
+
   willInsertElement() {
     this._super();
+    /*
     let _height = this.get('_height');
     let heightProp = this.get('heightProperty');
     let defaultHeight = this.get('defaultHeight');
@@ -58,6 +54,7 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
 
     this.element.style.visibility = 'hidden';
     this.element.style[heightProp] = _height ? _height + 'px' : defaultHeight;
+    */
   },
 
   willDestroyElement() {
