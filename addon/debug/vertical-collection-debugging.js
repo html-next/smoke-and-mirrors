@@ -9,7 +9,7 @@ const {
 
 
 export default Mixin.create({
-  showEdges: true,
+  showEdges: false,
   _nextVisualization: null,
 
   toggleEdgeVisualization () {
@@ -48,7 +48,10 @@ export default Mixin.create({
     });
     this.radar.didResizeSatellites = onResizeMethod;
     this.radar.didShiftSatellites = onScrollMethod;
-    this.visualization = new Visualization(this);
+
+    if (this.get('showEdges')) {
+      this.visualization = new Visualization(this);
+    }
   },
 
   _edges: computed('containerSize', function() {
@@ -81,8 +84,11 @@ export default Mixin.create({
   },
 
   visualize() {
+    if (!this.get('showEdges')) {
+      return;
+    }
     this._nextVisualization = run.scheduleOnce(
-      'render',
+      'afterRender',
       () => {
         this.visualization.render();
       });

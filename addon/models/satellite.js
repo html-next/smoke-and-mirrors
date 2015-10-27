@@ -12,7 +12,6 @@ class Satellite {
     this.component = component;
     this.element = component.element;
     this.geography = new Geography(this.element);
-    console.info('CREATED NEW SATELLITE', this.geography);
     this.key = guidFor(component);
     if (component.registerSatellite) {
       component.registerSatellite(this);

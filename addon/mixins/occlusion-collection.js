@@ -66,7 +66,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
    * but these values have been unified to ease a future transition in
    * the internal mechanics of the collection to utilize DOM recycling.
    */
-  bufferSize: .5,
+  bufferSize: 1,
 
   /**!
    * useContentProxy
@@ -405,8 +405,8 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
    *
    * @private
    */
-  _updateChildStates(source) {
-    console.info('UPDATING FROM: ' + source);
+  _updateChildStates(/*source*/) {
+    //console.info('UPDATING FROM: ' + source);
     if (!this.get('shouldRenderList')) {
       return;
     }
@@ -813,7 +813,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
         this.__prependComponents(addCount);
       } else {
         this._sm_scheduleUpdate('reflect changes');
-        run.scheduleOnce('sync', this.radar, this.radar.expandHorizon);
+        run.scheduleOnce('sync', this.radar, this.radar.updateSkyline);
       }
     };
   },
@@ -826,7 +826,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
       let addCount = get(newArray, 'length') - get(oldArray, 'length');
       this.__prependComponents(addCount);
     } else {
-      run.scheduleOnce('sync', this.radar, this.radar.expandHorizon);
+      run.scheduleOnce('sync', this.radar, this.radar.updateSkyline);
     }
   },
 

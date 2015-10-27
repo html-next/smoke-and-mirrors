@@ -62,7 +62,7 @@ export default class Visualization {
     element.style.left = ((this.radar.planet.width * 2) - this.radar.planet.left - geography.left) + "px";
 
     let errorLevel = false;
-    if (Math.abs(geography.top - compare.top) > 15) {
+    if (Math.abs(geography.top - compare.top) > 35) {
       errorLevel = true;
     }
 

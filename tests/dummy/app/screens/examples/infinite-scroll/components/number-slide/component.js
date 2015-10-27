@@ -55,8 +55,7 @@ function numberToRGB(number) {
   let r = number > 255 ? 255 : number;
   number = r === 255 ? number - 255 : 0;
   let g = number > 255 ? 255 : number;
-  number = g === 255 ? number - 255 : 0;
-  let b = number;
+  let b = g === 255 ? number - 255 : 0;
 
   return setOrder(num * 16000, {
     r, g, b
@@ -69,11 +68,15 @@ export default Component.extend({
   style: computed('number', function() {
     let num = parseInt(this.get('number'), 10);
     if (num < 0) {
-      num = base + num;
+      num = 380 + num;
     }
     let c = numberToRGB(num);
-    console.log('color', c, num);
-    return `background: rgb(${c.r},${c.g},${c.b});`;
+    let b = {
+      r: 255 - c.r,
+      g: 255 - c.g,
+      b: 255 - c.b
+    };
+    return `background: rgb(${c.r},${c.g},${c.b}); color: rgb(${b.r},${b.g},${b.b});`;
   }),
   layout: layout,
   index: 0,

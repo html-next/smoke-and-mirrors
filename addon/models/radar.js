@@ -84,7 +84,9 @@ export default class Radar {
   }
 
   updateSkyline() {
-    this.sky.setState();
+    if (this.sky) {
+      this.sky.setState();
+    }
   }
 
   _shift(dY, dX) {
@@ -105,26 +107,22 @@ export default class Radar {
   }
 
   shiftSatellites(dY, dX) {
-    console.info('SHIFT SATELLITES:', dY);
     this.willShiftSatellites(dY, dX);
     this._shift(dY, dX);
     this.didShiftSatellites(dY, dX);
   }
 
   silentNight(dY, dX) {
-    console.info('INITIAL SCROLL STATE', this.scrollY, this.scrollContainer.scrollTop);
     this.scrollY = this.scrollContainer.scrollTop += dY;
     this.scrollX = this.scrollContainer.scrollLeft += dX;
-    console.info('FINAL SCROLL STATE', this.scrollY, this.scrollContainer.scrollTop);
-    this.expandHorizon();
+    this.rebuild();
   }
 
-  expandHorizon() {
-    if (this.sky) {
-      console.info('EXPANDING HORIZON FROM', this.sky.height);
-      this.sky.setState();
-      console.info('NEW HEIGHT', this.sky.height);
-    }
+  rebuild() {
+    this.updateSkyline();
+    this.satellites.forEach((satellite) => {
+      satellite.geography.setState();
+    });
   }
 
   filterMovement() {
