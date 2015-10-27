@@ -80,6 +80,28 @@ img.async-image {
   position: relative;
 }
 
+number-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 250px;
+  height: 250px;
+  background: #1f2f30;
+  border: 1px solid #bbb;
+  box-shadow: 1px 1px 5px 0 #d0d0d0;
+  color: #fff;
+}
+
+number-slide .number {
+  font-size: 7.5rem;
+  font-weight: 900;
+}
+
+number-slide .index {
+  font-size: 2rem;
+  color: #aaa;
+}
+
 .image-slide.flexible {
   height: auto;
 }

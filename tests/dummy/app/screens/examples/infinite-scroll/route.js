@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import getImages from 'dummy/lib/get-images';
+import getNumbers from 'dummy/lib/get-numbers';
 
 const {
   Route
@@ -8,7 +8,11 @@ const {
 export default Route.extend({
 
   model() {
-    return { images: getImages(10) };
+    return {
+      numbers: getNumbers(0, 20),
+      first: 0,
+      last: 20
+    };
   }
 
 });

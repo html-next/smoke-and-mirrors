@@ -5,15 +5,16 @@
           {{!- BEGIN-SNIPPET infinite-scroll-example }}
             <div class="table-wrapper dark">
               {{#vertical-collection
-                content=model.images
+                content=model.numbers
                 defaultHeight=270
-                useContentProxy=true
+                alwaysUseDefaultHeight=true
+                useContentProxy=false
                 firstReached="loadAbove"
                 lastReached="loadBelow"
-                as |image|
+                as |item index|
               }}
                   <div class="image-slide">
-                    {{async-image src=image.small}}
+                    {{examples/infinite-scroll/components/number-slide number=item.number index=index}}
                   </div>
               {{/vertical-collection}}
             </div>

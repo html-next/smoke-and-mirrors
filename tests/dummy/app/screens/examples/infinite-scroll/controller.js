@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import getImages from 'dummy/lib/get-images';
+import getNumbers from 'dummy/lib/get-numbers';
 
 const {
   Controller
@@ -13,18 +13,22 @@ export default Controller.extend({
 
     loadAbove() {
       // console.info('LOAD ABOVE: ' + (new Date()).getTime());
-      let images = getImages(5);
-      let model = this.get('model.images');
-      let newModel =  images.concat(model);
-      this.set('model.images', newModel);
+      let first = this.get('model.first');
+      let numbers = getNumbers(first - 20, 20);
+      let model = this.get('model.numbers');
+      let newModel =  numbers.concat(model);
+      this.set('model.numbers', newModel);
+      this.set('model.first', first - 20);
     },
 
     loadBelow() {
       // console.info('LOAD BELOW: ' + (new Date()).getTime());
-      let images =  getImages(5);
-      let model = this.get('model.images');
-      let newModel =  model.concat(images);
-      this.set('model.images', newModel);
+      let last = this.get('model.last');
+      let numbers = getNumbers(last, 20);
+      let model = this.get('model.numbers');
+      let newModel =  model.concat(numbers);
+      this.set('model.numbers', newModel);
+      this.set('model.last', last + 20);
     }
 
   }
