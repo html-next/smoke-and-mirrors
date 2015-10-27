@@ -1,4 +1,6 @@
 /* global document*/
+import Geography from '../models/geography';
+
 export default class Visualization {
 
   constructor(component) {
@@ -52,6 +54,21 @@ export default class Visualization {
     element.style.left = (this.radar.planet.width - this.radar.planet.left - geography.left) + "px";
   }
 
+  applySatelliteMirrorStyles(element, componentElement, compare) {
+    let geography = new Geography(componentElement);
+    element.style.width = geography.width + "px";
+    element.style.height = geography.height + "px";
+    element.style.top = geography.top + "px";
+    element.style.left = ((this.radar.planet.width * 2) - this.radar.planet.left - geography.left) + "px";
+
+    let errorLevel = false;
+    if (Math.abs(geography.top - compare.top) > 15) {
+      errorLevel = true;
+    }
+
+    element.setAttribute('hasErrors', errorLevel ? "true" : "false");
+  }
+
 
   static applyStyles(element, geography) {
     element.style.width = geography.width + "px";
@@ -65,7 +82,7 @@ export default class Visualization {
     let planet = this.radar.planet;
     let sky = this.radar.sky;
 
-    this.wrapper.style.width = (((2 * planet.left) + planet.width) * 0.2) + 'px';
+    this.wrapper.style.width = (((2 * planet.left) + planet.width) * 0.3) + 'px';
     this.container.style.width = planet.width + "px";
     this.container.style.height = planet.height + "px";
     Visualization.applyStyles(this.telescope, planet);
@@ -102,14 +119,24 @@ export default class Visualization {
 
   makeSatellite() {
     let satellite;
+    let mirror;
     if (this.cache.length) {
       satellite = this.cache.pop();
     } else {
       satellite = document.createElement('div');
       satellite.className = 'sm_visualization-satellite';
     }
+    if (satellite.mirrorSatellite) {
+      mirror = satellite.mirrorSatellite;
+    } else {
+      mirror = document.createElement('div');
+      mirror.className = 'sm_visualization-mirror';
+      mirror.siblingSatellite = satellite;
+      satellite.mirrorSatellite = mirror;
+    }
     this.satellites.push(satellite);
     this.container.insertBefore(satellite, this.container.firstElementChild);
+    this.container.insertBefore(mirror, this.container.firstElementChild);
   }
 
   makeSatellites() {
@@ -119,6 +146,7 @@ export default class Visualization {
       if (isShrinking) {
         let satellite = this.satellites.pop();
         satellite.parentNode.removeChild(satellite);
+        satellite.mirrorSatellite.parentNode.removeChild(satellite.mirrorSatellite);
         this.cache.push(satellite);
       } else {
         this.makeSatellite();
@@ -133,6 +161,7 @@ export default class Visualization {
       let element = sats[index];
       this.applySatelliteStyles(element, sat.geography);
       element.setAttribute('viewState', sat.component.get('viewState'));
+      this.applySatelliteMirrorStyles(element.mirrorSatellite, sat.component.element, sat.geography);
     });
   }
 

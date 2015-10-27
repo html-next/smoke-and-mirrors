@@ -43,6 +43,15 @@
   position: absolute;
 }
 
+.sm_visualization-mirror {
+  position: absolute;
+  background: rgba(100, 250, 100, 0.5);
+}
+
+.sm_visualization-mirror[hasErrors=true] {
+  background: rgba(255, 50, 50, 1);
+}
+
 .sm_visualization-satellite[viewState="culled"] {
   background: rgba(230, 230, 230, 0.6);
 }

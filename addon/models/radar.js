@@ -149,8 +149,8 @@ export default class Radar {
 
     this._scrollHandler = () => {
       if (this.isTracking) {
-        this._nextScroll = run.scheduleOnce('sync', this, this.filterMovement);
-        //this._nextScroll = run.debounce(this, this.filterMovement, this.scrollThrottle);
+        //this._nextScroll = run.scheduleOnce('sync', this, this.filterMovement);
+        this._nextScroll = run.throttle(this, this.filterMovement, this.scrollThrottle, false);
       }
     };
     this._resizeHandler = () => {

@@ -533,9 +533,9 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
       .concat((childComponents.slice(0, topComponentIndex)))
       .concat(childComponents.slice(bottomComponentIndex));
 
-    //this._nextTeardown = run.debounce(this, this._removeComponents, toCull, toHide, 128);
-    toCull.forEach((i) => { i.cull(); });
-    toHide.forEach((i) => { i.hide(); });
+    this._nextTeardown = run.throttle(this, this._removeComponents, toCull, toHide, 64, false);
+    //toCull.forEach((i) => { i.cull(); });
+    //toHide.forEach((i) => { i.hide(); });
     toShow.forEach((i) => { i.show(); });
 
     //set scroll
