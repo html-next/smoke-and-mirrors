@@ -4,7 +4,6 @@ import getTagDescendant from '../utils/get-tag-descendant';
 import keyForItem from '../mixins/key-for-item';
 import proxied from '../computed/proxied-array';
 import ListRadar from '../models/list-radar';
-// import patchSetTimeout from '../lib/backburner-frames';
 import SmartActionsMixin from './smart-actions';
 
 /**
@@ -772,11 +771,11 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
     let rect = this.radar.planet;
     return {
       viewportTop: rect.top,
-      visibleTop: -1 * bufferSize * rect.top,
-      invisibleTop: -2 * bufferSize * rect.top,
+      visibleTop: (-1 * bufferSize * rect.height) + rect.top,
+      invisibleTop: (-2 * bufferSize * rect.height) + rect.top,
       viewportBottom: rect.bottom,
-      visibleBottom: bufferSize * rect.bottom,
-      invisibleBottom: 2 * bufferSize * rect.bottom
+      visibleBottom: (1 * bufferSize * rect.height) + rect.bottom,
+      invisibleBottom: (2 * bufferSize * rect.height) + rect.bottom
     };
   }),
 
