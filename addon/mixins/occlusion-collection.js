@@ -336,11 +336,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
    @param {Number} adj Height adjustment
    @returns {Number} the index into childViews of the first view to render
    **/
-  _findFirstRenderedComponent(viewportStart, adj) {
-    // adjust viewportStart to prevent the randomized coin toss
-    // from not finding a view when the pixels are off by < 1
-    viewportStart -= 1;
-
+  _findFirstRenderedComponent(invisibleTop) {
     let childComponents = this.get('children');
     let maxIndex = childComponents.length - 1;
     let minIndex = 0;
@@ -353,9 +349,9 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
       // in case of not full-window scrolling
       let component = childComponents[midIndex];
-      let componentBottom = component.satellite.geography.bottom + adj;
+      let componentBottom = component.satellite.geography.bottom;
 
-      if (componentBottom > viewportStart) {
+      if (componentBottom > invisibleTop) {
         maxIndex = midIndex - 1;
       } else {
         minIndex = midIndex + 1;
@@ -373,6 +369,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
       let index = get(item, 'index');
       output[index] = item;
     });
+    console.log('recomputed children');
     return output;
   }),
 
@@ -445,7 +442,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
       currentUpperBound = currentViewportBound;
     }
 
-    let topComponentIndex = this._findFirstRenderedComponent(currentUpperBound, edges.viewportTop);
+    let topComponentIndex = this._findFirstRenderedComponent(currentUpperBound);
     let bottomComponentIndex = topComponentIndex;
     let lastIndex = childComponents.length - 1;
     let topVisibleSpotted = false;
@@ -536,7 +533,9 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
       .concat((childComponents.slice(0, topComponentIndex)))
       .concat(childComponents.slice(bottomComponentIndex));
 
-    this._nextTeardown = run.debounce(this, this._removeComponents, toCull, toHide, 128);
+    //this._nextTeardown = run.debounce(this, this._removeComponents, toCull, toHide, 128);
+    toCull.forEach((i) => { i.cull(); });
+    toHide.forEach((i) => { i.hide(); });
     toShow.forEach((i) => { i.show(); });
 
     //set scroll
