@@ -1,12 +1,11 @@
 {{#each _content key='@index' as |item index|}}
   {{#vertical-item
-    defaultHeight=defaultHeight
     itemTagName=itemTagName
+    defaultHeight=defaultHeight
     alwaysUseDefaultHeight=alwaysUseDefaultHeight
     content=item
     radar=radar
     index=index
-    keyForId=key
     collection=this
   }}
     {{#if shouldRenderList}}
