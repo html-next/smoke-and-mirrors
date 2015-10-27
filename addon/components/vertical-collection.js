@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import OcclusionMixin from '../mixins/occlusion-collection';
 import layout from '../templates/components/vertical-collection';
-import DebugMixin from '../lib/vertical-collection-debugging';
+import DebugMixin from '../debug/vertical-collection-debugging';
 
 const {
   Component
