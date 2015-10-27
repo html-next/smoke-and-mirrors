@@ -16,7 +16,6 @@ const {
  @namespace Ember
  **/
 export default Component.extend(LinkedComponentMixin, StateMapMixin, {
-
   layout: layout,
   tagName: 'vertical-item',
   itemTagName: 'vertical-item',
