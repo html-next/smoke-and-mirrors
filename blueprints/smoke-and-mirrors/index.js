@@ -1,10 +1,9 @@
-/* global module*/
 module.exports = {
+  description: 'Install ember-run-raf',
+
   normalizeEntityName: function() {},
 
   afterInstall: function() {
-    return this.addBowerPackagesToProject([
-      { name: 'animation-frame', target: '~0.2.4' }
-    ]);
+    return this.addAddonToProject('ember-run-raf', '1.0.0');
   }
 };
