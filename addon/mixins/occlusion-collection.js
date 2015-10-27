@@ -66,7 +66,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
    * but these values have been unified to ease a future transition in
    * the internal mechanics of the collection to utilize DOM recycling.
    */
-  bufferSize: 1,
+  bufferSize: .5,
 
   /**!
    * useContentProxy
@@ -283,7 +283,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
    */
   _scrollIsForward: 0,
   radar: null,
-  minimumMovement: 25,
+  minimumMovement: 15,
   _nextUpdate: null,
   _nextTeardown: null,
   _nextMaintenance: null,

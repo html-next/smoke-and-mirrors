@@ -112,15 +112,18 @@ export default class Radar {
   }
 
   silentNight(dY, dX) {
+    console.info('INITIAL SCROLL STATE', this.scrollY, this.scrollContainer.scrollTop);
     this.scrollY = this.scrollContainer.scrollTop += dY;
     this.scrollX = this.scrollContainer.scrollLeft += dX;
-    console.info('SCROLL STATE', this.scrollY);
+    console.info('FINAL SCROLL STATE', this.scrollY, this.scrollContainer.scrollTop);
     this.expandHorizon();
   }
 
   expandHorizon() {
     if (this.sky) {
-      this.sky.getState();
+      console.info('EXPANDING HORIZON FROM', this.sky.height);
+      this.sky.setState();
+      console.info('NEW HEIGHT', this.sky.height);
     }
   }
 
@@ -134,7 +137,6 @@ export default class Radar {
     if (this.isEarthquake(_scrollY, scrollY) || this.isEarthquake(_scrollX, scrollX)) {
       this.scrollY = scrollY;
       this.scrollX = scrollX;
-      console.info('SCROLL STATE CHANGE', scrollY, _scrollY);
       this.shiftSatellites(scrollY - _scrollY, scrollX - _scrollX);
     }
   }
@@ -148,6 +150,7 @@ export default class Radar {
     this._scrollHandler = () => {
       if (this.isTracking) {
         this._nextScroll = run.scheduleOnce('sync', this, this.filterMovement);
+        //this._nextScroll = run.debounce(this, this.filterMovement, this.scrollThrottle);
       }
     };
     this._resizeHandler = () => {

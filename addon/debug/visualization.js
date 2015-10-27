@@ -141,4 +141,11 @@ export default class Visualization {
     this.makeSatellites();
   }
 
+  destroy() {
+    this.wrapper.parentNode.removeChild(this.wrapper);
+    this.component = null;
+    this.satellites = null;
+    this.cache = null;
+  }
+
 }

@@ -3,6 +3,7 @@ import Visualization from './visualization';
 
 const {
   run,
+  computed,
   Mixin
   } = Ember;
 
@@ -23,11 +24,7 @@ export default Mixin.create({
       return;
     }
     this._nextUpdate = run.scheduleOnce('actions', this, this._updateChildStates, source);
-    this._nextVisualization = run.scheduleOnce(
-      'render',
-      () => {
-        this.visualization.render();
-      });
+    this.visualize();
   },
 
   setupHandlers() {
@@ -52,6 +49,57 @@ export default Mixin.create({
     this.radar.didResizeSatellites = onResizeMethod;
     this.radar.didShiftSatellites = onScrollMethod;
     this.visualization = new Visualization(this);
+  },
+
+  _edges: computed('containerSize', function() {
+    if (!this.radar || !this.radar.planet) {
+      return {};
+    }
+
+    // segment top break points
+    this.radar.planet.setState();
+
+    let bufferSize = this.get('bufferSize');
+    let rect = this.radar.planet;
+
+    this.visualize();
+
+    return {
+      viewportTop: rect.top,
+      visibleTop: (-1 * bufferSize * rect.height) + rect.top,
+      invisibleTop: (-2 * bufferSize * rect.height) + rect.top,
+      viewportBottom: rect.bottom,
+      visibleBottom: (1 * bufferSize * rect.height) + rect.bottom,
+      invisibleBottom: (2 * bufferSize * rect.height) + rect.bottom
+    };
+  }),
+
+  _removeComponents(toCull, toHide) {
+    toCull.forEach((v) => { v.cull(); });
+    toHide.forEach((v) => { v.hide(); });
+    this.visualize();
+  },
+
+  visualize() {
+    this._nextVisualization = run.scheduleOnce(
+      'render',
+      () => {
+        this.visualization.render();
+      });
+  },
+
+  __prependComponents(addCount) {
+    if (this.get('_sm_canRender')) {
+      this._isPrepending = true;
+      run.cancel(this._nextUpdate);
+      this._nextUpdate = run.scheduleOnce('actions', this, function() {
+        let heightPerItem = this.__getEstimatedDefaultHeight();
+        this.radar.silentNight(addCount * heightPerItem, 0);
+        this._updateChildStates('prepend');
+        this.visualize();
+        this._isPrepending = false;
+      });
+    }
   },
 
   willDestroy() {
