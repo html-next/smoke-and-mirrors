@@ -296,10 +296,8 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
   canSendActions(name/*, context*/) {
     // don't trigger during a prepend or initial render
     if (this._isFirstRender || this._isPrepending) {
-      console.log('discarding action send');
       return false;
     }
-    console.log('sending action!', name);
 
     if (name === 'firstReached') {
       if (this.get('_scrollIsForward')) {
@@ -370,7 +368,6 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
       let index = get(item, 'index');
       output[index] = item;
     });
-    console.log('recomputed children');
     return output;
   }),
 
@@ -406,8 +403,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
    *
    * @private
    */
-  _updateChildStates(source) {
-    console.info('UPDATING FROM: ' + source);
+  _updateChildStates(/*source*/) {
     if (!this.get('shouldRenderList')) {
       return;
     }
