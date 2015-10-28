@@ -56,7 +56,6 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
    * resizing the window.
    */
   resizeDebounce: 128,
-  scrollThrottle: 8,
 
   /**!
    * how much extra room to keep visible and invisible on
@@ -610,7 +609,6 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
   setupHandlers() {
     let resizeDebounce = this.resizeDebounce;
-    let scrollThrottle = this.scrollThrottle;
     let container = this._container;
     let onScrollMethod = (dY, dX) => {
       this._scheduleOcclusion(dY, dX);
@@ -624,8 +622,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
       telescope: this._container,
       resizeDebounce: resizeDebounce,
       skyline: container === window ? document.body : this.element,
-      minimumMovement: this.minimumMovement,
-      scrollThrottle: scrollThrottle
+      minimumMovement: this.minimumMovement
     });
     this.radar.didResizeSatellites = onResizeMethod;
     this.radar.didShiftSatellites = onScrollMethod;
