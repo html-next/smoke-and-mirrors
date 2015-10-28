@@ -98,9 +98,11 @@ export default Mixin.create({
     if (this.get('_sm_canRender')) {
       this._isPrepending = true;
       run.cancel(this._nextUpdate);
-      this._nextUpdate = run.scheduleOnce('actions', this, function() {
-        let heightPerItem = this.__getEstimatedDefaultHeight();
-        this.radar.silentNight(addCount * heightPerItem, 0);
+      let heightPerItem = this.__getEstimatedDefaultHeight();
+      this.radar.silentNight(addCount * heightPerItem, 0);
+      console.log('prepending');
+      this._nextUpdate = run.scheduleOnce('render', this, function() {
+        console.log('running prepend');
         this._updateChildStates('prepend');
         this.visualize();
         this._isPrepending = false;
