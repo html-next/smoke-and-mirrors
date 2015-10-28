@@ -35,7 +35,6 @@ export default class Radar {
     this.scrollY = this.scrollContainer ? this.scrollContainer.scrollTop : 0;
     this.minimumMovement = state.minimumMovement || 25;
     this.resizeDebounce = state.resizeDebounce || 64;
-    this.scrollThrottle = state.scrollThrottle || 8;
     this.isTracking = state.hasOwnProperty('isTracking') ? state.isTracking : true;
     if (this.telescope && this.skyline) {
       this._teardownHandlers();
@@ -147,8 +146,7 @@ export default class Radar {
 
     this._scrollHandler = () => {
       if (this.isTracking) {
-        //this._nextScroll = run.scheduleOnce('sync', this, this.filterMovement);
-        this._nextScroll = run.throttle(this, this.filterMovement, this.scrollThrottle, false);
+        this._nextScroll = run.scheduleOnce('sync', this, this.filterMovement);
       }
     };
     this._resizeHandler = () => {
