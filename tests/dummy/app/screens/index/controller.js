@@ -6,8 +6,6 @@ const {
   } = Ember;
 
 export default Controller.extend({
-
-  version: config.version,
+  version: config.VERSION,
   emberVersion: Ember.VERSION
-
 });
