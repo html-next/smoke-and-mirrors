@@ -36,7 +36,7 @@
     "ember-code-snippet": "^1.1.0",
     "ember-disable-proxy-controllers": "^1.0.0",
     "ember-export-application-global": "^1.0.2",
-    "ember-run-raf": "^1.0.1",
+    "ember-run-raf": "^1.0.2",
     "ember-try": "0.0.6",
     "grunt": "0.4.5",
     "grunt-bump": "0.0.16",
