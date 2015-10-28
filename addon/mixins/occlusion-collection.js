@@ -573,7 +573,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
   //–––––––––––––– Setup/Teardown
   setupContainer() {
-    var containerSelector = this.get('containerSelector');
+   let containerSelector = this.get('containerSelector');
 
     let container;
     if (containerSelector === 'body') {

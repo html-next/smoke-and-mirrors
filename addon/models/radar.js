@@ -188,7 +188,7 @@ export default class Radar {
     };
 
     window.addEventListener('resize', this._resizeHandler, true);
-    this.scrollContainer.addEventListener('scroll', this._scrollHandler, true);
+    this.telescope.addEventListener('scroll', this._scrollHandler, true);
     if (this.scrollContainer !== document.body) {
       document.body.addEventListener('scroll', this._scrollAdjuster, true);
     }
@@ -199,7 +199,7 @@ export default class Radar {
     run.cancel(this._nextScroll);
     run.cancel(this._nextAdjustment);
     window.removeEventListener('resize', this._resizeHandler, true);
-    if (this.scrollContainer) {
+    if (this.telescope) {
       this.telescope.removeEventListener('scroll', this._scrollHandler, true);
     }
     if (this.scrollContainer !== document.body) {
