@@ -20,35 +20,12 @@ export default Mixin.create({
    * Overrider to implement edge updates
    */
   _sm_scheduleUpdate(source) {
-    if (this._isPrepending) {
-      return;
-    }
-    this._nextUpdate = run.scheduleOnce('actions', this, this._updateChildStates, source);
+    this._super(source);
     this.visualize();
   },
 
   setupHandlers() {
-    let resizeDebounce = this.resizeDebounce;
-    let scrollThrottle = this.scrollThrottle;
-    let container = this._container;
-    let onScrollMethod = (dY, dX) => {
-      this._scheduleOcclusion(dY, dX);
-    };
-
-    let onResizeMethod = () => {
-      this.notifyPropertyChange('_edges');
-    };
-
-    this.radar.setState({
-      telescope: this._container,
-      resizeDebounce: resizeDebounce,
-      skyline: container === window ? document.body : this.element,
-      minimumMovement: this.minimumMovement,
-      scrollThrottle: scrollThrottle
-    });
-    this.radar.didResizeSatellites = onResizeMethod;
-    this.radar.didShiftSatellites = onScrollMethod;
-
+    this._super();
     if (this.get('showEdges')) {
       this.visualization = new Visualization(this);
     }
@@ -78,8 +55,7 @@ export default Mixin.create({
   }),
 
   _removeComponents(toCull, toHide) {
-    toCull.forEach((v) => { v.cull(); });
-    toHide.forEach((v) => { v.hide(); });
+    this._super(toCull, toHide);
     this.visualize();
   },
 
@@ -95,17 +71,8 @@ export default Mixin.create({
   },
 
   __prependComponents(addCount) {
-    if (this.get('_sm_canRender')) {
-      this._isPrepending = true;
-      run.cancel(this._nextUpdate);
-      let heightPerItem = this.__getEstimatedDefaultHeight();
-      this.radar.silentNight(addCount * heightPerItem, 0);
-      this._nextUpdate = run.scheduleOnce('render', this, function() {
-        this._updateChildStates('prepend');
-        this.visualize();
-        this._isPrepending = false;
-      });
-    }
+    this._super(addCount);
+    this.visualize();
   },
 
   willDestroy() {

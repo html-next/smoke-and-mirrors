@@ -112,14 +112,24 @@ export default class Radar {
     this.didShiftSatellites(dY, dX);
   }
 
-  silentNight(dY, dX) {
+  silentNight() {
+    let _height = this.sky.height;
+    let _width = this.sky.width;
+    this.updateSkyline();
+    let height = this.sky.height;
+    let width = this.sky.width;
+    let dY = height - _height;
+    let dX = width - _width;
     this.scrollY = this.scrollContainer.scrollTop += dY;
     this.scrollX = this.scrollContainer.scrollLeft += dX;
+    this.sky.left -= dX;
+    this.sky.right -= dX;
+    this.sky.bottom -= dY;
+    this.sky.top -= dY;
     this.rebuild();
   }
 
   rebuild() {
-    this.updateSkyline();
     this.posX = document.body.scrollLeft;
     this.posY = document.body.scrollTop;
     this.satellites.forEach((satellite) => {
@@ -134,10 +144,13 @@ export default class Radar {
     let scrollX = this.scrollContainer.scrollLeft;
     let _scrollY = this.scrollY;
     let _scrollX = this.scrollX;
+
     if (this.isEarthquake(_scrollY, scrollY) || this.isEarthquake(_scrollX, scrollX)) {
       this.scrollY = scrollY;
       this.scrollX = scrollX;
-      this.shiftSatellites(scrollY - _scrollY, scrollX - _scrollX);
+      let dY = scrollY - _scrollY;
+      let dX = scrollX - _scrollX;
+      this.shiftSatellites(dY, dX);
     }
   }
 

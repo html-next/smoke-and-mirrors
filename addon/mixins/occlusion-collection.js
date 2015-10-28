@@ -689,13 +689,12 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
   },
 
 
-  __prependComponents(addCount) {
+  __prependComponents() {
     if (this.get('_sm_canRender')) {
       this._isPrepending = true;
       run.cancel(this._nextUpdate);
       this._nextUpdate = run.scheduleOnce('actions', this, function() {
-        let heightPerItem = this.__getEstimatedDefaultHeight();
-        this.radar.silentNight(addCount * heightPerItem, 0);
+        this.radar.silentNight();
         this._updateChildStates('prepend');
         this._isPrepending = false;
       });
