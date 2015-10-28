@@ -621,6 +621,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
       minimumMovement: this.minimumMovement
     });
     this.radar.didResizeSatellites = onResizeMethod;
+    this.radar.didUpdatePosition = onResizeMethod;
     this.radar.didShiftSatellites = onScrollMethod;
   },
 

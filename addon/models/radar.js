@@ -33,6 +33,9 @@ export default class Radar {
 
     this.scrollX = this.scrollContainer ? this.scrollContainer.scrollLeft : 0;
     this.scrollY = this.scrollContainer ? this.scrollContainer.scrollTop : 0;
+    this.posX = document.body.scrollLeft;
+    this.posY = document.body.scrollTop;
+
     this.minimumMovement = state.minimumMovement || 25;
     this.resizeDebounce = state.resizeDebounce || 64;
     this.isTracking = state.hasOwnProperty('isTracking') ? state.isTracking : true;
@@ -69,6 +72,8 @@ export default class Radar {
   didShiftSatellites() {}
   willResizeSatellites() {}
   didResizeSatellites() {}
+  willAdjustPosition() {}
+  didAdjustPosition() {}
 
   _resize() {
     this.satellites.forEach((c) => {
@@ -95,14 +100,10 @@ export default class Radar {
     });
 
     // move the sky
-    if (dX) {
-      this.sky.left -= dX;
-      this.sky.right -= dX;
-    }
-    if (dY) {
-      this.sky.bottom -= dY;
-      this.sky.top -= dY;
-    }
+    this.sky.left -= dX;
+    this.sky.right -= dX;
+    this.sky.bottom -= dY;
+    this.sky.top -= dY;
   }
 
   shiftSatellites(dY, dX) {
@@ -119,6 +120,8 @@ export default class Radar {
 
   rebuild() {
     this.updateSkyline();
+    this.posX = document.body.scrollLeft;
+    this.posY = document.body.scrollTop;
     this.satellites.forEach((satellite) => {
       satellite.geography.setState();
     });
@@ -138,11 +141,39 @@ export default class Radar {
     }
   }
 
+  updateScrollPosition() {
+    let _posX = this.posX;
+    let _posY = this.posY;
+    let posX = document.body.scrollLeft;
+    let posY = document.body.scrollTop;
+    if (this.isEarthquake(_posY, posY) || this.isEarthquake(_posX, posX)) {
+      this.posY = posY;
+      this.posX = posX;
+      this.adjustPosition(posY - _posY, posX - _posX);
+    }
+  }
+
+  _adjustPosition(dY, dX) {
+    this.planet.top -= dY;
+    this.planet.bottom -= dY;
+    this.planet.left -= dX;
+    this.planet.right -= dX;
+
+    this._shift(dY, dX);
+  }
+
+  adjustPosition(dY,dX) {
+    this.willAdjustPosition(dY, dX);
+    this._adjustPosition(dY, dX);
+    this.didAdjustPosition(dY, dX);
+  }
+
   _setupHandlers() {
     this._resizeHandler = null;
     this._scrollHandler = null;
     this._nextResize = null;
     this._nextScroll = null;
+    this._nextAdjustment = null;
 
     this._scrollHandler = () => {
       if (this.isTracking) {
@@ -152,17 +183,27 @@ export default class Radar {
     this._resizeHandler = () => {
       this._nextResize = run.debounce(this, this.resizeSatellites, this.resizeDebounce);
     };
+    this._scrollAdjuster = () => {
+      this._nextAdjustment = run.scheduleOnce('sync', this, this.updateScrollPosition);
+    };
 
     window.addEventListener('resize', this._resizeHandler, true);
-    this.telescope.addEventListener('scroll', this._scrollHandler, true);
+    this.scrollContainer.addEventListener('scroll', this._scrollHandler, true);
+    if (this.scrollContainer !== document.body) {
+      document.body.addEventListener('scroll', this._scrollAdjuster, true);
+    }
   }
 
   _teardownHandlers() {
     run.cancel(this._nextResize);
     run.cancel(this._nextScroll);
+    run.cancel(this._nextAdjustment);
     window.removeEventListener('resize', this._resizeHandler, true);
-    if (this.telescope) {
+    if (this.scrollContainer) {
       this.telescope.removeEventListener('scroll', this._scrollHandler, true);
+    }
+    if (this.scrollContainer !== document.body) {
+      document.body.removeEventListener('scroll', this._scrollAdjuster, true);
     }
   }
 
