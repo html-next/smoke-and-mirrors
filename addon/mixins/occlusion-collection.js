@@ -55,7 +55,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
    * Time (in ms) to debounce layout recalculations when
    * resizing the window.
    */
-  resizeDebounce: 128,
+  resizeDebounce: 64,
 
   /**!
    * how much extra room to keep visible and invisible on

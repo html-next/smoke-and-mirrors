@@ -100,9 +100,7 @@ export default Mixin.create({
       run.cancel(this._nextUpdate);
       let heightPerItem = this.__getEstimatedDefaultHeight();
       this.radar.silentNight(addCount * heightPerItem, 0);
-      console.log('prepending');
       this._nextUpdate = run.scheduleOnce('render', this, function() {
-        console.log('running prepend');
         this._updateChildStates('prepend');
         this.visualize();
         this._isPrepending = false;

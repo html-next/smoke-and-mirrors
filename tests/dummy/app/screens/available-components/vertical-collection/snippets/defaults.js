@@ -7,16 +7,16 @@ export default
 
   // required
   content: null,
-  defaultHeight: 0,
+  defaultHeight: 75, //Integer: attempts to work with em, rem, px
 
   // performance
   useContentProxy: false,
   key: '@identity',
   alwaysUseDefaultHeight: false,
-  visibleBuffer: 1,
-  invisibleBuffer: 1,
-  scrollThrottle: 16,
-  exposeAttributeState: false,
+  bufferSize: 1,
+  resizeDebounce: 64,
+  // exposeAttributeState: false, currently disabled entirely,
+  //     pending outcome of recycling implementation in 0.5
 
   // actions
   firstReached: null,
@@ -33,7 +33,7 @@ export default
   shouldRender: true,
 
   // scroll setup
-  minimumMovement: 25,
+  minimumMovement: 15,
   shouldGPUAccelerate: true,
   containerSelector: null,
   containerHeight: null

@@ -6,13 +6,13 @@ module.exports = {
 
   included : function (app) {
     if (!/production/.test(app.env)) {
-      console.info('Including Debugging Visualization');
+      console.info('Smoke-and-mirrors:: Including Vertical-Collection Debug CSS');
       app.import('./vendor/debug.css');
     }
   },
 
   isDevelopingAddon: function() {
-    return true;
+    return false;
   }
 
 };

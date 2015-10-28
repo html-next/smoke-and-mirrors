@@ -36,7 +36,7 @@ export default class Radar {
     this.posX = document.body.scrollLeft;
     this.posY = document.body.scrollTop;
 
-    this.minimumMovement = state.minimumMovement || 25;
+    this.minimumMovement = state.minimumMovement || 15;
     this.resizeDebounce = state.resizeDebounce || 64;
     this.isTracking = state.hasOwnProperty('isTracking') ? state.isTracking : true;
     if (this.telescope && this.skyline) {
