@@ -34,7 +34,6 @@ export default
 
   // scroll setup
   minimumMovement: 15,
-  shouldGPUAccelerate: true,
   containerSelector: null,
   containerHeight: null
 }
