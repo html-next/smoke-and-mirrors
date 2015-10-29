@@ -40,31 +40,46 @@ export default Component.extend({
   }),
 
   _imageLoadHandler: null,
+  _imageErrorHandler: null,
   willDestroy() {
-    let loaded = this._imageLoadHandler;
-    let Img = this._image;
-    Img.src = TRANSPARENT_IMAGE;
+    this._super();
+    this.teardownImage();
+  },
 
-    if (Img.attachEvent) {
-      Img.detachEvent('onload', loaded);
-    } else {
-      Img.removeEventListener('load', loaded);
+  teardownImage() {
+    if (this._image) {
+      this.teardownHandlers(this._image);
+      this.set('_src', TRANSPARENT_IMAGE);
+      this._image.src = TRANSPARENT_IMAGE;
+      this._image = null;
     }
+  },
 
-    this._image = null;
+  teardownHandlers(image) {
+    if (image.attachEvent) {
+      image.detachEvent('onload', this._imageLoadHandler);
+      image.detachEvent('onerror', this._imageErrorHandler);
+    } else {
+      image.removeEventListener('load', this._imageLoadHandler, true);
+      image.removeEventListener('error', this._imageErrorHandler, true);
+    }
   },
 
   _onload(Image) {
     if (!(this.get('isDestroyed') || this.get('isDestroying'))) {
       this.set('_src', Image.src);
       this.set('isLoaded', true);
+      this.set('isFailed', false);
     }
   },
 
+  _onError(/*Image*/) {
+    this.set('isFailed', true);
+  },
+
   _loadImage: observer('src', function() {
-    // reset if component's image has been changed
-    if (this.get('_src')) {
-      this.set('_src', TRANSPARENT_IMAGE);
+    if (this._image) {
+      this.teardownHandlers(this._image);
     }
 
     this.setProperties({
@@ -81,13 +96,19 @@ export default Component.extend({
       let loaded = () => {
         this._onload(Img);
       };
+      let failed = () => {
+        this._onError(Img);
+      };
       this._imageLoadHandler = loaded;
+      this._imageErrorHandler = failed;
       this._image = Img;
 
       if (Img.attachEvent) {
         Img.attachEvent('onload', loaded);
+        Img.attachEvent('onerror', failed);
       } else {
-        Img.addEventListener('load', loaded);
+        Img.addEventListener('load', loaded, true);
+        Img.addEventListener('error', failed, true);
       }
       Img.src = src;
 
@@ -96,6 +117,8 @@ export default Component.extend({
         loaded();
       }
 
+    } else {
+      this.teardownImage();
     }
   }),
 
