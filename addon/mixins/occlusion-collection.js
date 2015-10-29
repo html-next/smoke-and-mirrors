@@ -228,16 +228,6 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
   __isInitialized: false,
 
   /**!
-   * Set this to false to prevent addition of styles which
-   * cause GPU acceleration of the list.  GPU accleration
-   * is recommended, especially on mobile, unless you are
-   * doing your own acceleration styles.  GPU accleration
-   * causes bugs with fixed position content, making it
-   * behave as absolutely positioned content.
-   */
-  shouldGPUAccelerate: true,
-
-  /**!
    * Set this to false to prevent rendering entirely.
    * Useful for situations in which rendering is
    * expensive enough that it interferes with a
@@ -588,15 +578,6 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
         'overflow-y': 'scroll'
       });
 
-      if (this.get('shouldGPUAccelerate')) {
-        $container.css({
-          '-webkit-transform' : 'translate3d(0,0,0)',
-          '-moz-transform'    : 'translate3d(0,0,0)',
-          '-ms-transform'     : 'translate3d(0,0,0)',
-          '-o-transform'      : 'translate3d(0,0,0)',
-          'transform'         : 'translate3d(0,0,0)'
-        });
-      }
     }
 
     this._container = container;
