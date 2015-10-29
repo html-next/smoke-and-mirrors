@@ -786,7 +786,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
     let content = this.get('_content');
     content.contentArrayDidChange = (items, offset, removeCount, addCount) => {
       if (offset <= this.get('_firstVisibleIndex')) {
-        this.__prependComponents(addCount);
+        this.__prependComponents();
       } else {
         this._sm_scheduleUpdate('reflect changes');
         run.scheduleOnce('sync', this.radar, this.radar.updateSkyline);
@@ -799,8 +799,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
     let oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
     let newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
     if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
-      let addCount = get(newArray, 'length') - get(oldArray, 'length');
-      this.__prependComponents(addCount);
+      this.__prependComponents();
     } else {
       run.scheduleOnce('sync', this.radar, this.radar.updateSkyline);
     }
