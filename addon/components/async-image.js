@@ -15,12 +15,14 @@ export default Component.extend({
   title: null,
   alt: null,
   src: null,
+  width: null,
+  height: null,
 
   // image
   _src: null,
   _image: null,
 
-  attributeBindings: ['_src:src', 'title', 'alt'],
+  attributeBindings: ['_src:src', 'title', 'alt', 'width', 'height'],
   classNames: ['async-image'],
   classNameBindings: ['imgState'],
 
