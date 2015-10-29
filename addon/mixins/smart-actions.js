@@ -28,7 +28,7 @@ export default Mixin.create({
     }
 
     let contextCache = this._sm_actionCache;
-    if (contextCache[name]) {
+    if (contextCache.hasOwnProperty(name)) {
       let contextKey = this.keyForContext(context);
       if (contextCache[name] === contextKey) {
         return;
