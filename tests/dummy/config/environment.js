@@ -15,7 +15,7 @@ module.exports = function(environment) {
       EXTEND_PROTOTYPES : true
     },
 
-    VERSION: "0.4.2",
+    VERSION: "0.4.3",
 
     APP: {
       // Here you can pass flags/options to your application instance

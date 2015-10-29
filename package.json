@@ -1,6 +1,6 @@
 {
   "name": "smoke-and-mirrors",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Performance minded `views`, `mixins`, and `components` to help you deliver your ambitions",
   "directories": {
     "doc": "doc",
