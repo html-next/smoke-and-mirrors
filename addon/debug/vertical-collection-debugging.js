@@ -24,6 +24,7 @@ export default Mixin.create({
     this.visualize();
   },
 
+  visualization: null,
   setupHandlers() {
     this._super();
     if (this.get('showEdges')) {
@@ -78,7 +79,9 @@ export default Mixin.create({
   willDestroy() {
     this._super();
     run.cancel(this._nextVisualization);
-    this.visualization.destroy();
+    if (this.visualization) {
+      this.visualization.destroy();
+    }
   }
 
 });
