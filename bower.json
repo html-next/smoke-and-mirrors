@@ -3,9 +3,9 @@
   "dependencies": {
     "animation-frame": "~0.2.4",
     "ember": "2.1.0",
-    "ember-cli-shims": "ember-cli/ember-cli-shims#0.0.3",
+    "ember-cli-shims": "~0.0.6",
     "ember-cli-test-loader": "0.2.1",
-    "ember-load-initializers": "ember-cli/ember-load-initializers#0.1.5",
+    "ember-load-initializers": "~0.1.7",
     "ember-qunit": "0.4.15",
     "ember-qunit-notifications": "0.0.7",
     "ember-resolver": "~0.1.18",
