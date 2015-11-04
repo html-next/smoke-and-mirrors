@@ -48,6 +48,10 @@
   "keywords": [
     "ember-addon",
     "occlusion",
+    "infinite",
+    "infinite-scroll",
+    "collection",
+    "grid",
     "list-view",
     "recycling",
     "cloaking",
