@@ -7,7 +7,7 @@ moduleForComponent('vertical-collection', 'Integration | Component | vertical co
 });
 
 test('The Collection Renders', function(assert) {
-  assert.expect(2);
+  assert.expect(1);
 
   // Set any properties with this.set('myProperty', 'value');
   // Handle any actions with this.on('myAction', function(val) { ... });
