@@ -172,8 +172,16 @@ export default class Visualization {
 
   destroy() {
     this.wrapper.parentNode.removeChild(this.wrapper);
+    this.wrapper = null;
+    this.radar = null;
     this.component = null;
+    this.satellites.forEach((satellite) => {
+      satellite.destroy();
+    });
     this.satellites = null;
+    this.cache.forEach((satellite) => {
+      satellite.destroy();
+    });
     this.cache = null;
   }
 

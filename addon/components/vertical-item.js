@@ -60,18 +60,24 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
   },
 
   willDestroyElement() {
-    this._super();
+    this._super(...arguments);
     this.setProperties({
       viewState: 'culled',
       contentCulled: true,
       contentHidden: false,
       contentInserted: false });
     this.get('radar').unregister(this);
+    this.satellite = null;
   },
 
   willDestroy() {
-    this._super();
+    this._super(...arguments);
     this.collection.unregister(this);
+    let radar = this.get('radar');
+    if (radar) {
+      radar.unregister(this);
+    }
+    this.satellite = null;
   },
 
   init() {

@@ -42,6 +42,10 @@ export default class Geography {
     };
   }
 
+  destroy() {
+    this.element = null;
+  }
+
   /**
    * Eventually, Satellite will be reusable and able to orbit many planets
    * so instead of these properties being on the satellite, they are available

@@ -189,7 +189,6 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
   _content: null,
 
   //–––––––––––––– Private Internals
-  _firstVisible: null,
   _firstVisibleIndex: 0,
 
   /**!
@@ -197,30 +196,6 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
    * this is known as the "telescope" within the Radar class.
    */
   _container: null,
-
-  /**!
-   * Cached reference to the last bottom item used
-   * to notify `lastReached` to prevent resending.
-   */
-  _lastLastSent: null,
-
-  /**!
-   * Cached reference to the last top item used
-   * to notify `firstReached` to prevent resending.
-   */
-  _lastFirstSent: null,
-
-  /**!
-   * Cached reference to the last visible top item used
-   * to notify `firstVisibleChanged` to prevent resending.
-   */
-  _lastVisibleFirstSent: null,
-
-  /**!
-   * Cached reference to the last visible bottom item used
-   * to notify `lastVisibleChange` to prevent resending.
-   */
-  _lastVisibleLastSent: null,
 
   /**!
    * false until the first full setup has completed
@@ -371,9 +346,12 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
 
   unregister(child) {
-    this.get('_children').removeObject(child);
-    if (this.__isInitialized && !this.get('isDestroying') && !this.get('isDestroyed')) {
-      this._sm_scheduleUpdate('unregister');
+    let children = this.get('_children');
+    if (children) {
+      children.removeObject(child);
+      if (this.__isInitialized && !this.get('isDestroying') && !this.get('isDestroyed')) {
+        this._sm_scheduleUpdate('unregister');
+      }
     }
   },
 
@@ -485,14 +463,12 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
         if (!topVisibleSpotted) {
           topVisibleSpotted = true;
-          this.set('_firstVisible', component);
           this.set('_firstVisibleIndex', bottomComponentIndex);
           this.sendActionOnce('firstVisibleChanged', {
             item: component,
             index: bottomComponentIndex
           });
         }
-        this.set('_lastVisible', component);
         this.sendActionOnce('lastVisibleChanged', {
           item: component,
           index: bottomComponentIndex
@@ -660,15 +636,30 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
    * scroll position on relaunch.
    */
   willDestroyElement() {
+    this._destroyCollection();
+  },
+
+  willDestroy() {
+    this._super();
+    this._destroyCollection();
+  },
+
+  _destroyCollection() {
     //cleanup scroll
-    this.radar.destroy();
+    if (this.radar) {
+      this.radar.destroy();
+      this.set('radar', null);
+    }
+
+    this.set('_content', null);
+    this.set('_children', null);
+
 
     //clean up scheduled tasks
     run.cancel(this._nextUpdate);
     run.cancel(this._nextTeardown);
     run.cancel(this._nextMaintenance);
   },
-
 
   __prependComponents() {
     if (this.get('_sm_canRender')) {
@@ -784,7 +775,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
   _reflectContentChanges() {
     let content = this.get('_content');
-    content.contentArrayDidChange = (items, offset, removeCount, addCount) => {
+    content.contentArrayDidChange = (items, offset /*, removeCount, addCount*/) => {
       if (offset <= this.get('_firstVisibleIndex')) {
         this.__prependComponents();
       } else {

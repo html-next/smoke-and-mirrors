@@ -226,6 +226,14 @@ export default class Radar {
       satellite.destroy();
     });
     this.satellites = null;
+    this.telescope = null;
+    this.skyline = null;
+
+    this.planet.destroy();
+    this.planet = null;
+    this.scrollContainer = null;
+    this.sky.destroy();
+    this.sky = null;
   }
 
 }
