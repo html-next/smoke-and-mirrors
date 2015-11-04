@@ -5,19 +5,25 @@ Smoke-and-mirrors
 [![Build Status](https://travis-ci.org/runspired/smoke-and-mirrors.svg)](https://travis-ci.org/runspired/smoke-and-mirrors)
 [![Ember Observer Score](http://emberobserver.com/badges/smoke-and-mirrors.svg)](http://emberobserver.com/addons/smoke-and-mirrors)
 
-Sometimes being "ambitious" gets you in trouble.  When it does, `Smoke-and-mirrors` is here
-to put out your `Ember` fire.
+Sometimes being "ambitious" gets you in trouble.  When it does, `smoke-and-mirrors` is here
+to put out the fire.
 
-`Smoke-and-mirrors` is an `ember-cli-addon` that exposes performance minded `components` and primitives 
+`Smoke-and-mirrors` is an `ember-addon` that exposes performance minded `components` and primitives 
 to help you deliver your ambitions without sacrifice or compromise.
 
-## WIP (pre 1.0.0)
+## Features
 
-This addon is beta software, but development and testing is ramping up as 1.0 nears.
-Features and APIs will lock with the release of 0.4 and only bug fixes will be performed
-until the 1.0 cycle completes.
+ `smoke-and-mirrors` offers a suite of services, primitives, mixins, and components, but the primary focus is
+ giving you a `svelte render`.  TL;DR the fewer things you need to render, the faster your renders will be.
+ 
+ To that end, the main component of the library is the [`vertical-collection`](http://runspired.github.io/smoke-and-mirrors/#/available-components/vertical-collection) component which can be used to build.
+
+ - [infinite scroll](http://runspired.github.io/smoke-and-mirrors/#/examples/infinite-scroll)
+   - even when you need to scroll via [body](http://runspired.github.io/smoke-and-mirrors/#/examples/scrollable-body)
+   - with [dynamic item sizes](http://runspired.github.io/smoke-and-mirrors/#/examples/flexible-layout)
+   - and even in [pathological rendering](http://runspired.github.io/smoke-and-mirrors/#/examples/dbmon) scenarios.
 
 ## Documentation
 
-For up-today documentation and demos running the latest release, 
+For updated documentation, announcements, and demos running the latest release please 
 visit [http://runspired.github.io/smoke-and-mirrors/](http://runspired.github.io/smoke-and-mirrors/)
