@@ -1,27 +1,47 @@
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
-
+import Ember from 'ember';
 
 moduleForComponent('vertical-collection', 'Integration | Component | vertical collection', {
   integration: true
 });
 
-test('it renders', function(assert) {
-  assert.expect(2);
+test('The Collection Renders', function(assert) {
+  assert.expect(1);
 
   // Set any properties with this.set('myProperty', 'value');
   // Handle any actions with this.on('myAction', function(val) { ... });
-
-  this.render(hbs`{{vertical-collection}}`);
-
-  assert.equal(this.$().text(), '');
+  this.set('items', Ember.A([Ember.Object.create({ text: 'b' })]));
 
   // Template block usage:
   this.render(hbs`
-    {{#vertical-collection}}
-      template block text
+  <div style="height: 500px; width: 500px;">
+    {{#vertical-collection content=items as |item|}}
+      {{item.text}}
     {{/vertical-collection}}
+  </div>
   `);
 
-  assert.equal(this.$().text().trim(), 'template block text');
+  assert.equal(this.$().find('vertical-item').length, 1);
 });
+
+/*
+test("The Collection Reveals it's children when `renderAllInitially` is true.", function(assert) {
+  assert.expect(1);
+
+  // Set any properties with this.set('myProperty', 'value');
+  // Handle any actions with this.on('myAction', function(val) { ... });
+  this.set('items', Ember.A([Ember.Object.create({ text: 'b' })]));
+
+  // Template block usage:
+  this.render(hbs`
+  <div style="height: 500px; width: 500px;">
+    {{#vertical-collection content=items renderAllInitially=true as |item|}}
+      {{item.text}}
+    {{/vertical-collection}}
+  </div>
+  `);
+
+  assert.equal(this.$().find('vertical-item').first().get(0).innerHTML, 'b');
+});
+*/
