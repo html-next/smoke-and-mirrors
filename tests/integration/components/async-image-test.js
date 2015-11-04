@@ -18,10 +18,8 @@ test('it renders', function(assert) {
 
   // Template block usage:
   this.render(hbs`
-    {{#async-image}}
-      template block text
-    {{/async-image}}
+    {{async-image}}
   `);
 
-  assert.equal(this.$().text().trim(), 'template block text');
+  assert.equal(this.$().get(0).firstElementChild.tagName, 'IMG');
 });
