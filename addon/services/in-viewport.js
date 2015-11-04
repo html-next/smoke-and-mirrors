@@ -4,4 +4,10 @@ const {
   Service
   } = Ember;
 
-export default Service.extend({});
+export default Service.extend({
+
+  init() {
+    this._super(...arguments);
+  }
+  
+});
