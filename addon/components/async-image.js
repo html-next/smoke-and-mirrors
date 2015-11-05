@@ -63,6 +63,8 @@ export default Component.extend({
       image.removeEventListener('load', this._imageLoadHandler, true);
       image.removeEventListener('error', this._imageErrorHandler, true);
     }
+    this._imageLoadHandler = null;
+    this._imageErrorHandler = null;
   },
 
   _onload(Image) {
