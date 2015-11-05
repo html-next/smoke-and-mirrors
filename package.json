@@ -18,7 +18,12 @@
   "engines": {
     "node": ">= 0.10.0"
   },
-  "author": "",
+  "homepage": "https://runspired.github.io/smoke-and-mirrors",
+  "bugs": "https://github.com/runspired/smoke-and-mirrors/issues",
+  "author": {
+    "name": "Chris Thoburn (@runspired)",
+    "url": "http://runspired.com"
+  },
   "license": "MIT",
   "devDependencies": {
     "broccoli-asset-rev": "^2.0.2",
@@ -37,7 +42,7 @@
     "ember-disable-prototype-extensions": "^1.0.0",
     "ember-disable-proxy-controllers": "^1.0.0",
     "ember-export-application-global": "^1.0.2",
-    "ember-run-raf": "^1.0.2",
+    "ember-run-raf": "^1.0.3",
     "ember-try": "0.0.6",
     "grunt": "0.4.5",
     "grunt-bump": "0.0.16",
