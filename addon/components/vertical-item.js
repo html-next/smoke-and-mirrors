@@ -25,7 +25,6 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
 
 //  attributeBindings: ['viewState'],
   classNames: ['vertical-item'],
-  collection: null,
 
   defaultHeight: 75,
   index: null,
@@ -72,7 +71,7 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
 
   willDestroy() {
     this._super(...arguments);
-    this.collection.unregister(this);
+    this.unregister(this);
     let radar = this.get('radar');
     if (radar) {
       radar.unregister(this);
@@ -90,7 +89,7 @@ export default Component.extend(LinkedComponentMixin, StateMapMixin, {
     let isTableChild = tag === 'tr' || tag === 'td' || tag === 'th';
     // table children don't respect min-height :'(
     this.heightProperty = isTableChild || this.alwaysUseDefaultHeight ? 'height' : 'minHeight';
-    this.collection.register(this);
+    this.register(this);
   }
 
 });

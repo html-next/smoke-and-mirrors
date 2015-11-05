@@ -13,6 +13,12 @@ export default Route.extend({
       first: 0,
       last: 20
     };
+  },
+
+  actions: {
+    willTransition() {
+      this.controller.set('model', null);
+    }
   }
 
 });

@@ -24,6 +24,9 @@ export default class Radar {
      the sky is the element with the full height of
      the content.
      */
+    if (this.telescope && state.telescope) {
+      this._teardownHandlers();
+    }
     this.telescope = state.telescope;
     this.skyline = state.skyline;
 
@@ -40,7 +43,6 @@ export default class Radar {
     this.resizeDebounce = state.resizeDebounce || 64;
     this.isTracking = state.hasOwnProperty('isTracking') ? state.isTracking : true;
     if (this.telescope && this.skyline) {
-      this._teardownHandlers();
       this._setupHandlers();
     }
   }
@@ -208,9 +210,6 @@ export default class Radar {
   }
 
   _teardownHandlers() {
-    run.cancel(this._nextResize);
-    run.cancel(this._nextScroll);
-    run.cancel(this._nextAdjustment);
     window.removeEventListener('resize', this._resizeHandler, true);
     if (this.telescope) {
       this.telescope.removeEventListener('scroll', this._scrollHandler, true);
@@ -218,6 +217,12 @@ export default class Radar {
     if (this.scrollContainer !== document.body) {
       document.body.removeEventListener('scroll', this._scrollAdjuster, true);
     }
+    run.cancel(this._nextResize);
+    run.cancel(this._nextScroll);
+    run.cancel(this._nextAdjustment);
+    this._scrollHandler = null;
+    this._resizeHandler = null;
+    this._scrollAdjuster = null;
   }
 
   destroy() {

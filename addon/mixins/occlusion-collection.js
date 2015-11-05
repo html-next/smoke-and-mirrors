@@ -537,9 +537,21 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
   },
 
 
+  didInsertElement() {
+    this._super();
+    this._nextMaintenance = run.next(() => {
+      this.setupContainer();
+      this.set('_sm_canRender', true);
+      //draw initial boundaries
+      this._initializeScrollState();
+      this.notifyPropertyChange('_edges');
+    });
+  },
+
+
   //–––––––––––––– Setup/Teardown
   setupContainer() {
-   let containerSelector = this.get('containerSelector');
+    let containerSelector = this.get('containerSelector');
 
     let container;
     if (containerSelector === 'body') {
@@ -581,19 +593,6 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
     this.radar.didUpdatePosition = onResizeMethod;
     this.radar.didShiftSatellites = onScrollMethod;
   },
-
-
-  didInsertElement() {
-    this._super();
-    this._nextMaintenance = run.next(() => {
-      this.setupContainer();
-      this.set('_sm_canRender', true);
-      //draw initial boundaries
-      this._initializeScrollState();
-      this.notifyPropertyChange('_edges');
-    });
-  },
-
 
   _initializeScrollState() {
     var scrollPosition = this.scrollPosition;
@@ -653,6 +652,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
     this.set('_content', null);
     this.set('_children', null);
+    this._container = null;
 
 
     //clean up scheduled tasks
@@ -828,7 +828,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
       this.set('_content', proxied.call(this, 'content', this.get('key')));
       this._reflectContentChanges();
     } else {
-      this.set('_content', computed.alias('content'));
+      this.set('_content', computed.oneWay('content'));
       this.set('didReceiveAttrs', this._didReceiveAttrs);
     }
   }

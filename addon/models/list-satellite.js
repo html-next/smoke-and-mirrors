@@ -27,6 +27,9 @@ export default class ListSatellite extends Satellite {
     }
     this.component = null;
     this.satellite = null;
+    this.element = null;
+    this.geography.destroy();
+    this.geography = null;
     this.list = null;
   }
 

@@ -1,6 +1,8 @@
 import Ember from 'ember';
 import layout from './template';
 
+const SafeString = Ember.Handlebars.SafeString;
+
 const {
   Component,
   computed
@@ -75,7 +77,7 @@ export default Component.extend({
       g: 255 - c.g,
       b: 255 - c.b
     };
-    return `background: rgb(${c.r},${c.g},${c.b}); color: rgb(${b.r},${b.g},${b.b});`;
+    return new SafeString(`background: rgb(${c.r},${c.g},${c.b}); color: rgb(${b.r},${b.g},${b.b});`);
   }),
   layout: layout,
   index: 0,
