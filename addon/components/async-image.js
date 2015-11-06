@@ -33,8 +33,8 @@ export default Component.extend({
   isEmpty: true,
   imgState: computed('isLoaded', 'isLoading', 'isFailed', 'isEmpty', function () {
     if (this.get('isFailed')) { return 'is-failed'; }
-    if (this.get('isLoaded')) { return 'is-loaded'; }
     if (this.get('isLoading')) { return 'is-loading'; }
+    if (this.get('isLoaded')) { return 'is-loaded'; }
     if (this.get('isEmpty')) { return 'is-empty'; }
     return 'unknown';
   }),
@@ -71,12 +71,14 @@ export default Component.extend({
     if (!(this.get('isDestroyed') || this.get('isDestroying'))) {
       this.set('_src', Image.src);
       this.set('isLoaded', true);
+      this.set('isLoading', false);
       this.set('isFailed', false);
     }
   },
 
   _onError(/*Image*/) {
     this.set('isFailed', true);
+    this.teardownImage();
   },
 
   _loadImage: observer('src', function() {
