@@ -529,14 +529,6 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
     this._nextUpdate = run.scheduleOnce('actions', this, this._updateChildStates, source);
   },
 
-
-  _scheduleOcclusion(dY /*, dX*/) {
-    if (!this.__isInitialized || this._isPrepending) { return; }
-    this.set('_scrollIsForward', dY > 0);
-    this._sm_scheduleUpdate('scroll');
-  },
-
-
   didInsertElement() {
     this._super();
     this._nextMaintenance = run.next(() => {
@@ -576,7 +568,9 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
     let resizeDebounce = this.resizeDebounce;
     let container = this._container;
     let onScrollMethod = (dY, dX) => {
-      this._scheduleOcclusion(dY, dX);
+      if (!this.__isInitialized || this._isPrepending) { return; }
+      this.set('_scrollIsForward', dY > 0);
+      this._sm_scheduleUpdate('scroll');
     };
 
     let onResizeMethod = () => {
