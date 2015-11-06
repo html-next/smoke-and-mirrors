@@ -4,6 +4,7 @@ module.exports = {
   normalizeEntityName: function() {},
 
   afterInstall: function() {
-    return this.addAddonToProject('ember-run-raf', '^1.0.4');
+    this.addAddonToProject('ember-run-raf', '^1.0.5');
+    return this.addAddonToProject('ember-async-image', '0.0.1');
   }
 };
