@@ -46,6 +46,41 @@ export default class Radar {
     }
   }
 
+  getSatelliteZones(satellite) {
+    return {
+      y: this.getSatelliteYZone(satellite),
+      x: this.getSatelliteXZone(satellite)
+    }
+  }
+
+  getSatelliteYZone(satellite) {
+    const satGeo = satellite.geography;
+    let distance = 0;
+    const y_scalar = this.planet.height;
+
+    if (satGeo.bottom > this.planet.top) {
+      distance = satGeo.bottom - this.planet.top;
+    } else if (satGeo.top < this.planet.bottom) {
+      distance = satGeo.top - this.planet.bottom;
+    }
+
+    return Math.floor(distance / y_scalar);
+  }
+
+  getSatelliteXZone(satellite) {
+    const satGeo = satellite.geography;
+    let distance = 0;
+    const x_scalar = this.planet.width;
+
+    if (satGeo.right > this.planet.left) {
+      distance = satGeo.bottom - this.planet.top;
+    } else if (satGeo.left < this.planet.right) {
+      distance = satGeo.top - this.planet.bottom;
+    }
+
+    return Math.floor(distance / x_scalar);
+  }
+
   register(component) {
     this.satellites.push(new Satellite(component));
   }
