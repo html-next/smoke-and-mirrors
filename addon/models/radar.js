@@ -229,8 +229,20 @@ export default class Radar {
     this._scrollAdjuster = null;
   }
 
+  // avoid retaining memory by deleting references
+  // that likely contain other scopes to be torn down
+  _teardownHooks() {
+    this.willShiftSatellites = null;
+    this.didShiftSatellites = null;
+    this.willResizeSatellites = null;
+    this.didResizeSatellites = null;
+    this.willAdjustPosition = null;
+    this.didAdjustPosition = null;
+  }
+
   destroy() {
     this._teardownHandlers();
+    this._teardownHooks();
     this.satellites.forEach((satellite) => {
       satellite.destroy();
     });
