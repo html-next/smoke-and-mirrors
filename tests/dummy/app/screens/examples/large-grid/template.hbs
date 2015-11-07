@@ -1,0 +1,23 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-7">
+          <h4>Code for Demo</h4>
+          {{code-snippet name="occludable-area-example.hbs"}}
+        </div>
+        <div class="col-sm-5">
+            <h3>Occlude Anything</h3>
+        </div>
+    </div>
+    <div class="row">
+        <h3>Demo ({{model.pages.length}} pages of 100 images)</h3>
+      {{!- BEGIN-SNIPPET occludable-area-example }}
+        {{#each model.pages as |page|}}
+          {{#occludable-area class="auto-box"}}
+            {{#each page as |image|}}
+              {{async-image width=image.previewWidth height=image.previewHeight}}
+            {{/each}}
+          {{/occludable-area}}
+        {{/each}}
+      {{!- END-SNIPPET }}
+    </div>
+</div>

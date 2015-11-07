@@ -64,14 +64,6 @@ nav a {
   height: 37px;
 }
 
-img.async-image {
-  width: 250px;
-  height: 250px;
-  background: #1f2f30;
-  border: 1px solid #bbb;
-  box-shadow: 1px 1px 5px 0 #d0d0d0;
-}
-
 .image-slide {
   width: 250px;
   height: 270px;
@@ -110,6 +102,16 @@ number-slide .index {
 
 .image-slide.flexible {
   height: auto;
+}
+
+img.async-image {
+  background: #1f2f30;
+  border: 1px solid #bbb;
+  box-shadow: 1px 1px 5px 0 #d0d0d0;
+}
+
+.auto-box {
+  float: left;
 }
 
 .image-slide.flexible img.async-image {

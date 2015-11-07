@@ -100,14 +100,16 @@ function generateDynamicImageSrc(index) {
 
   const height = getDynamicHeight();
   const isPortrait = booleanToss();
+  const width = getDynamicWidth(height, isPortrait);
 
+  parts.push(width);
   parts.push(height);
-  parts.push(getDynamicWidth(height, isPortrait));
 
-  const small = 100;
+  const smallWidth = 100;
+  const smallHeight = getDynamicWidth(smallWidth, isPortrait);
 
-  preview.push(small);
-  preview.push(getDynamicWidth(small, isPortrait));
+  preview.push(smallWidth);
+  preview.push(smallHeight);
 
   const cat = CATEGORIES[getCategoryIndex()];
 
@@ -122,7 +124,11 @@ function generateDynamicImageSrc(index) {
   return {
     large: parts.join('/'),
     small: preview.join('/'),
-    id: generateImageId(index)
+    id: generateImageId(index),
+    width: width,
+    height: height,
+    previewWidth: smallWidth,
+    previewHeight: smallHeight
   };
 }
 
