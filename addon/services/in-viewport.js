@@ -20,15 +20,15 @@ export default Service.extend({
   },
 
   updateZones() {
-    let satellites = this.radar.satellites;
     /*
       This is needed until computed properties will
       work with ES6 classes.
      */
-    satellites.forEach((satellite) => {
+    this.radar.satellites.forEach((satellite) => {
+      const zones = this.radar.getSatelliteZones(satellite);
       satellite.component.setProperties({
-        zoneX: satellite.zoneX,
-        zoneY: satellite.zoneY
+        zoneX: zones.x,
+        zoneY: zones.y
       });
     });
   },

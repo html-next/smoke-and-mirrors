@@ -8,5 +8,5 @@ const {
 
 export default Component.extend(ViewportMixin, {
   layout,
-  attributeBindings: ['_position.zoneX:x', '_position.zoneY:y']
+  attributeBindings: ['zoneX:x', 'zoneY:y']
 });
