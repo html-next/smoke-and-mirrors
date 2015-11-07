@@ -27,11 +27,11 @@ export default class Radar {
       this._teardownHandlers();
     }
     this.telescope = state.telescope;
-    this.skyline = state.skyline;
+    this.sky = state.sky;
 
     this.planet = this.telescope ? new Geography(this.telescope) : null;
     this.scrollContainer = this.telescope === window ? document.body : this.telescope;
-    this.sky = this.skyline ? new Geography(this.skyline) : null;
+    this.skyline = this.sky ? new Geography(this.sky) : null;
 
     this.scrollX = this.scrollContainer ? this.scrollContainer.scrollLeft : 0;
     this.scrollY = this.scrollContainer ? this.scrollContainer.scrollTop : 0;
@@ -41,7 +41,7 @@ export default class Radar {
     this.minimumMovement = state.minimumMovement || 15;
     this.resizeDebounce = state.resizeDebounce || 64;
     this.isTracking = state.hasOwnProperty('isTracking') ? state.isTracking : true;
-    if (this.telescope && this.skyline) {
+    if (this.telescope && this.sky) {
       this._setupHandlers();
     }
   }
@@ -89,8 +89,8 @@ export default class Radar {
   }
 
   updateSkyline() {
-    if (this.sky) {
-      this.sky.setState();
+    if (this.skyline) {
+      this.skyline.setState();
     }
   }
 
@@ -101,10 +101,10 @@ export default class Radar {
     });
 
     // move the sky
-    this.sky.left -= dX;
-    this.sky.right -= dX;
-    this.sky.bottom -= dY;
-    this.sky.top -= dY;
+    this.skyline.left -= dX;
+    this.skyline.right -= dX;
+    this.skyline.bottom -= dY;
+    this.skyline.top -= dY;
   }
 
   shiftSatellites(dY, dX) {
@@ -128,10 +128,10 @@ export default class Radar {
 
     this.scrollY = this.scrollContainer.scrollTop += dY;
     this.scrollX = this.scrollContainer.scrollLeft += dX;
-    this.sky.left -= dX;
-    this.sky.right -= dX;
-    this.sky.bottom -= dY;
-    this.sky.top -= dY;
+    this.skyline.left -= dX;
+    this.skyline.right -= dX;
+    this.skyline.bottom -= dY;
+    this.skyline.top -= dY;
     this.rebuild();
   }
 
@@ -236,13 +236,13 @@ export default class Radar {
     });
     this.satellites = null;
     this.telescope = null;
-    this.skyline = null;
+    this.sky = null;
 
     this.planet.destroy();
     this.planet = null;
     this.scrollContainer = null;
-    this.sky.destroy();
-    this.sky = null;
+    this.skyline.destroy();
+    this.skyline = null;
   }
 
 }

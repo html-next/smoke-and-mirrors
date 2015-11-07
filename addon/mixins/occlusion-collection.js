@@ -476,7 +476,7 @@ export default Mixin.create({
 
     }
 
-    let currentViewportBound = this.radar.sky.top;
+    let currentViewportBound = this.radar.skyline.top;
     let currentUpperBound = edges.invisibleTop;
 
     if (currentUpperBound < currentViewportBound) {
@@ -660,7 +660,7 @@ export default Mixin.create({
     this.radar.setState({
       telescope: this._container,
       resizeDebounce: this.resizeDebounce,
-      skyline: container === window ? document.body : this.element,
+      sky: container === window ? document.body : this.element,
       minimumMovement: this.minimumMovement
     });
     this.radar.didResizeSatellites = onResizeMethod;
