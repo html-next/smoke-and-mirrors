@@ -7,7 +7,7 @@ module.exports = function(defaults) {
   defaults.snippetPaths = ['tests/dummy/snippets'];
 
   var app = new EmberApp(defaults, {
-    minifyJS: { enabled: true },
+    minifyJS: { enabled: false },
     babel: {
       includePolyfill: true
     }
