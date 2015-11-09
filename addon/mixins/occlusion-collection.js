@@ -786,6 +786,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
     if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
       this.__prependComponents();
     } else {
+      this._sm_scheduleUpdate('didReveiveAttrs');
       run.scheduleOnce('sync', this.radar, this.radar.updateSkyline);
     }
   },
