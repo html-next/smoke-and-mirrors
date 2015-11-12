@@ -2,7 +2,7 @@
 import Ember from 'ember';
 import getTagDescendant from '../utils/get-tag-descendant';
 import keyForItem from '../mixins/key-for-item';
-import proxied from '../computed/proxied-array';
+import proxied from '../stable/proxied-array';
 import ListRadar from '../models/list-radar';
 import SmartActionsMixin from './smart-actions';
 
