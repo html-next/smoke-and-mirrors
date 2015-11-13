@@ -39,6 +39,12 @@ export default Mixin.create({
 
     // this MUST be async or glimmer will freak
     run.schedule('afterRender', this, this.sendAction, name, context);
+  },
+
+  willDestroy() {
+    this._super();
+    let contextCache = this._sm_actionCache;
+    this._sm_actionCache = null;
   }
 
 });

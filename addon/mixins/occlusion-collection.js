@@ -251,8 +251,6 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
   _nextUpdate: null,
   _nextTeardown: null,
   _nextMaintenance: null,
-  _sm_scrollListener: null,
-  _sm_resizeListener: null,
   _isPrepending: false,
   _children: null,
 
