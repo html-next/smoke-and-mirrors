@@ -1,10 +1,9 @@
 /*global Array, parseFloat, Math */
 import Ember from 'ember';
 import getTagDescendant from '../utils/get-tag-descendant';
-import keyForItem from '../mixins/key-for-item';
 import proxied from '../computed/proxied-array';
 import ListRadar from '../models/list-radar';
-import SmartActionsMixin from './smart-actions';
+import identity from '../lib/identity';
 
 /**
  * Investigations: http://jsfiddle.net/sxqnt/73/
@@ -17,7 +16,7 @@ const {
   } = Ember;
 
 
-export default Mixin.create(SmartActionsMixin, keyForItem, {
+export default Mixin.create({
   //–––––––––––––– Optional Settings
   /**!
    * A jQuery selector string that will select the element from
@@ -254,6 +253,36 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
   _isPrepending: false,
   _children: null,
 
+  keyForItem(item, index) {
+    let key;
+    let keyPath = this.get('key');
+
+    switch (keyPath) {
+      case '@index':
+        // allow 0 index
+        if (!index && index !== 0) {
+          throw "No index was supplied to keyForItem";
+        }
+        key = index;
+        break;
+      case '@identity':
+        key = identity(item);
+        break;
+      default:
+        if (keyPath) {
+          key = get(item, keyPath);
+        } else {
+          key = identity(item);
+        }
+    }
+
+    if (typeof key === 'number') {
+      key = String(key);
+    }
+
+    return key;
+  },
+
 
   //–––––––––––––– Action Helper Functions
   canSendActions(name/*, context*/) {
@@ -288,14 +317,38 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
     return this.keyForItem(context.item, context.index);
   },
 
+  _sm_actionCache: null,
+  sendActionOnce(name, context) {
+    if (!this.canSendActions(name, context)) {
+      return;
+    }
+
+    context = this.prepareActionContext(name, context);
+    if (!context) {
+      return;
+    }
+
+    let contextCache = this._sm_actionCache;
+    if (contextCache.hasOwnProperty(name)) {
+      let contextKey = this.keyForContext(context);
+      if (contextCache[name] === contextKey) {
+        return;
+      } else {
+        contextCache[name] = contextKey;
+      }
+    }
+
+    // this MUST be async or glimmer will freak
+    run.schedule('afterRender', this, this.sendAction, name, context);
+  },
+
   /**
    Binary search for finding the topmost visible view.
    This is not the first visible item on screen, but the first
    item that will render it's content.
 
    @method _findFirstRenderedComponent
-   @param {Number} viewportStart The top/left of the viewport to search against
-   @param {Number} adj Height adjustment
+   @param {Number} invisibleTop The top/left of the viewport to search against
    @returns {Number} the index into childViews of the first view to render
    **/
   _findFirstRenderedComponent(invisibleTop) {
@@ -566,7 +619,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
   setupHandlers() {
     let resizeDebounce = this.resizeDebounce;
     let container = this._container;
-    let onScrollMethod = (dY, dX) => {
+    let onScrollMethod = (dY) => {
       if (!this.__isInitialized || this._isPrepending) { return; }
       this.set('_scrollIsForward', dY > 0);
       this._sm_scheduleUpdate('scroll');
@@ -649,7 +702,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
     this.set('_content', null);
     this.set('_children', null);
     this._container = null;
-
+    this._sm_actionCache = null;
 
     //clean up scheduled tasks
     run.cancel(this._nextUpdate);
