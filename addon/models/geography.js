@@ -55,35 +55,37 @@ export default class Geography {
    * @returns {{rect: *, zoneX: number, zoneY: number, distanceX: *, distanceY: *, _satellite: Geography}}
    */
   getZones(planet) {
-    let distanceX;
     let distanceY;
+    let distanceX;
 
-    if (this.bottom > planet.top) {
-      distanceX = this.bottom - planet.top;
-    } else if (this.top > planet.top) {
-      distanceX = this.top - planet.top;
-    } else if (this.top < planet.bottom) {
-      distanceX = this.top - planet.bottom;
-    } else if (this.bottom < planet.bottom) {
-      distanceX = this.bottom - planet.bottom;
+    // the bottom is above the viewport
+    if (this.bottom < planet.top) {
+      distanceY = planet.top - this.bottom;
+
+    // the top is below the viewport
+    } else if (this.top > planet.bottom) {
+      distanceY = planet.bottom - this.top;
+
+    // some portion is within the viewport
+    } else {
+      distanceY = 0;
+    }
+
+    // the right edge is to the left of the viewport
+    if (this.right < planet.left) {
+      distanceX = planet.left - this.right;
+
+    // the left edge is to the right of the viewport
+    } else if (this.left > planet.right) {
+      distanceX = planet.right - this.left;
+
+    // some portion is within the viewport
     } else { //we're within the planet
       distanceX = 0;
     }
 
-    if (this.right > planet.left) {
-      distanceY = this.right - planet.left;
-    } else if (this.left > planet.left) {
-      distanceY = this.left - planet.left;
-    } else if (this.left < planet.right) {
-      distanceY = this.left - planet.right;
-    } else if (this.right < planet.right) {
-      distanceY = this.right - planet.right;
-    } else { //we're within the planet
-      distanceY = 0;
-    }
-
-    let zoneX = Math.floor(distanceX / planet.height);
-    let zoneY = Math.floor(distanceY / planet.width);
+    let zoneY = distanceY < 0 ? Math.floor(distanceY / planet.height) : Math.ceil(distanceY / planet.height);
+    let zoneX = distanceX < 0 ? Math.floor(distanceX / planet.width) : Math.ceil(distanceX / planet.width);
 
     return {
       zoneX: zoneX,
