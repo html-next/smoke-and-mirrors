@@ -24,6 +24,11 @@ export default Mixin.create({
   init() {
     this._super(...arguments);
     this.registry = this.container.lookup('-view-registry:main') || Ember.View.views;
+  },
+
+  willDestroy() {
+    this._super();
+    this.registry = null;
   }
 
 });

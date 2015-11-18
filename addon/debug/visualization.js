@@ -161,7 +161,9 @@ export default class Visualization {
       let element = sats[index];
       this.applySatelliteStyles(element, sat.geography);
       element.setAttribute('viewState', sat.component.get('viewState'));
+      element.innerText = sat.component.get('index');
       this.applySatelliteMirrorStyles(element.mirrorSatellite, sat.component.element, sat.geography);
+      element.mirrorSatellite.innerText = sat.component.get('index');
     });
   }
 

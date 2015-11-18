@@ -9,6 +9,7 @@ const {
 export default Route.extend({
 
   numRows: 100,
+  _nextLoad: null,
 
   model() {
     return getData(this.numRows);
@@ -20,7 +21,7 @@ export default Route.extend({
 
   loadSamples() {
     this.controller.set('model', getData(this.numRows));
-    run.next(this, this.loadSamples);
+    this._nextLoad = run.next(this, this.loadSamples);
   },
 
   actions: {
@@ -31,6 +32,11 @@ export default Route.extend({
 
     removeRow() {
       this.numRows--;
+    },
+
+    willTransition() {
+      run.cancel(this._nextLoad);
+      this.controller.set('model', null);
     }
 
   }

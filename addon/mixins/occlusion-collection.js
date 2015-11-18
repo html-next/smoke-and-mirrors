@@ -337,6 +337,7 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
 
   register(child) {
     this.get('_children').addObject(child);
+    child.radar = this.radar;
     if (this.__isInitialized) {
       this._sm_scheduleUpdate('register');
     }
@@ -639,7 +640,10 @@ export default Mixin.create(SmartActionsMixin, keyForItem, {
     //cleanup scroll
     if (this.radar) {
       this.radar.destroy();
-      this.set('radar', null);
+      this.radar.didResizeSatellites = null;
+      this.radar.didUpdatePosition = null;
+      this.radar.didShiftSatellites = null;
+      this.radar = null;
     }
 
     this.set('_content', null);

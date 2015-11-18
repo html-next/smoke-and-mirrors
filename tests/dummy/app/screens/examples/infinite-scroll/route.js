@@ -17,7 +17,9 @@ export default Route.extend({
 
   actions: {
     willTransition() {
+      this.set('controller.model.numbers', null);
       this.controller.set('model', null);
+      this.set('currentModel', null);
     }
   }
 
