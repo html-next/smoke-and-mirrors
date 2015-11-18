@@ -9,7 +9,8 @@ module.exports = function(defaults) {
   var app = new EmberApp(defaults, {
     babel: {
       includePolyfill: true
-    }
+    },
+    hinting: false
   });
 
   var bootstrapPath = app.bowerDirectory + '/bootstrap/dist/';
