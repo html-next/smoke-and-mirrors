@@ -10,7 +10,6 @@
     "start": "ember server",
     "build": "ember build",
     "test": "ember try:testall",
-    "suave": "",
     "lint": "eslint -c .eslintrc addon/",
     "lint-all": "eslint -c .eslintrc app/ addon/ tests/",
     "lint-staged": "git diff --diff-filter=ACMRTUXB --cached --name-only | grep '*.js' | grep -v 'node_modules' | grep -v 'tests' | xargs eslint -c .eslintrc"
