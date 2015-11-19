@@ -45,8 +45,8 @@ export default Mixin.create({
    * This feature will be deprecated quickly when named yields become available in
    * Ember.
    */
-  // TODO implement, also can we do named yield's to make this API better?
-  loadingComponentClass: null,
+  loadBeforeComponent: null,
+  loadAfterComponent: null,
 
   /*
    * Used if you want to explicitly set the tagName of collection's items
@@ -139,7 +139,6 @@ export default Mixin.create({
    * it's `loadingFailed` property to true.
    *
    */
-  // TODO this feature needs the `Promise` portion done.
   firstReached: null,
 
   /*
@@ -169,7 +168,6 @@ export default Mixin.create({
    * it's `loadingFailed` property to true.
    *
    */
-  // TODO this feature needs the `Promise` portion done.
   lastReached: null,
 
   /*
@@ -215,9 +213,9 @@ export default Mixin.create({
    */
   shouldRender: true,
 
-  shouldRenderList: computed('shouldRender', '_smCanRender', function() {
+  shouldRenderList: computed('shouldRender', '__smCanRender', function() {
     const shouldRender = this.get('shouldRender');
-    const canRender = this.get('_smCanRender');
+    const canRender = this.get('__smCanRender');
     const doRender = shouldRender && canRender;
     const _shouldDidChange = this.get('__shouldRender') !== shouldRender;
 
@@ -238,7 +236,7 @@ export default Mixin.create({
    *
    * @private
    */
-  _smCanRender: false,
+  __smCanRender: false,
 
   __shouldRender: true,
 
@@ -318,6 +316,8 @@ export default Mixin.create({
   },
 
   __smActionCache: null,
+  __smIsLoadingAbove: false,
+  __smIsLoadingBelow: false,
   sendActionOnce(name, context) {
     if (!this.canSendActions(name, context)) {
       return;
@@ -337,8 +337,27 @@ export default Mixin.create({
       contextCache[name] = contextKey;
     }
 
+    const callback = (promise) => {
+      if (name === 'firstReached' && this.loadBeforeComponent) {
+        this.set('__smIsLoadingBefore', true);
+        this.set('__smLoadingBeforePromise', promise);
+        promise.finally(() => {
+          this.set('__smIsLoadingBefore', false);
+          this.set('__smLoadingBeforePromise', null);
+        });
+      }
+      if (name === 'lastReached' && this.loadAfterComponent) {
+        this.set('__smIsLoadingAfter', true);
+        this.set('__smLoadingAfterPromise', promise);
+        promise.finally(() => {
+          this.set('__smIsLoadingAfter', false);
+          this.set('__smLoadingAfterPromise', null);
+        });
+      }
+    };
+
     // this MUST be async or glimmer will freak
-    run.schedule('afterRender', this, this.sendAction, name, context);
+    run.schedule('afterRender', this, this.sendAction, name, context, callback);
   },
 
   /*
@@ -404,6 +423,9 @@ export default Mixin.create({
       }
     }
   },
+
+  __smSpacerAboveHeight: 0,
+  __smSpacerBelowHeight: 0,
 
   _removeComponents(toCull, toHide) {
     toCull.forEach((v) => {
