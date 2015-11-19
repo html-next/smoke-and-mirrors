@@ -64,11 +64,11 @@ export default Mixin.create({
       }
       return;
     }
-    this._nextVisualization = run.scheduleOnce(
-      'afterRender',
-      () => {
+    this._nextVisualization = run.scheduleOnce('afterRender', () => {
+      if (this.visualization) {
         this.visualization.render();
-      });
+      }
+    });
   },
 
   __prependComponents(addCount) {

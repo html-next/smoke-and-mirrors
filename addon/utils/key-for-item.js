@@ -1,6 +1,6 @@
 /* global String */
 import Ember from 'ember';
-import identity from 'identity';
+import identity from './identity';
 
 const {
   get

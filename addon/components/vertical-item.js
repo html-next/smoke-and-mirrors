@@ -9,14 +9,14 @@ const STATE_LIST = ['culled', 'hidden', 'visible'];
 
 const STATE_TRANSITIONS_UP = [
   { state: 'culled', method: '' },
-  { state: 'hidden', method: '_smInsert' },
-  { state: 'visible', method: '_smReveal' }
+  { state: 'hidden', method: '__smInsert' },
+  { state: 'visible', method: '__smReveal' }
 ];
 
 const STATE_TRANSITIONS_DOWN = [
   { state: 'visible', method: '' },
-  { state: 'hidden', method: '_smObscure' },
-  { state: 'culled', method: '_smTeardown' }
+  { state: 'hidden', method: '__smObscure' },
+  { state: 'culled', method: '__smTeardown' }
 ];
 
 /*
@@ -107,7 +107,7 @@ export default Component.extend({
    *
    * @private
    */
-  _smTeardown() {
+  __smTeardown() {
     const heightProp = this.heightProperty;
 
     if (!this.alwaysUseDefaultHeight && this.element && this.get('contentInserted')) {
@@ -121,7 +121,7 @@ export default Component.extend({
    *
    * @private
    */
-  _smInsert() {
+  __smInsert() {
     this.setProperties({ contentHidden: true, contentCulled: false, contentInserted: true });
   },
 
@@ -130,7 +130,7 @@ export default Component.extend({
    *
    * @private
    */
-  _smReveal() {
+  __smReveal() {
     const heightProp = this.heightProperty;
 
     this.setProperties({ contentHidden: false, contentVisible: true, contentInserted: true });
@@ -160,7 +160,7 @@ export default Component.extend({
    *
    * @private
    */
-  _smObscure() {
+  __smObscure() {
     this._updateHeight();
     this.setProperties({ contentHidden: true, contentVisible: false, contentInserted: true });
     this.element.style.visibility = 'hidden';
