@@ -19,7 +19,7 @@
     "url": "https://github.com/runspired/smoke-and-mirrors"
   },
   "engines": {
-    "node": ">= 0.10.0"
+    "node": ">= 4.1.1"
   },
   "homepage": "https://runspired.github.io/smoke-and-mirrors",
   "bugs": "https://github.com/runspired/smoke-and-mirrors/issues",
