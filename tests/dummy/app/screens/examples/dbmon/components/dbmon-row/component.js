@@ -20,7 +20,7 @@ export default Ember.Component.extend({
 
     return topFiveQueries.map(function(query, index) {
       return {
-        key: index + '',
+        key: String(index),
         query: query.query,
         elapsed: query.elapsed ? formatElapsed(query.elapsed) : '',
         className: elapsedClass(query.elapsed)
@@ -56,20 +56,20 @@ function elapsedClass(elapsed) {
   }
 }
 
-var _base = String.prototype;
+const _base = String.prototype;
 
 _base.lpad = _base.lpad || function(padding, toLength) {
   return padding.repeat((toLength - this.length) / padding.length).concat(this);
 };
 
 function formatElapsed(value) {
-  var str = parseFloat(value).toFixed(2);
+  let str = parseFloat(value).toFixed(2);
+
   if (value > 60) {
-    var minutes = Math.floor(value / 60);
-    var comps = (value % 60).toFixed(2).split('.');
-    var seconds = comps[0].lpad('0', 2);
-    var ms = comps[1];
-    str = minutes + ':' + seconds + '.' + ms;
+    const minutes = Math.floor(value / 60);
+    const comps = (value % 60).toFixed(2).split('.');
+    const seconds = comps[0].lpad('0', 2);
+    str = `${minutes}:${seconds}.${comps[1]}`;
   }
   return str;
 }

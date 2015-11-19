@@ -1,4 +1,4 @@
-/* global document*/
+/* global document */
 import Geography from '../models/geography';
 
 export default class Visualization {
@@ -48,20 +48,23 @@ export default class Visualization {
   }
 
   applySatelliteStyles(element, geography) {
-    element.style.width = geography.width + 'px';
-    element.style.height = geography.height + 'px';
-    element.style.top = geography.top + 'px';
-    element.style.left = (this.radar.planet.width - this.radar.planet.left - geography.left) + 'px';
+    const left = (this.radar.planet.width - this.radar.planet.left - geography.left);
+    element.style.width = `${geography.width}px`;
+    element.style.height = `${geography.height}px`;
+    element.style.top = `${geography.top}px`;
+    element.style.left = `${left}px`;
   }
 
   applySatelliteMirrorStyles(element, componentElement, compare) {
-    let geography = new Geography(componentElement);
-    element.style.width = geography.width + 'px';
-    element.style.height = geography.height + 'px';
-    element.style.top = geography.top + 'px';
-    element.style.left = ((this.radar.planet.width * 2) - this.radar.planet.left - geography.left) + 'px';
-
+    const geography = new Geography(componentElement);
+    const left = ((this.radar.planet.width * 2) - this.radar.planet.left - geography.left);
     let errorLevel = false;
+
+    element.style.width = `${geography.width}px`;
+    element.style.height = `${geography.height}px`;
+    element.style.top = `${geography.top}px`;
+    element.style.left = `${left}px`;
+
     if (Math.abs(geography.top - compare.top) > 35) {
       errorLevel = true;
     }
@@ -70,20 +73,24 @@ export default class Visualization {
   }
 
   static applyStyles(element, geography) {
-    element.style.width = geography.width + 'px';
-    element.style.height = geography.height + 'px';
-    element.style.top = geography.top + 'px';
-    element.style.left = geography.left + 'px';
+    element.style.width = `${geography.width}px`;
+    element.style.height = `${geography.height}px`;
+    element.style.top = `${geography.top}px`;
+    element.style.left = `${geography.left}px`;
   }
 
   styleViewport() {
-    let edges = this.component.get('_edges');
-    let planet = this.radar.planet;
-    let sky = this.radar.sky;
+    const edges = this.component.get('_edges');
+    const {
+      planet,
+      sky
+      } = this.radar;
+    const wrapperWidth = (((2 * planet.left) + planet.width) * 0.3);
 
-    this.wrapper.style.width = (((2 * planet.left) + planet.width) * 0.3) + 'px';
-    this.container.style.width = planet.width + 'px';
-    this.container.style.height = planet.height + 'px';
+    this.wrapper.style.width = `${wrapperWidth}px`;
+    this.container.style.width = `${planet.width}px`;
+    this.container.style.height = `${planet.height}px`;
+
     Visualization.applyStyles(this.telescope, planet);
     Visualization.applyStyles(this.skyline, sky);
 
@@ -119,6 +126,7 @@ export default class Visualization {
   makeSatellite() {
     let satellite;
     let mirror;
+
     if (this.cache.length) {
       satellite = this.cache.pop();
     } else {
@@ -139,11 +147,15 @@ export default class Visualization {
   }
 
   makeSatellites() {
-    let length = this.radar.satellites.length;
-    let isShrinking = this.satellites.length > length;
+    const {
+      length
+      } = this.radar.satellites;
+    const isShrinking = this.satellites.length > length;
+
     while (this.satellites.length !== length) {
       if (isShrinking) {
-        let satellite = this.satellites.pop();
+        const satellite = this.satellites.pop();
+
         satellite.parentNode.removeChild(satellite);
         satellite.mirrorSatellite.parentNode.removeChild(satellite.mirrorSatellite);
         this.cache.push(satellite);
@@ -155,9 +167,11 @@ export default class Visualization {
   }
 
   styleSatellites() {
-    let sats = this.satellites;
+    const sats = this.satellites;
+
     this.radar.satellites.forEach((sat, index) => {
-      let element = sats[index];
+      const element = sats[index];
+
       this.applySatelliteStyles(element, sat.geography);
       element.setAttribute('viewState', sat.component.get('viewState'));
       element.innerText = sat.component.get('index');

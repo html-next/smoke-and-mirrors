@@ -9,17 +9,17 @@ const STATE_LIST = ['culled', 'hidden', 'visible'];
 
 const STATE_TRANSITIONS_UP = [
   { state: 'culled', method: '' },
-  { state: 'hidden', method: '_ov_insert' },
-  { state: 'visible', method: '_ov_reveal' }
+  { state: 'hidden', method: '_smInsert' },
+  { state: 'visible', method: '_smReveal' }
 ];
 
 const STATE_TRANSITIONS_DOWN = [
   { state: 'visible', method: '' },
-  { state: 'hidden', method: '_ov_obscure' },
-  { state: 'culled', method: '_ov_teardown' }
+  { state: 'hidden', method: '_smObscure' },
+  { state: 'culled', method: '_smTeardown' }
 ];
 
-/**
+/*
  A vertical-item is one that intelligently removes
  its content when scrolled off the screen vertically.
 
@@ -28,7 +28,7 @@ const STATE_TRANSITIONS_DOWN = [
  @namespace Ember
  **/
 export default Component.extend({
-  layout: layout,
+  layout,
   tagName: 'vertical-item',
   itemTagName: 'vertical-item',
 
@@ -107,10 +107,11 @@ export default Component.extend({
    *
    * @private
    */
-  _ov_teardown() {
-    let heightProp = this.heightProperty;
+  _smTeardown() {
+    const heightProp = this.heightProperty;
+
     if (!this.alwaysUseDefaultHeight && this.element && this.get('contentInserted')) {
-      this.element.style[heightProp] = this.satellite.geography.height + 'px';
+      this.element.style[heightProp] = `${this.satellite.geography.height}px`;
     }
     this.setProperties({ contentCulled: true, contentHidden: false, contentInserted: false });
   },
@@ -120,7 +121,7 @@ export default Component.extend({
    *
    * @private
    */
-  _ov_insert() {
+  _smInsert() {
     this.setProperties({ contentHidden: true, contentCulled: false, contentInserted: true });
   },
 
@@ -129,8 +130,9 @@ export default Component.extend({
    *
    * @private
    */
-  _ov_reveal() {
-    let heightProp = this.heightProperty;
+  _smReveal() {
+    const heightProp = this.heightProperty;
+
     this.setProperties({ contentHidden: false, contentVisible: true, contentInserted: true });
     if (!this.alwaysUseDefaultHeight) {
       this.element.style[heightProp] = null;
@@ -140,7 +142,8 @@ export default Component.extend({
 
   _hasRealHeight: false,
   _updateHeight() {
-    let needsRealHeight = !this.get('alwaysUseDefaultHeight');
+    const needsRealHeight = !this.get('alwaysUseDefaultHeight');
+
     if (needsRealHeight && !this._hasRealHeight) {
       this.satellite.resize();
       this._hasRealHeight = true;
@@ -157,7 +160,7 @@ export default Component.extend({
    *
    * @private
    */
-  _ov_obscure() {
+  _smObscure() {
     this._updateHeight();
     this.setProperties({ contentHidden: true, contentVisible: false, contentInserted: true });
     this.element.style.visibility = 'hidden';
@@ -190,11 +193,11 @@ export default Component.extend({
     let defaultHeight = this.get('defaultHeight');
 
     if (typeof defaultHeight === 'number') {
-      defaultHeight += 'px';
+      defaultHeight = `${defaultHeight}px`;
     }
 
     this.element.style.visibility = 'hidden';
-    this.element.style[heightProp] = _height ? _height + 'px' : defaultHeight;
+    this.element.style[heightProp] = _height ? `${_height}px` : defaultHeight;
   },
 
   willDestroyElement() {
@@ -203,11 +206,11 @@ export default Component.extend({
       viewState: 'culled',
       contentCulled: true,
       contentHidden: false,
-      contentInserted: false });
-    const radar = this.radar;
+      contentInserted: false
+    });
 
-    if (radar) {
-      radar.unregister(this);
+    if (this.radar) {
+      this.radar.unregister(this);
     }
     this.satellite = null;
   },
@@ -215,10 +218,9 @@ export default Component.extend({
   willDestroy() {
     this._super(...arguments);
     this.unregister(this);
-    const radar = this.radar;
 
-    if (radar) {
-      radar.unregister(this);
+    if (this.radar) {
+      this.radar.unregister(this);
     }
     this.satellite = null;
     this.registry = null;

@@ -7,7 +7,7 @@ export default
 
   // required
   content: null,
-  defaultHeight: 75, //Integer: attempts to work with em, rem, px
+  defaultHeight: 75, // Integer: attempts to work with em, rem, px
 
   // performance
   useContentProxy: false,

@@ -4,51 +4,57 @@ import Geography from 'smoke-and-mirrors/models/geography';
 const RELATIVE_UNIT = 100;
 
 module('Unit | Model | Geography', {
+
   beforeEach: (assert) => {
-    var planetADiv = document.createElement('div');
-    planetADiv.style.height = RELATIVE_UNIT + 'px';
-    planetADiv.style.width = RELATIVE_UNIT + 'px';
+    const planetADiv = document.createElement('div');
+
+    planetADiv.style.height = `${RELATIVE_UNIT}px`;
+    planetADiv.style.width = `${RELATIVE_UNIT}px`;
     planetADiv.style.position = 'absolute';
-    planetADiv.style.top = (RELATIVE_UNIT + 1) + 'px';
-    planetADiv.style.left = (RELATIVE_UNIT + 1) + 'px';
+    planetADiv.style.top = `${(RELATIVE_UNIT + 1)}px`;
+    planetADiv.style.left = `${(RELATIVE_UNIT + 1)}px`;
     document.body.appendChild(planetADiv);
     assert.planetADiv = planetADiv;
 
-    var planetBDiv = document.createElement('div');
-    planetBDiv.style.height = RELATIVE_UNIT + 'px';
-    planetBDiv.style.width = RELATIVE_UNIT + 'px';
+    const planetBDiv = document.createElement('div');
+
+    planetBDiv.style.height = `${RELATIVE_UNIT}px`;
+    planetBDiv.style.width = `${RELATIVE_UNIT}px`;
     planetBDiv.style.top = '0px';
     planetBDiv.style.left = '0px';
     planetBDiv.style.position = 'absolute';
     assert.planetBDiv = planetBDiv;
   },
+
   afterEach: (assert) => {
     assert.planetADiv.parentNode.removeChild(assert.planetADiv);
     assert.planetADiv = null;
+
     if (assert.planetBDiv.parentNode) {
       assert.planetBDiv.parentNode.removeChild(assert.planetBDiv);
     }
+
     assert.planetBDiv = null;
   }
 });
 
 test('Geography should work with `window`', (assert) => {
-  let geography = new Geography(window);
-  let state = geography.getState();
+  const geography = new Geography(window);
+  const state = geography.getState();
 
   assert.ok(state.top === 0 && state.bottom > 0);
 });
 
 test('Geography.destroy() properly tears down the instance.', (assert) => {
-  let geography = new Geography(window);
+  const geography = new Geography(window);
 
   geography.destroy();
   assert.notOk(geography.element);
 });
 
 test('geography sets the state for an element on the page', (assert) => {
-  let geography = new Geography(assert.planetADiv);
-  let state = geography.getState();
+  const geography = new Geography(assert.planetADiv);
+  const state = geography.getState();
   assert.expect(12);
 
   assert.equal(state.width, RELATIVE_UNIT, 'planetA width is 100');
@@ -63,8 +69,8 @@ test('geography sets the state for an element on the page', (assert) => {
   assert.planetBDiv.style.top = '0px';
   document.body.appendChild(assert.planetBDiv);
 
-  let geographyB = new Geography(assert.planetBDiv);
-  let stateB = geographyB.getState();
+  const geographyB = new Geography(assert.planetBDiv);
+  const stateB = geographyB.getState();
 
   assert.equal(stateB.width, RELATIVE_UNIT, 'planetB width is 100');
   assert.equal(stateB.height, RELATIVE_UNIT, 'planetB height is 100');
@@ -76,8 +82,8 @@ test('geography sets the state for an element on the page', (assert) => {
 });
 
 test('setState updates the elements of a geography class', (assert) => {
-  let geography = new Geography(window);
-  let planetA = new Geography(assert.planetADiv);
+  const geography = new Geography(window);
+  const planetA = new Geography(assert.planetADiv);
   geography.setState(planetA);
 
   assert.equal(geography.getState().width, RELATIVE_UNIT);
@@ -88,18 +94,18 @@ test('getZones correctly determines the X (horizontal) distance and zone.', (ass
 
   // test before
   assert.planetBDiv.style.left = '0px';
-  assert.planetBDiv.style.top = RELATIVE_UNIT + 'px';
+  assert.planetBDiv.style.top = `${RELATIVE_UNIT}px`;
   document.body.appendChild(assert.planetBDiv);
 
-  let planetA = new Geography(assert.planetADiv);
-  let planetB = new Geography(assert.planetBDiv);
+  const planetA = new Geography(assert.planetADiv);
+  const planetB = new Geography(assert.planetBDiv);
   let result = planetA.getZones(planetB);
 
   assert.equal(result.distanceX, -1, 'The satellite is 1px to the left');
   assert.equal(result.zoneX, -1, 'The satellite is 1 zone to the left');
 
   // test ontop of
-  assert.planetBDiv.style.left = (RELATIVE_UNIT + 1) + 'px';
+  assert.planetBDiv.style.left = `${(RELATIVE_UNIT + 1)}px`;
 
   planetB.setState();
   result = planetA.getZones(planetB);
@@ -108,7 +114,7 @@ test('getZones correctly determines the X (horizontal) distance and zone.', (ass
   assert.equal(result.zoneX, 0, 'The satellite is 0 zones away');
 
   // test after
-  assert.planetBDiv.style.left = (2 * RELATIVE_UNIT + 2) + 'px';
+  assert.planetBDiv.style.left = `${(2 * RELATIVE_UNIT + 2)}px`;
 
   planetB.setState();
   result = planetA.getZones(planetB);
@@ -122,18 +128,18 @@ test('getZones correctly determines the Y (vertical) distance and zone.', (asser
 
   // test before
   assert.planetBDiv.style.top = '0px';
-  assert.planetBDiv.style.left = RELATIVE_UNIT + 'px';
+  assert.planetBDiv.style.left = `${RELATIVE_UNIT}px`;
   document.body.appendChild(assert.planetBDiv);
 
-  let planetA = new Geography(assert.planetADiv);
-  let planetB = new Geography(assert.planetBDiv);
+  const planetA = new Geography(assert.planetADiv);
+  const planetB = new Geography(assert.planetBDiv);
   let result = planetA.getZones(planetB);
 
   assert.equal(result.distanceY, -1, 'The satellite is 1px above');
   assert.equal(result.zoneY, -1, 'The satellite is 1 zone above');
 
   // test ontop of
-  assert.planetBDiv.style.top = (RELATIVE_UNIT + 1) + 'px';
+  assert.planetBDiv.style.top = `${(RELATIVE_UNIT + 1)}px`;
 
   planetB.setState();
   result = planetA.getZones(planetB);
@@ -142,7 +148,7 @@ test('getZones correctly determines the Y (vertical) distance and zone.', (asser
   assert.equal(result.zoneY, 0, 'The satellite is 0 zones away');
 
   // test after
-  assert.planetBDiv.style.top = (2 * RELATIVE_UNIT + 2) + 'px';
+  assert.planetBDiv.style.top = `${(2 * RELATIVE_UNIT + 2)}px`;
 
   planetB.setState();
   result = planetA.getZones(planetB);
@@ -156,10 +162,10 @@ test('getZones for element slightly overlaping another planet', (assert) => {
   assert.planetBDiv.style.left = '50px';
   document.body.appendChild(assert.planetBDiv);
 
-  let planetA = new Geography(assert.planetADiv);
-  let planetB = new Geography(assert.planetBDiv);
+  const planetA = new Geography(assert.planetADiv);
+  const planetB = new Geography(assert.planetBDiv);
 
-  var result = planetA.getZones(planetB);
+  const result = planetA.getZones(planetB);
 
   assert.equal(result.zoneX, 0, 'Partial Overlap on X results in zone 0');
   assert.equal(result.zoneY, 0, 'Partial Overlap on Y results in zone 0');
@@ -172,10 +178,10 @@ test('getZones for element slightly larger and in same position as another plane
   assert.planetBDiv.style.left = '100px';
   document.body.appendChild(assert.planetBDiv);
 
-  let planetA = new Geography(assert.planetADiv);
-  let planetB = new Geography(assert.planetBDiv);
+  const planetA = new Geography(assert.planetADiv);
+  const planetB = new Geography(assert.planetBDiv);
 
-  var result = planetA.getZones(planetB);
+  const result = planetA.getZones(planetB);
 
   assert.equal(result.zoneX, 0, 'Fully encompassing X results in zone 0');
   assert.equal(result.zoneY, 0, 'Fully encompassing Y results in zone 0');

@@ -1,9 +1,9 @@
 /* global String */
 import Ember from 'ember';
-import identity from '../lib/identity';
+import identity from 'identity';
 
 const {
-  get: get
+  get
   } = Ember;
 
 export default function keyForItem(item, keyPath, index) {

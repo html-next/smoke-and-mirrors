@@ -55,8 +55,8 @@ export default class Radar {
     if (!this.satellites) {
       return;
     }
-    let satellite = this.satellites.find((satellite) => {
-      return satellite.key === key;
+    const satellite = this.satellites.find((sat) => {
+      return sat.key === key;
     });
     if (satellite) {
       let index = this.satellites.indexOf(satellite);
@@ -114,13 +114,18 @@ export default class Radar {
   }
 
   silentNight() {
-    let _height = this.sky.height;
-    let _width = this.sky.width;
+    const _height = this.sky.height;
+    const _width = this.sky.width;
+
     this.updateSkyline();
-    let height = this.sky.height;
-    let width = this.sky.width;
-    let dY = height - _height;
-    let dX = width - _width;
+
+    const {
+      height,
+      width
+      } = this.sky;
+    const dY = height - _height;
+    const dX = width - _width;
+
     this.scrollY = this.scrollContainer.scrollTop += dY;
     this.scrollX = this.scrollContainer.scrollLeft += dX;
     this.sky.left -= dX;

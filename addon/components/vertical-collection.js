@@ -15,7 +15,7 @@ const VerticalCollection = Component.extend(OcclusionMixin, {
    * with the `vertical-item`.
    */
   tagName: 'vertical-collection',
-  layout: layout,
+  layout,
 
   // –––––––––––––– Required Settings
 

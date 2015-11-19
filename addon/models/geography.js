@@ -8,10 +8,9 @@ function getRect(element) {
       right: window.innerWidth,
       bottom: window.innerHeight
     };
-  } else {
-    return element.getBoundingClientRect();
   }
 
+  return element.getBoundingClientRect();
 }
 
 export default class Geography {
@@ -46,7 +45,7 @@ export default class Geography {
     this.element = null;
   }
 
-  /**
+  /*
    * Eventually, Satellite will be reusable and able to orbit many planets
    * so instead of these properties being on the satellite, they are available
    * as a method call based on planet.
@@ -80,7 +79,7 @@ export default class Geography {
       distanceX = planet.right - this.left;
 
     // some portion is within the viewport
-    } else { //we're within the planet
+    } else { // we're within the planet
       distanceX = 0;
     }
 
@@ -88,10 +87,10 @@ export default class Geography {
     let zoneX = distanceX < 0 ? Math.floor(distanceX / planet.width) : Math.ceil(distanceX / planet.width);
 
     return {
-      zoneX: zoneX,
-      zoneY: zoneY,
-      distanceX: distanceX,
-      distanceY: distanceY
+      zoneX,
+      zoneY,
+      distanceX,
+      distanceY
     };
   }
 

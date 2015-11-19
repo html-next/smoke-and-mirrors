@@ -7,6 +7,6 @@ const {
   } = Ember;
 
 export default Component.extend(ViewportMixin, {
-  layout: layout,
+  layout,
   attributeBindings: ['_position.zoneX:x', '_position.zoneY:y']
 });

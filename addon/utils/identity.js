@@ -6,7 +6,7 @@ const {
 
 export default function identity(item) {
   let key;
-  let type = typeof item;
+  const type = typeof item;
 
   if (type === 'string' || type === 'number') {
     key = item;

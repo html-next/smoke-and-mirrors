@@ -3,13 +3,10 @@ import Ember from 'ember';
 import getTagDescendant from '../utils/get-tag-descendant';
 import proxied from '../utils/proxied-array';
 import ListRadar from '../models/list-radar';
-import identity from '../lib/identity';
+import identity from '../utils/identity';
 
-/*
- * Investigations: http://jsfiddle.net/sxqnt/73/
- */
 const {
-  get: get,
+  get,
   Mixin,
   computed,
   run
@@ -20,7 +17,8 @@ function valueForIndex(arr, index) {
 }
 
 function getContent(obj, isProxied) {
-  let key = isProxied ? 'content.content' : 'content';
+  const key = isProxied ? 'content.content' : 'content';
+
   return get(obj, key);
 }
 
@@ -217,11 +215,11 @@ export default Mixin.create({
    */
   shouldRender: true,
 
-  shouldRenderList: computed('shouldRender', '_sm_canRender', function() {
-    let shouldRender = this.get('shouldRender');
-    let canRender = this.get('_sm_canRender');
-    let doRender = shouldRender && canRender;
-    let _shouldDidChange = this.get('__shouldRender') !== shouldRender;
+  shouldRenderList: computed('shouldRender', '_smCanRender', function() {
+    const shouldRender = this.get('shouldRender');
+    const canRender = this.get('_smCanRender');
+    const doRender = shouldRender && canRender;
+    const _shouldDidChange = this.get('__shouldRender') !== shouldRender;
 
     // trigger a cycle
     if (doRender && _shouldDidChange) {
@@ -240,7 +238,7 @@ export default Mixin.create({
    *
    * @private
    */
-  _sm_canRender: false,
+  _smCanRender: false,
 
   __shouldRender: true,
 
@@ -264,7 +262,7 @@ export default Mixin.create({
     case '@index':
       // allow 0 index
       if (!index && index !== 0) {
-        throw 'No index was supplied to keyForItem';
+        throw new Error('No index was supplied to keyForItem');
       }
       key = index;
       break;
@@ -287,7 +285,7 @@ export default Mixin.create({
   },
 
   // –––––––––––––– Action Helper Functions
-  canSendActions(name/*, context*/) {
+  canSendActions(name /* context*/) {
     // don't trigger during a prepend or initial render
     if (this._isFirstRender || this._isPrepending) {
       return false;
@@ -319,7 +317,7 @@ export default Mixin.create({
     return this.keyForItem(context.item, context.index);
   },
 
-  _sm_actionCache: null,
+  __smActionCache: null,
   sendActionOnce(name, context) {
     if (!this.canSendActions(name, context)) {
       return;
@@ -330,14 +328,13 @@ export default Mixin.create({
       return;
     }
 
-    let contextCache = this._sm_actionCache;
+    let contextCache = this.__smActionCache;
     if (contextCache.hasOwnProperty(name)) {
       let contextKey = this.keyForContext(context);
       if (contextCache[name] === contextKey) {
         return;
-      } else {
-        contextCache[name] = contextKey;
       }
+      contextCache[name] = contextKey;
     }
 
     // this MUST be async or glimmer will freak
@@ -394,7 +391,7 @@ export default Mixin.create({
     this.get('_children').addObject(child);
     child.radar = this.radar;
     if (this.__isInitialized) {
-      this._sm_scheduleUpdate('register');
+      this.__smScheduleUpdate('register');
     }
   },
 
@@ -403,7 +400,7 @@ export default Mixin.create({
     if (children) {
       children.removeObject(child);
       if (this.__isInitialized && !this.get('isDestroying') && !this.get('isDestroyed')) {
-        this._sm_scheduleUpdate('unregister');
+        this.__smScheduleUpdate('unregister');
       }
     }
   },
@@ -426,7 +423,7 @@ export default Mixin.create({
    *
    * @private
    */
-  _updateChildStates(/*source*/) {
+  _updateChildStates(/* source */) {  // eslint: complexity
     if (!this.get('shouldRenderList')) {
       return;
     }
@@ -583,7 +580,7 @@ export default Mixin.create({
     }
   },
 
-  _sm_scheduleUpdate(source) {
+  __smScheduleUpdate(source) {
     if (this._isPrepending) {
       return;
     }
@@ -594,8 +591,8 @@ export default Mixin.create({
     this._super();
     this._nextMaintenance = run.next(() => {
       this.setupContainer();
-      this.set('_sm_canRender', true);
-      //draw initial boundaries
+      this.set('__smCanRender', true);
+      // draw initial boundaries
       this._initializeScrollState();
       this.notifyPropertyChange('_edges');
     });
@@ -625,14 +622,13 @@ export default Mixin.create({
   },
 
   setupHandlers() {
-    let resizeDebounce = this.resizeDebounce;
     let container = this._container;
     let onScrollMethod = (dY) => {
       if (!this.__isInitialized || this._isPrepending) {
         return;
       }
       this.set('_scrollIsForward', dY > 0);
-      this._sm_scheduleUpdate('scroll');
+      this.__smScheduleUpdate('scroll');
     };
 
     let onResizeMethod = () => {
@@ -641,7 +637,7 @@ export default Mixin.create({
 
     this.radar.setState({
       telescope: this._container,
-      resizeDebounce: resizeDebounce,
+      resizeDebounce: this.resizeDebounce,
       skyline: container === window ? document.body : this.element,
       minimumMovement: this.minimumMovement
     });
@@ -651,20 +647,20 @@ export default Mixin.create({
   },
 
   _initializeScrollState() {
-    var scrollPosition = this.scrollPosition;
-    var idForFirstItem = this.get('idForFirstItem');
+    const idForFirstItem = this.get('idForFirstItem');
 
-    if (scrollPosition) {
-      this.radar.scrollContainer.scrollTop = scrollPosition;
+    if (this.scrollPosition) {
+      this.radar.scrollContainer.scrollTop = this.scrollPosition;
     } else if (this.get('renderFromLast')) {
-      var last = this.$().get(0).lastElementChild;
+      const last = this.$().get(0).lastElementChild;
+
       this.set('__isInitializingFromLast', true);
       if (last) {
         last.scrollIntoView(false);
       }
     } else if (idForFirstItem) {
-      var content = this.get('content');
-      var firstVisibleIndex;
+      const content = this.get('content');
+      let firstVisibleIndex;
 
       for (let i = 0; i < get(content, 'length'); i++) {
         if (idForFirstItem === this.keyForItem(valueForIndex(content, i), i)) {
@@ -711,7 +707,7 @@ export default Mixin.create({
     this.set('_content', null);
     this.set('_children', null);
     this._container = null;
-    this._sm_actionCache = null;
+    this.__smActionCache = null;
 
     // clean up scheduled tasks
     run.cancel(this._nextUpdate);
@@ -720,7 +716,7 @@ export default Mixin.create({
   },
 
   __prependComponents() {
-    if (this.get('_sm_canRender')) {
+    if (this.get('__smCanRender')) {
       this._isPrepending = true;
       run.cancel(this._nextUpdate);
       this._nextUpdate = run.scheduleOnce('actions', this, function() {
@@ -731,21 +727,22 @@ export default Mixin.create({
     }
   },
 
-  __getEstimatedDefaultHeight: function() {
-    var _defaultHeight = this.get('_defaultHeight');
+  __getEstimatedDefaultHeight() {
+    let _defaultHeight = this.get('_defaultHeight');
 
     if (_defaultHeight) {
       return _defaultHeight;
     }
 
-    var defaultHeight = '' + this.get('defaultHeight');
+    let defaultHeight = `${this.get('defaultHeight')}`;
 
     if (defaultHeight.indexOf('em') === -1) {
       _defaultHeight = parseInt(defaultHeight, 10);
       this.set('_defaultHeight', _defaultHeight);
       return _defaultHeight;
     }
-    var element;
+
+    let element;
 
     // use body if rem
     if (defaultHeight.indexOf('rem') !== -1) {
@@ -760,7 +757,7 @@ export default Mixin.create({
       }
     }
 
-    var fontSize = window.getComputedStyle(element).getPropertyValue('font-size');
+    const fontSize = window.getComputedStyle(element).getPropertyValue('font-size');
 
     if (_defaultHeight) {
       _defaultHeight = parseFloat(defaultHeight) * parseFloat(fontSize);
@@ -797,7 +794,7 @@ export default Mixin.create({
       visibleTop: (-1 * bufferSize * rect.height) + rect.top,
       invisibleTop: (-2 * bufferSize * rect.height) + rect.top,
       viewportBottom: rect.bottom,
-      visibleBottom: (1 * bufferSize * rect.height) + rect.bottom,
+      visibleBottom: (bufferSize * rect.height) + rect.bottom,
       invisibleBottom: (2 * bufferSize * rect.height) + rect.bottom
     };
   }),
@@ -808,7 +805,7 @@ export default Mixin.create({
   _prepareComponent() {
     this.set('__shouldRender', this.get('shouldRender'));
 
-    this._sm_actionCache = {
+    this.__smActionCache = {
       firstReached: null,
       lastReached: null,
       firstVisibleChanged: null,
@@ -835,7 +832,7 @@ export default Mixin.create({
       if (offset <= this.get('_firstVisibleIndex')) {
         this.__prependComponents();
       } else {
-        this._sm_scheduleUpdate('reflect changes');
+        this.__smScheduleUpdate('reflect changes');
         run.scheduleOnce('sync', this.radar, this.radar.updateSkyline);
       }
     };
@@ -847,7 +844,7 @@ export default Mixin.create({
     if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
       this.__prependComponents();
     } else {
-      this._sm_scheduleUpdate('didReveiveAttrs');
+      this.__smScheduleUpdate('didReveiveAttrs');
       run.scheduleOnce('sync', this.radar, this.radar.updateSkyline);
     }
   },

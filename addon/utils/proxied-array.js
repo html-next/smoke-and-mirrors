@@ -5,7 +5,7 @@ const {
   computed,
   ArrayProxy,
   ObjectProxy,
-  get: get
+  get
 } = Ember;
 
 function valueForIndex(arr, index) {
@@ -13,7 +13,7 @@ function valueForIndex(arr, index) {
 }
 
 function changeIsPrepend(oldArray, newArray, keyPath) {
-  let lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
+  const lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
 
   // if either array is empty or the new array is not longer, do not treat as prepend
   if (!get(newArray, 'length') || !get(oldArray, 'length') || lengthDifference <= 0) {
@@ -21,31 +21,32 @@ function changeIsPrepend(oldArray, newArray, keyPath) {
   }
 
   // if the keys at the correct indexes are the same, this is a prepend
-  let oldInitialItem = get(valueForIndex(oldArray, 0), 'content');
-  let oldInitialKey = keyForItem(oldInitialItem, keyPath, 0);
-  let newInitialItem = valueForIndex(newArray, lengthDifference);
-  let newInitialKey = keyForItem(newInitialItem, keyPath, lengthDifference);
+  const oldInitialItem = get(valueForIndex(oldArray, 0), 'content');
+  const oldInitialKey = keyForItem(oldInitialItem, keyPath, 0);
+  const newInitialItem = valueForIndex(newArray, lengthDifference);
+  const newInitialKey = keyForItem(newInitialItem, keyPath, lengthDifference);
 
   return oldInitialKey === newInitialKey;
 }
 
 export default function proxiedArray(arrayKey, keyPath = '@identity') {
   // create the value cache for the array
-  let outbound = ArrayProxy.create({ content: Ember.A() });
+  const outbound = ArrayProxy.create({ content: Ember.A() });
 
   // create the computed args array
-  let args = [];
-  args.push(arrayKey.indexOf('.[]') !== -1 ? arrayKey : arrayKey + '.[]');
+  const args = [];
 
-  let fn = () => {
-    let inbound = this.get(arrayKey);
+  args.push(arrayKey.indexOf('.[]') !== -1 ? arrayKey : `${arrayKey}.[]`);
+
+  const fn = () => {
+    const inbound = this.get(arrayKey);
 
     if (!inbound || !get(inbound, 'length')) {
       outbound.clear();
       return outbound;
     }
     let newLength;
-    let newObjects = Ember.A();
+    const newObjects = Ember.A();
     let diff;
 
     outbound.beginPropertyChanges();
@@ -64,7 +65,8 @@ export default function proxiedArray(arrayKey, keyPath = '@identity') {
     // handle additions and inline changes
     } else {
       inbound.forEach((item, index) => {
-        var proxiedObject = outbound.objectAt(index);
+        const proxiedObject = outbound.objectAt(index);
+
         if (proxiedObject) {
           proxiedObject.set('content', item);
         } else {

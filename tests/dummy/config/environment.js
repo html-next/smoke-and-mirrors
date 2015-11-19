@@ -1,4 +1,5 @@
 /* jshint node:true */
+// jscs:disable
 /* global module */
 module.exports = function(environment) {
   var DEBUG = false;

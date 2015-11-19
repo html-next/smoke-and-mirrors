@@ -7,7 +7,7 @@ const {
   } = Ember;
 
 export default Component.extend(OcclusionCollectionMixin, {
-  layout: layout,
+  layout,
 
   defaultWidth: 200,
   _defaultWidth: null,

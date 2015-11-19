@@ -1,4 +1,6 @@
 import Ember from 'ember';
+import getDimensions from '../utils/element/get-dimensions';
+import applyDimensions from '../utils/element/apply-dimensions';
 
 const {
   Mixin,
@@ -14,19 +16,19 @@ export default Mixin.create({
   destination: computed('renderInParent', 'parent', function() {
     let renderInParent = this.get('renderInParent');
     let parent = this.get('parent');
-    this._sm_appendBody((parent || this.element).cloneNode(false));
+    this.__smAppendBody((parent || this.element).cloneNode(false));
     return renderInParent ? (parent || this.element) : this._fragmentBody;
   }),
 
   didPreRender(/* dimensions */) {},
   didMoveElement() {},
 
-  _sm_getComputedStyle() {
+  __smGetComputedStyle() {
     let bodyStyle = getDimensions(this._fragmentBody);
     this.didPreRender(bodyStyle);
   },
 
-  _sm_updateFragmentStyles() {
+  __smUpdateFragmentStyles() {
     let parent = this.get('parent') || this.element;
     if (parent === this.element) {
       if (!this.get('parentElementDidInsert')) {
@@ -38,13 +40,13 @@ export default Mixin.create({
     let computedStyle = getDimensions(parentWrapper);
     applyDimensions(this._fragmentWrapper, computedStyle);
 
-    this._sm_getComputedStyle();
+    this.__smGetComputedStyle();
   },
 
   _fragment: null,
   _fragmentWrapper: null,
   _fragmentBody: null,
-  _sm_setupFragment() {
+  __smSetupFragment() {
     if (this._fragment) {
       return;
     }
@@ -61,7 +63,7 @@ export default Mixin.create({
     document.body.appendChild(fragment);
   },
 
-  _sm_appendBody(clone) {
+  __smAppendBody(clone) {
     this._fragmentBody = clone;
     this._fragmentWrapper.appendChild(clone);
   },
@@ -76,14 +78,15 @@ export default Mixin.create({
   didInsertElement() {
     this.set('parentElementDidInsert', true);
     if (!this.get('parent')) {
-      this._sm_updateFragmentStyles();
+      this.__smUpdateFragmentStyles();
     }
   },
 
   willDestroyElement() {
     this._super(...arguments);
-    var firstNode = this._firstNode;
-    var lastNode = this._lastNode;
+    const firstNode = this._firstNode;
+    const lastNode = this._lastNode;
+
     run.schedule('render', () => {
       this.removeRange(firstNode, lastNode);
     });
@@ -113,7 +116,7 @@ export default Mixin.create({
     }
 
     if (destinationElement === this._fragmentBody) {
-      this._sm_updateFragmentStyles();
+      this.__smUpdateFragmentStyles();
     }
 
     this.didMoveElement();
@@ -127,9 +130,10 @@ export default Mixin.create({
   },
 
   removeRange(firstNode, lastNode) {
-    var node = lastNode;
+    let node = lastNode;
+
     do {
-      var next = node.previousSibling;
+      let next = node.previousSibling;
       if (node.parentNode) {
         node.parentNode.removeChild(node);
         if (node === firstNode) {
@@ -142,93 +146,7 @@ export default Mixin.create({
 
   init() {
     this._super(...arguments);
-    this._sm_setupFragment();
+    this.__smSetupFragment();
   }
 
 });
-
-function dimFromStr(str) {
-  return str ? parseFloat(str) : 0;
-}
-
-function getWidth(dims, withMargins) {
-  let width;
-  switch (dims.boxSizing) {
-  case 'border-box':
-    width = dims.width +
-      dims.borderLeftWidth + dims.borderRightWidth +
-      dims.paddingLeft + dims.paddingRight;
-    break;
-  case 'content-box':
-    width = dims.width;
-    break;
-  default:
-    width = dims.width;
-    break;
-  }
-  if (withMargins) {
-    width += dims.marginLeft + dims.marginRight;
-  }
-  return width;
-}
-
-function getHeight(dims, withMargins) {
-  let height;
-  switch (dims.boxSizing) {
-  case 'border-box':
-    height = dims.height +
-      dims.borderTopWidth + dims.borderBottomWidth +
-      dims.paddingTop + dims.paddingBottom;
-    break;
-  case 'content-box':
-    height = dims.height;
-    break;
-  default:
-    height = dims.height;
-    break;
-  }
-  if (withMargins) {
-    height += dims.marginTop + dims.marginBottom;
-  }
-  return height;
-}
-
-function getDimensions(element) {
-  let style = window.getComputedStyle(element, null);
-  let dims = {
-    width: dimFromStr(style.width),
-    height: dimFromStr(style.height),
-    marginLeft: dimFromStr(style.marginLeft),
-    marginRight: dimFromStr(style.marginRight),
-    marginTop: dimFromStr(style.marginTop),
-    marginBottom: dimFromStr(style.marginBottom),
-    paddingLeft: dimFromStr(style.paddingLeft),
-    paddingRight: dimFromStr(style.paddingRight),
-    paddingTop: dimFromStr(style.paddingTop),
-    paddingBottom: dimFromStr(style.paddingBottom),
-    borderLeftWidth: dimFromStr(style.borderLeftWidth),
-    borderRightWidth: dimFromStr(style.borderRightWidth),
-    borderTopWidth: dimFromStr(style.borderTopWidth),
-    borderBottomWidth: dimFromStr(style.borderBottomWidth),
-    boxSizing: style.boxSizing,
-    fontSize: dimFromStr(style.fontSize),
-    lineHeight: dimFromStr(style.lineHeight)
-  };
-  return {
-    style: dims,
-    calc: {
-      width: getWidth(dims),
-      height: getHeight(dims),
-      widthWithMargin: getWidth(dims, true),
-      heightWithMargin: getHeight(dims, true)
-    }
-  };
-}
-
-function applyDimensions(element, dimensions) {
-  for (let i in dimensions.style) {
-    if (dimensions.style.hasOwnProperty(i)) {
-      element.style[i] = i === 'boxSizing' ? dimensions.style[i] : dimensions.style[i] + 'px';
-    }
-  }
-}

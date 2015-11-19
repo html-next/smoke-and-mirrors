@@ -8,7 +8,7 @@ export default class ListSatellite extends Satellite {
   }
 
   heightDidChange(dX) {
-    this.list._adjust(this, { dX: dX, dY: 0 });
+    this.list._adjust(this, { dX, dY: 0 });
   }
 
   next() {

@@ -1,6 +1,6 @@
-var DEFAULT_COUNT = 10;
-var URL_BASE = 'http://lorempixel.com';
-var CATEGORIES = [
+const DEFAULT_COUNT = 10;
+const URL_BASE = 'http://lorempixel.com';
+const CATEGORIES = [
   'abstract',
   'city',
   'people',
@@ -40,7 +40,7 @@ function getDynamicWidth(height, isPortrait) {
 }
 
 function generateImageId(index) {
-  return (new Date()).getTime() + '-' + index;
+  return `${((new Date()).getTime())}-${index}`;
 }
 function getId() {
   return getRandomNumber(0, 10);
@@ -51,26 +51,35 @@ function getCategoryIndex() {
 }
 
 function generateImageSrc(index) {
-  var parts = [];
-  var preview = [];
+  const parts = [];
+  const preview = [];
+
   parts.push(URL_BASE);
   preview.push(URL_BASE);
   if (isGray()) {
     parts.push('g');
     preview.push('g');
   }
-  var width = getWidth();
+
+  const width = getWidth();
+
   parts.push(width);
   parts.push(width);
-  var small = 250;
+
+  const small = 250;
   preview.push(small);
   preview.push(small);
-  var cat = CATEGORIES[getCategoryIndex()];
+
+  const cat = CATEGORIES[getCategoryIndex()];
+
   parts.push(cat);
   preview.push(cat);
-  var id = getId();
+
+  const id = getId();
+
   parts.push(id);
   preview.push(id);
+
   return {
     large: parts.join('/'),
     small: preview.join('/'),
@@ -79,27 +88,37 @@ function generateImageSrc(index) {
 }
 
 function generateDynamicImageSrc(index) {
-  var parts = [];
-  var preview = [];
+  const parts = [];
+  const preview = [];
+
   parts.push(URL_BASE);
   preview.push(URL_BASE);
   if (isGray()) {
     parts.push('g');
     preview.push('g');
   }
-  var height = getDynamicHeight();
-  var isPortrait = booleanToss();
+
+  const height = getDynamicHeight();
+  const isPortrait = booleanToss();
+
   parts.push(height);
   parts.push(getDynamicWidth(height, isPortrait));
-  var small = 100;
+
+  const small = 100;
+
   preview.push(small);
   preview.push(getDynamicWidth(small, isPortrait));
-  var cat = CATEGORIES[getCategoryIndex()];
+
+  const cat = CATEGORIES[getCategoryIndex()];
+
   parts.push(cat);
   preview.push(cat);
-  var id = getId();
+
+  const id = getId();
+
   parts.push(id);
   preview.push(id);
+
   return {
     large: parts.join('/'),
     small: preview.join('/'),
@@ -109,9 +128,9 @@ function generateDynamicImageSrc(index) {
 
 function getImages(count) {
   count = count || DEFAULT_COUNT;
-  var imageUrls = [];
+  const imageUrls = [];
 
-  for (var i = 1; i <= count; i++) {
+  for (let i = 1; i <= count; i++) {
     imageUrls.push(generateImageSrc(i));
   }
 
@@ -120,9 +139,9 @@ function getImages(count) {
 
 function getDynamicImages(count) {
   count = count || DEFAULT_COUNT;
-  var imageUrls = [];
+  const imageUrls = [];
 
-  for (var i = 1; i <= count; i++) {
+  for (let i = 1; i <= count; i++) {
     imageUrls.push(generateDynamicImageSrc(i));
   }
 

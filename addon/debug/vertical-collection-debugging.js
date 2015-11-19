@@ -15,7 +15,7 @@ export default Mixin.create({
     this.toggleProperty('showEdges');
   },
 
-  _sm_scheduleUpdate(source) {
+  __smScheduleUpdate(source) {
     this._super(source);
     this.visualize();
   },

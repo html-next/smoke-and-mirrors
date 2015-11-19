@@ -7,5 +7,5 @@ const {
   } = Ember;
 
 export default Component.extend(PreRenderMixin, {
-  layout: layout
+  layout
 });

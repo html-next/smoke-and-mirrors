@@ -1,12 +1,14 @@
 import Ember from 'ember';
 import layout from './template';
 
-const SafeString = Ember.Handlebars.SafeString;
+const {
+  SafeString
+} = Ember.Handlebars;
 
 const {
   Component,
   computed
-  } = Ember;
+} = Ember;
 
 const base = (255 * 255 * 255);
 
@@ -68,6 +70,7 @@ export default Component.extend({
   attributeBindings: ['style'],
   style: computed('number', function() {
     let num = parseInt(this.get('number'), 10);
+
     if (num < 0) {
       num = 380 + num;
     }
@@ -79,7 +82,7 @@ export default Component.extend({
     };
     return new SafeString(`background: rgb(${c.r},${c.g},${c.b}); color: rgb(${b.r},${b.g},${b.b});`);
   }),
-  layout: layout,
+  layout,
   index: 0,
   number: 0
 });

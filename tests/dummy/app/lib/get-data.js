@@ -1,24 +1,26 @@
-var DEFAULT_ROWS = 20;
+const DEFAULT_ROWS = 20;
+
+// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 
 export default function getData(ROWS) {
 
   ROWS = ROWS || DEFAULT_ROWS;
 
   // generate some dummy data
-  var data = {
+  const data = {
     start_at: new Date().getTime() / 1000,
     databases: []
   };
 
-  for (var i = 1; i <= ROWS; i++) {
+  for (let i = 1; i <= ROWS; i++) {
 
     data.databases.push({
-      id: 'cluster' + i,
+      id: `cluster${i}`,
       queries: []
     });
 
     data.databases.push({
-      id: 'cluster' + i + 'slave',
+      id: `cluster${i}slave`,
       queries: []
     });
 
@@ -26,9 +28,9 @@ export default function getData(ROWS) {
 
   data.databases.forEach(function(info) {
 
-    var r = Math.floor((Math.random() * 10) + 1);
-    for (var i = 0; i < r; i++) {
-      var q = {
+    const r = Math.floor((Math.random() * 10) + 1);
+    for (let i = 0; i < r; i++) {
+      const q = {
         canvas_action: null,
         canvas_context_id: null,
         canvas_controller: null,
