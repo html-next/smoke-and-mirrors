@@ -20,8 +20,8 @@ module('Unit | Model | Geography', {
 
     planetBDiv.style.height = `${RELATIVE_UNIT}px`;
     planetBDiv.style.width = `${RELATIVE_UNIT}px`;
-    planetBDiv.style.top = '0px';
-    planetBDiv.style.left = '0px';
+    planetBDiv.style.top = '0';
+    planetBDiv.style.left = '0';
     planetBDiv.style.position = 'absolute';
     assert.planetBDiv = planetBDiv;
   },
@@ -93,7 +93,7 @@ test('getZones correctly determines the X (horizontal) distance and zone.', (ass
   assert.expect(6);
 
   // test before
-  assert.planetBDiv.style.left = '0px';
+  assert.planetBDiv.style.left = "0";
   assert.planetBDiv.style.top = `${RELATIVE_UNIT}px`;
   document.body.appendChild(assert.planetBDiv);
 
@@ -127,7 +127,7 @@ test('getZones correctly determines the Y (vertical) distance and zone.', (asser
   assert.expect(6);
 
   // test before
-  assert.planetBDiv.style.top = '0px';
+  assert.planetBDiv.style.top = "0";
   assert.planetBDiv.style.left = `${RELATIVE_UNIT}px`;
   document.body.appendChild(assert.planetBDiv);
 
