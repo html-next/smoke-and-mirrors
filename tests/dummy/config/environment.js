@@ -1,7 +1,6 @@
-/* jshint node: true */
-
+/* jshint node:true */
+/* global module */
 module.exports = function(environment) {
-
   var DEBUG = false;
 
   var ENV = {
@@ -12,7 +11,7 @@ module.exports = function(environment) {
     locationType: 'hash',
     EmberENV: {
       FEATURES: {},
-      EXTEND_PROTOTYPES : true
+      EXTEND_PROTOTYPES: true
     },
 
     VERSION: "0.4.4",
@@ -33,7 +32,7 @@ module.exports = function(environment) {
     'media-src': "'self' data: http://lorempixel.com"
   };
 
-  //debugging
+  // debugging
   if (DEBUG) {
     ENV.APP.LOG_LFANIMATION_RESOLUTION = true;
     ENV.APP.debugMode = true;
@@ -69,7 +68,7 @@ module.exports = function(environment) {
   }
 
   if (environment === 'production') {
-    //ENV.baseURL = '/smoke-and-mirrors';
+    // ENV.baseURL = '/smoke-and-mirrors';
   }
 
   return ENV;

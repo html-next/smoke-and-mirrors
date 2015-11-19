@@ -5,7 +5,7 @@ import proxied from '../computed/proxied-array';
 import ListRadar from '../models/list-radar';
 import identity from '../lib/identity';
 
-/**
+/*
  * Investigations: http://jsfiddle.net/sxqnt/73/
  */
 const {
@@ -17,8 +17,8 @@ const {
 
 
 export default Mixin.create({
-  //–––––––––––––– Optional Settings
-  /**!
+  // –––––––––––––– Optional Settings
+  /*
    * A jQuery selector string that will select the element from
    * which to calculate the viewable height and needed offsets.
    *
@@ -31,7 +31,7 @@ export default Mixin.create({
    */
   containerSelector: null,
 
-  /**!
+  /*
    * The name of the view to render either above or below the existing content when
    * more items are being loaded.  For more information about how and when this is
    * used, see the `Actions` section below.
@@ -39,24 +39,24 @@ export default Mixin.create({
    * This feature will be deprecated quickly when named yields become available in
    * Ember.
    */
-  //TODO implement, also can we do named yield's to make this API better?
+  // TODO implement, also can we do named yield's to make this API better?
   loadingComponentClass: null,
 
 
-  /**!
+  /*
    * Used if you want to explicitly set the tagName of collection's items
    */
   itemTagName: '',
   key: '@identity',
 
-  //–––––––––––––– Performance Tuning
+  // –––––––––––––– Performance Tuning
   /**!
    * Time (in ms) to debounce layout recalculations when
    * resizing the window.
    */
   resizeDebounce: 64,
 
-  /**!
+  /*
    * how much extra room to keep visible and invisible on
    * either side of the viewport.
    *
@@ -66,20 +66,20 @@ export default Mixin.create({
    */
   bufferSize: 1,
 
-  /**!
+  /*
    * useContentProxy
    */
   useContentProxy: false,
 
-  //–––––––––––––– Initial State
-  /**!
+  // –––––––––––––– Initial State
+  /*
    *  If set, this will be used to set
    *  the scroll position at which the
    *  component initially renders.
    */
   scrollPosition: 0,
 
-  /**!
+  /*
    * If set, if scrollPosition is empty
    * at initialization, the component will
    * render starting at the bottom.
@@ -87,7 +87,7 @@ export default Mixin.create({
   renderFromLast: false,
   __isInitializingFromLast: false,
 
-  /**!
+  /*
    * If set, all items will initially be revealed
    * so that their dimensions can be correctly
    * determined
@@ -95,7 +95,7 @@ export default Mixin.create({
   renderAllInitially: false,
   _isFirstRender: true,
 
-  /**!
+  /*
    * If set, upon initialization the scroll
    * position will be set such that the item
    * with the provided id is at the top left
@@ -108,8 +108,8 @@ export default Mixin.create({
 
 
 
-  //–––––––––––––– Actions
-  /**!
+  // –––––––––––––– Actions
+  /*
    * Specify an action to fire when the last item is reached.
    *
    * This action will only fire once per unique last item, and
@@ -136,10 +136,10 @@ export default Mixin.create({
    * it's `loadingFailed` property to true.
    *
    */
-  //TODO this feature needs the `Promise` portion done.
+  // TODO this feature needs the `Promise` portion done.
   firstReached: null,
 
-  /**!
+  /*
    * Specify an action to fire when the first item is reached.
    *
    * This action will only fire once per unique first item, and
@@ -166,10 +166,10 @@ export default Mixin.create({
    * it's `loadingFailed` property to true.
    *
    */
-  //TODO this feature needs the `Promise` portion done.
+  // TODO this feature needs the `Promise` portion done.
   lastReached: null,
 
-  /**!
+  /*
    * Specify an action to fire when the first on-screen item
    * changes.
    *
@@ -177,7 +177,7 @@ export default Mixin.create({
    */
   firstVisibleChanged: null,
 
-  /**!
+  /*
    * Specify an action to fire when the last on-screen item
    * changes.
    *
@@ -187,21 +187,21 @@ export default Mixin.create({
 
   _content: null,
 
-  //–––––––––––––– Private Internals
+  // –––––––––––––– Private Internals
   _firstVisibleIndex: 0,
 
-  /**!
+  /*
    * a cached element reference to the container "viewport" element
    * this is known as the "telescope" within the Radar class.
    */
   _container: null,
 
-  /**!
+  /*
    * false until the first full setup has completed
    */
   __isInitialized: false,
 
-  /**!
+  /*
    * Set this to false to prevent rendering entirely.
    * Useful for situations in which rendering is
    * expensive enough that it interferes with a
@@ -228,7 +228,7 @@ export default Mixin.create({
   }),
 
 
-  /**!
+  /*
    * Internal boolean used to track whether the component
    * has been inserted into the DOM and DOM related setup
    * has occurred.
@@ -241,7 +241,7 @@ export default Mixin.create({
 
   __shouldRender: true,
 
-  /**
+  /*
    * forward is true, backwards is false
    */
   _scrollIsForward: 0,
@@ -284,7 +284,7 @@ export default Mixin.create({
   },
 
 
-  //–––––––––––––– Action Helper Functions
+  // –––––––––––––– Action Helper Functions
   canSendActions(name/*, context*/) {
     // don't trigger during a prepend or initial render
     if (this._isFirstRender || this._isPrepending) {
@@ -342,7 +342,7 @@ export default Mixin.create({
     run.schedule('afterRender', this, this.sendAction, name, context);
   },
 
-  /**
+  /*
    Binary search for finding the topmost visible view.
    This is not the first visible item on screen, but the first
    item that will render it's content.
@@ -414,7 +414,7 @@ export default Mixin.create({
   },
 
 
-  /**!
+  /*
    *
    * The big question is can we render from the bottom
    * without the bottom most item being taken off screen?
@@ -435,7 +435,7 @@ export default Mixin.create({
       if (this.get('renderAllInitially')) {
         childComponents.forEach((i) => { i.show(); });
 
-        //set scroll
+        // set scroll
         if (this.get('__isInitializingFromLast')) {
           this._nextMaintenance = run.schedule('afterRender', this, function() {
             let last = this.$().get(0).lastElementChild;
@@ -479,15 +479,15 @@ export default Mixin.create({
         break;
       }
 
-      //above the upper invisible boundary
+      // above the upper invisible boundary
       if (componentBottom < edges.invisibleTop) {
         toCull.push(component);
 
-        //above the upper reveal boundary
+        // above the upper reveal boundary
       } else if (componentBottom < edges.visibleTop) {
         toHide.push(component);
 
-        //above the upper screen boundary
+        // above the upper screen boundary
       } else if (componentBottom < edges.viewportTop) {
         toShow.push(component);
         if (bottomComponentIndex === 0) {
@@ -497,7 +497,7 @@ export default Mixin.create({
           });
         }
 
-        //above the lower screen boundary
+        // above the lower screen boundary
       } else if(componentTop < edges.viewportBottom) {
         toShow.push(component);
         if (bottomComponentIndex === 0) {
@@ -526,7 +526,7 @@ export default Mixin.create({
           index: bottomComponentIndex
         });
 
-        //above the lower reveal boundary
+        // above the lower reveal boundary
       } else if (componentTop < edges.visibleBottom) {
         toShow.push(component);
         if (bottomComponentIndex === lastIndex) {
@@ -536,7 +536,7 @@ export default Mixin.create({
           });
         }
 
-        //above the lower invisible boundary
+        // above the lower invisible boundary
       } else { // (componentTop <= edges.invisibleBottom) {
         toHide.push(component);
       }
@@ -548,12 +548,11 @@ export default Mixin.create({
       .concat((childComponents.slice(0, topComponentIndex)))
       .concat(childComponents.slice(bottomComponentIndex));
 
-    //this._nextTeardown = run.throttle(this, this._removeComponents, toCull, toHide, 64, false);
     toCull.forEach((i) => { i.cull(); });
     toHide.forEach((i) => { i.hide(); });
     toShow.forEach((i) => { i.show(); });
 
-    //set scroll
+    // set scroll
     if (this.get('__isInitializingFromLast')) {
      this._nextMaintenance = run.schedule('afterRender', this, function() {
         let last = this.$().get(0).lastElementChild;
@@ -593,7 +592,7 @@ export default Mixin.create({
   },
 
 
-  //–––––––––––––– Setup/Teardown
+  // –––––––––––––– Setup/Teardown
   setupContainer() {
     let containerSelector = this.get('containerSelector');
 
@@ -672,7 +671,7 @@ export default Mixin.create({
   },
 
 
-  /**!
+  /*
    * Remove the event handlers for this instance
    * and teardown any temporarily cached data.
    *
@@ -690,7 +689,7 @@ export default Mixin.create({
   },
 
   _destroyCollection() {
-    //cleanup scroll
+    // cleanup scroll
     if (this.radar) {
       this.radar.destroy();
       this.radar.didResizeSatellites = null;
@@ -704,7 +703,7 @@ export default Mixin.create({
     this._container = null;
     this._sm_actionCache = null;
 
-    //clean up scheduled tasks
+    // clean up scheduled tasks
     run.cancel(this._nextUpdate);
     run.cancel(this._nextTeardown);
     run.cancel(this._nextMaintenance);
@@ -763,7 +762,7 @@ export default Mixin.create({
     return parseFloat(defaultHeight) * parseFloat(fontSize);
   },
 
-  /**!
+  /*
    * Calculates pixel boundaries between visible, invisible,
    * and culled content based on the "viewport" height,
    * and the bufferSize.
@@ -794,7 +793,7 @@ export default Mixin.create({
     };
   }),
 
-  /**!
+  /*
    * Initialize
    */
   _prepareComponent() {
@@ -824,7 +823,7 @@ export default Mixin.create({
 
   _reflectContentChanges() {
     let content = this.get('_content');
-    content.contentArrayDidChange = (items, offset /*, removeCount, addCount*/) => {
+    content.contentArrayDidChange = (items, offset /* removeCount, addCount*/) => {
       if (offset <= this.get('_firstVisibleIndex')) {
         this.__prependComponents();
       } else {

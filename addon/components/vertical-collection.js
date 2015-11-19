@@ -7,8 +7,8 @@ const {
   Component
 } = Ember;
 
-let VerticalCollection = Component.extend(OcclusionMixin, {
-  /**!
+const VerticalCollection = Component.extend(OcclusionMixin, {
+  /*
    * Defaults to `vertical-collection`.
    *
    * If itemTagName is blank or null, the `vertical-collection` will [tag match](../addon/utils/get-tag-descendant.js)
@@ -17,9 +17,9 @@ let VerticalCollection = Component.extend(OcclusionMixin, {
   tagName: 'vertical-collection',
   layout: layout,
 
-  //–––––––––––––– Required Settings
+  // –––––––––––––– Required Settings
 
-  /**!
+  /*
    * This height is used to give the `vertical-item`s height prior to
    * it's content being rendered.
    *
@@ -29,16 +29,16 @@ let VerticalCollection = Component.extend(OcclusionMixin, {
   defaultHeight: 75,
   alwaysUseDefaultHeight: false,
 
-  /**!
+  /*
    * Cached value used once default height is
    * calculated firmly
    */
   _defaultHeight: null,
 
 
-  //–––––––––––––– Optional Settings
+  // –––––––––––––– Optional Settings
 
-  /**!
+  /*
    * Set this if you need to dynamically change the height of the container
    * (useful for viewport resizing on mobile apps when the keyboard is open).
    *

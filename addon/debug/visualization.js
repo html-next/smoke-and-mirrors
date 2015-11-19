@@ -103,11 +103,11 @@ export default class Visualization {
     });
 
     Visualization.applyStyles(this.hiddenAbove, {
-     width: planet.width,
-     top: edges.invisibleTop,
-     left: planet.left,
-     height: edges.visibleTop - edges.invisibleTop
-     });
+      width: planet.width,
+      top: edges.invisibleTop,
+      left: planet.left,
+      height: edges.visibleTop - edges.invisibleTop
+    });
 
     Visualization.applyStyles(this.hiddenBelow, {
       width: planet.width,

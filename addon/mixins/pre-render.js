@@ -19,7 +19,7 @@ export default Mixin.create({
     return renderInParent ? (parent || this.element) : this._fragmentBody;
   }),
 
-  didPreRender(/*dimensions*/) {},
+  didPreRender(/* dimensions */) {},
   didMoveElement() {},
 
   _sm_getComputedStyle() {
@@ -159,17 +159,17 @@ function dimFromStr(str) {
 function getWidth(dims, withMargins) {
   let width;
   switch (dims.boxSizing) {
-    case 'border-box':
-      width = dims.width +
-        dims.borderLeftWidth + dims.borderRightWidth +
-        dims.paddingLeft + dims.paddingRight;
-      break;
-    case 'content-box':
-      width = dims.width;
-      break;
-    default:
-      width = dims.width;
-      break;
+  case 'border-box':
+    width = dims.width +
+      dims.borderLeftWidth + dims.borderRightWidth +
+      dims.paddingLeft + dims.paddingRight;
+    break;
+  case 'content-box':
+    width = dims.width;
+    break;
+  default:
+    width = dims.width;
+    break;
   }
   if (withMargins) {
     width += dims.marginLeft + dims.marginRight;
@@ -180,17 +180,17 @@ function getWidth(dims, withMargins) {
 function getHeight(dims, withMargins) {
   let height;
   switch (dims.boxSizing) {
-    case 'border-box':
-      height = dims.height +
-        dims.borderTopWidth + dims.borderBottomWidth +
-        dims.paddingTop + dims.paddingBottom;
-      break;
-    case 'content-box':
-      height = dims.height;
-      break;
-    default:
-      height = dims.height;
-      break;
+  case 'border-box':
+    height = dims.height +
+      dims.borderTopWidth + dims.borderBottomWidth +
+      dims.paddingTop + dims.paddingBottom;
+    break;
+  case 'content-box':
+    height = dims.height;
+    break;
+  default:
+    height = dims.height;
+    break;
   }
   if (withMargins) {
     height += dims.marginTop + dims.marginBottom;
