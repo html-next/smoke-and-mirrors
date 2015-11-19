@@ -9,7 +9,10 @@
   "scripts": {
     "start": "ember server",
     "build": "ember build",
-    "test": "ember try:testall"
+    "test": "ember try:testall",
+    "lint": "eslint -c .eslintrc app/",
+    "lint-all": "eslint -c .eslintrc app/ tests/",
+    "lint-staged": "git diff --diff-filter=ACMRTUXB --cached --name-only | grep '*.js' | grep -v 'node_modules' | grep -v 'tests' | xargs eslint -c .eslintrc"
   },
   "repository": {
     "type": "git",
@@ -26,6 +29,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "babel-eslint": "^4.1.5",
     "broccoli-asset-rev": "^2.1.2",
     "ember-cli": "1.13.8",
     "ember-cli-app-version": "0.5.0",
@@ -44,11 +48,13 @@
     "ember-export-application-global": "^1.0.3",
     "ember-run-raf": "^1.0.5",
     "ember-try": "0.0.6",
-    "eslint-config-ember": "0.0.5",
+    "eslint": "^1.9.0",
+    "eslint-config-ember": "^0.2.0",
     "grunt": "0.4.5",
     "grunt-bump": "0.0.16",
     "grunt-cli": "0.1.13",
     "jit-grunt": "0.9.0",
+    "js-string-escape": "^1.0.0",
     "time-grunt": "1.0.0"
   },
   "keywords": [
