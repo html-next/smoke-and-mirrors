@@ -1,7 +1,7 @@
 {
   "name": "smoke-and-mirrors",
   "version": "0.4.4",
-  "description": "Performance minded `views`, `mixins`, and `components` to help you deliver your ambitions",
+  "description": "Ambitious infinite-scroll and rendering for ambitious applications.",
   "directories": {
     "doc": "doc",
     "test": "tests"
