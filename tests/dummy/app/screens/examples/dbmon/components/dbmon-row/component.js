@@ -15,12 +15,12 @@ export default Ember.Component.extend({
     let topFiveQueries = queries.slice(0, 5);
 
     while (topFiveQueries.length < 5) {
-      topFiveQueries.push({ query: "" });
+      topFiveQueries.push({ query: '' });
     }
 
     return topFiveQueries.map(function(query, index) {
       return {
-        key: index+'',
+        key: index + '',
         query: query.query,
         elapsed: query.elapsed ? formatElapsed(query.elapsed) : '',
         className: elapsedClass(query.elapsed)
@@ -31,14 +31,14 @@ export default Ember.Component.extend({
 
   countClassName: computed('queries', function() {
     let queries = this.get('queries');
-    let countClassName = "label";
+    let countClassName = 'label';
 
     if (queries.length >= 20) {
-      countClassName += " label-important";
+      countClassName += ' label-important';
     } else if (queries.length >= 10) {
-      countClassName += " label-warning";
+      countClassName += ' label-warning';
     } else {
-      countClassName += " label-success";
+      countClassName += ' label-success';
     }
 
     return countClassName;
@@ -46,14 +46,13 @@ export default Ember.Component.extend({
 
 });
 
-
 function elapsedClass(elapsed) {
   if (elapsed >= 10.0) {
-    return "elapsed warn_long";
+    return 'elapsed warn_long';
   } else if (elapsed >= 1.0) {
-    return "elapsed warn";
+    return 'elapsed warn';
   } else {
-    return "elapsed short";
+    return 'elapsed short';
   }
 }
 
@@ -70,7 +69,7 @@ function formatElapsed(value) {
     var comps = (value % 60).toFixed(2).split('.');
     var seconds = comps[0].lpad('0', 2);
     var ms = comps[1];
-    str = minutes + ":" + seconds + "." + ms;
+    str = minutes + ':' + seconds + '.' + ms;
   }
   return str;
 }

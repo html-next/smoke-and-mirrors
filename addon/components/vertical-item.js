@@ -97,7 +97,6 @@ export default Component.extend({
     this.set('viewState', toState);
   },
 
-
   /*
    * Destroy the View/Element
    *
@@ -116,7 +115,6 @@ export default Component.extend({
     this.setProperties({ contentCulled: true, contentHidden: false, contentInserted: false });
   },
 
-
   /*
    * Insert the Element into the DOM in a hidden state.
    *
@@ -125,7 +123,6 @@ export default Component.extend({
   _ov_insert() {
     this.setProperties({ contentHidden: true, contentCulled: false, contentInserted: true });
   },
-
 
   /*
    * Reveal the Element
@@ -140,7 +137,6 @@ export default Component.extend({
     }
     this.element.style.visibility = 'visible';
   },
-
 
   _hasRealHeight: false,
   _updateHeight() {

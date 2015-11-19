@@ -1,7 +1,7 @@
-/*global Array, parseFloat, Math */
+/* global Array, parseFloat, Math */
 import Ember from 'ember';
 import getTagDescendant from '../utils/get-tag-descendant';
-import proxied from '../computed/proxied-array';
+import proxied from '../utils/proxied-array';
 import ListRadar from '../models/list-radar';
 import identity from '../lib/identity';
 
@@ -15,6 +15,14 @@ const {
   run
   } = Ember;
 
+function valueForIndex(arr, index) {
+  return arr.objectAt ? arr.objectAt(index) : arr[index];
+}
+
+function getContent(obj, isProxied) {
+  let key = isProxied ? 'content.content' : 'content';
+  return get(obj, key);
+}
 
 export default Mixin.create({
   // –––––––––––––– Optional Settings
@@ -42,7 +50,6 @@ export default Mixin.create({
   // TODO implement, also can we do named yield's to make this API better?
   loadingComponentClass: null,
 
-
   /*
    * Used if you want to explicitly set the tagName of collection's items
    */
@@ -50,7 +57,7 @@ export default Mixin.create({
   key: '@identity',
 
   // –––––––––––––– Performance Tuning
-  /**!
+  /*
    * Time (in ms) to debounce layout recalculations when
    * resizing the window.
    */
@@ -105,8 +112,6 @@ export default Mixin.create({
    * is set to 0.
    */
   idForFirstItem: null,
-
-
 
   // –––––––––––––– Actions
   /*
@@ -212,7 +217,6 @@ export default Mixin.create({
    */
   shouldRender: true,
 
-
   shouldRenderList: computed('shouldRender', '_sm_canRender', function() {
     let shouldRender = this.get('shouldRender');
     let canRender = this.get('_sm_canRender');
@@ -226,7 +230,6 @@ export default Mixin.create({
 
     return doRender;
   }),
-
 
   /*
    * Internal boolean used to track whether the component
@@ -258,22 +261,22 @@ export default Mixin.create({
     let keyPath = this.get('key');
 
     switch (keyPath) {
-      case '@index':
-        // allow 0 index
-        if (!index && index !== 0) {
-          throw "No index was supplied to keyForItem";
-        }
-        key = index;
-        break;
-      case '@identity':
+    case '@index':
+      // allow 0 index
+      if (!index && index !== 0) {
+        throw 'No index was supplied to keyForItem';
+      }
+      key = index;
+      break;
+    case '@identity':
+      key = identity(item);
+      break;
+    default:
+      if (keyPath) {
+        key = get(item, keyPath);
+      } else {
         key = identity(item);
-        break;
-      default:
-        if (keyPath) {
-          key = get(item, keyPath);
-        } else {
-          key = identity(item);
-        }
+      }
     }
 
     if (typeof key === 'number') {
@@ -282,7 +285,6 @@ export default Mixin.create({
 
     return key;
   },
-
 
   // –––––––––––––– Action Helper Functions
   canSendActions(name/*, context*/) {
@@ -357,9 +359,11 @@ export default Mixin.create({
     let minIndex = 0;
     let midIndex;
 
-    if (maxIndex < 0) { return 0; }
+    if (maxIndex < 0) {
+      return 0;
+    }
 
-    while(maxIndex > minIndex){
+    while (maxIndex > minIndex) {
       midIndex = Math.floor((minIndex + maxIndex) / 2);
 
       // in case of not full-window scrolling
@@ -376,7 +380,6 @@ export default Mixin.create({
     return minIndex;
   },
 
-
   children: computed('_children.@each.index', function() {
     let children = this.get('_children');
     let output = new Array(get(children, 'length'));
@@ -387,7 +390,6 @@ export default Mixin.create({
     return output;
   }),
 
-
   register(child) {
     this.get('_children').addObject(child);
     child.radar = this.radar;
@@ -395,7 +397,6 @@ export default Mixin.create({
       this._sm_scheduleUpdate('register');
     }
   },
-
 
   unregister(child) {
     let children = this.get('_children');
@@ -407,12 +408,14 @@ export default Mixin.create({
     }
   },
 
-
   _removeComponents(toCull, toHide) {
-    toCull.forEach((v) => { v.cull(); });
-    toHide.forEach((v) => { v.hide(); });
+    toCull.forEach((v) => {
+      v.cull();
+    });
+    toHide.forEach((v) => {
+      v.hide();
+    });
   },
-
 
   /*
    *
@@ -433,7 +436,9 @@ export default Mixin.create({
 
     if (this._isFirstRender) {
       if (this.get('renderAllInitially')) {
-        childComponents.forEach((i) => { i.show(); });
+        childComponents.forEach((i) => {
+          i.show();
+        });
 
         // set scroll
         if (this.get('__isInitializingFromLast')) {
@@ -498,7 +503,7 @@ export default Mixin.create({
         }
 
         // above the lower screen boundary
-      } else if(componentTop < edges.viewportBottom) {
+      } else if (componentTop < edges.viewportBottom) {
         toShow.push(component);
         if (bottomComponentIndex === 0) {
           this.sendActionOnce('firstReached', {
@@ -548,13 +553,19 @@ export default Mixin.create({
       .concat((childComponents.slice(0, topComponentIndex)))
       .concat(childComponents.slice(bottomComponentIndex));
 
-    toCull.forEach((i) => { i.cull(); });
-    toHide.forEach((i) => { i.hide(); });
-    toShow.forEach((i) => { i.show(); });
+    toCull.forEach((i) => {
+      i.cull();
+    });
+    toHide.forEach((i) => {
+      i.hide();
+    });
+    toShow.forEach((i) => {
+      i.show();
+    });
 
     // set scroll
     if (this.get('__isInitializingFromLast')) {
-     this._nextMaintenance = run.schedule('afterRender', this, function() {
+      this._nextMaintenance = run.schedule('afterRender', this, function() {
         let last = this.$().get(0).lastElementChild;
         this.set('__isInitializingFromLast', false);
         if (last) {
@@ -567,11 +578,10 @@ export default Mixin.create({
       this._isFirstRender = false;
       this.sendActionOnce('didMountCollection', {
         firstVisible: { item: childComponents[topComponentIndex], index: topComponentIndex },
-        lastVisible: { item: childComponents[bottomComponentIndex - 1], index: bottomComponentIndex - 1}
+        lastVisible: { item: childComponents[bottomComponentIndex - 1], index: bottomComponentIndex - 1 }
       });
     }
   },
-
 
   _sm_scheduleUpdate(source) {
     if (this._isPrepending) {
@@ -590,7 +600,6 @@ export default Mixin.create({
       this.notifyPropertyChange('_edges');
     });
   },
-
 
   // –––––––––––––– Setup/Teardown
   setupContainer() {
@@ -619,7 +628,9 @@ export default Mixin.create({
     let resizeDebounce = this.resizeDebounce;
     let container = this._container;
     let onScrollMethod = (dY) => {
-      if (!this.__isInitialized || this._isPrepending) { return; }
+      if (!this.__isInitialized || this._isPrepending) {
+        return;
+      }
       this.set('_scrollIsForward', dY > 0);
       this._sm_scheduleUpdate('scroll');
     };
@@ -670,7 +681,6 @@ export default Mixin.create({
 
   },
 
-
   /*
    * Remove the event handlers for this instance
    * and teardown any temporarily cached data.
@@ -720,7 +730,6 @@ export default Mixin.create({
       });
     }
   },
-
 
   __getEstimatedDefaultHeight: function() {
     var _defaultHeight = this.get('_defaultHeight');
@@ -820,7 +829,6 @@ export default Mixin.create({
     this.radar = new ListRadar({});
   },
 
-
   _reflectContentChanges() {
     let content = this.get('_content');
     content.contentArrayDidChange = (items, offset /* removeCount, addCount*/) => {
@@ -833,7 +841,6 @@ export default Mixin.create({
     };
   },
 
-
   _didReceiveAttrs(attrs) {
     let oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
     let newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
@@ -844,7 +851,6 @@ export default Mixin.create({
       run.scheduleOnce('sync', this.radar, this.radar.updateSkyline);
     }
   },
-
 
   _changeIsPrepend(oldArray, newArray) {
     let lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
@@ -863,9 +869,7 @@ export default Mixin.create({
     return oldInitialKey === newInitialKey;
   },
 
-
   didReceiveAttrs() {},
-
 
   init() {
     this._super(...arguments);
@@ -882,14 +886,3 @@ export default Mixin.create({
     }
   }
 });
-
-
-function valueForIndex(arr, index) {
-  return arr.objectAt ? arr.objectAt(index) : arr[index];
-}
-
-
-function getContent(obj, isProxied) {
-  let key = isProxied? 'content.content' : 'content';
-  return get(obj, key);
-}

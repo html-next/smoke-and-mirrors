@@ -18,7 +18,7 @@ export default Mixin.create({
     case '@index':
       // allow 0 index
       if (!index && index !== 0) {
-        throw Error("No index was supplied to keyForItem");
+        throw Error('No index was supplied to keyForItem');
       }
       key = index;
       break;

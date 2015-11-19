@@ -14,67 +14,66 @@ export default class Visualization {
 
   setupViewport() {
     this.wrapper = document.createElement('div');
-    this.wrapper.className = "sm_visualization-wrapper";
+    this.wrapper.className = 'sm_visualization-wrapper';
 
     this.container = document.createElement('div');
-    this.container.className = "sm_visualization-container";
+    this.container.className = 'sm_visualization-container';
     this.wrapper.appendChild(this.container);
 
     this.skyline = document.createElement('div');
-    this.skyline.className = "sm_visualization-skyline";
+    this.skyline.className = 'sm_visualization-skyline';
     this.container.appendChild(this.skyline);
 
     this.telescope = document.createElement('div');
-    this.telescope.className = "sm_visualization-telescope";
+    this.telescope.className = 'sm_visualization-telescope';
     this.container.appendChild(this.telescope);
 
     this.visAbove = document.createElement('div');
-    this.visAbove.className = "sm_visualization-visible";
+    this.visAbove.className = 'sm_visualization-visible';
     this.container.appendChild(this.visAbove);
 
     this.visBelow = document.createElement('div');
-    this.visBelow.className = "sm_visualization-visible";
+    this.visBelow.className = 'sm_visualization-visible';
     this.container.appendChild(this.visBelow);
 
     this.hiddenAbove = document.createElement('div');
-    this.hiddenAbove.className = "sm_visualization-hidden";
+    this.hiddenAbove.className = 'sm_visualization-hidden';
     this.container.appendChild(this.hiddenAbove);
 
     this.hiddenBelow = document.createElement('div');
-    this.hiddenBelow.className = "sm_visualization-hidden";
+    this.hiddenBelow.className = 'sm_visualization-hidden';
     this.container.appendChild(this.hiddenBelow);
 
     document.body.appendChild(this.wrapper);
   }
 
   applySatelliteStyles(element, geography) {
-    element.style.width = geography.width + "px";
-    element.style.height = geography.height + "px";
-    element.style.top = geography.top + "px";
-    element.style.left = (this.radar.planet.width - this.radar.planet.left - geography.left) + "px";
+    element.style.width = geography.width + 'px';
+    element.style.height = geography.height + 'px';
+    element.style.top = geography.top + 'px';
+    element.style.left = (this.radar.planet.width - this.radar.planet.left - geography.left) + 'px';
   }
 
   applySatelliteMirrorStyles(element, componentElement, compare) {
     let geography = new Geography(componentElement);
-    element.style.width = geography.width + "px";
-    element.style.height = geography.height + "px";
-    element.style.top = geography.top + "px";
-    element.style.left = ((this.radar.planet.width * 2) - this.radar.planet.left - geography.left) + "px";
+    element.style.width = geography.width + 'px';
+    element.style.height = geography.height + 'px';
+    element.style.top = geography.top + 'px';
+    element.style.left = ((this.radar.planet.width * 2) - this.radar.planet.left - geography.left) + 'px';
 
     let errorLevel = false;
     if (Math.abs(geography.top - compare.top) > 35) {
       errorLevel = true;
     }
 
-    element.setAttribute('hasErrors', errorLevel ? "true" : "false");
+    element.setAttribute('hasErrors', errorLevel ? 'true' : 'false');
   }
 
-
   static applyStyles(element, geography) {
-    element.style.width = geography.width + "px";
-    element.style.height = geography.height + "px";
-    element.style.top = geography.top + "px";
-    element.style.left = geography.left + "px";
+    element.style.width = geography.width + 'px';
+    element.style.height = geography.height + 'px';
+    element.style.top = geography.top + 'px';
+    element.style.left = geography.left + 'px';
   }
 
   styleViewport() {
@@ -83,8 +82,8 @@ export default class Visualization {
     let sky = this.radar.sky;
 
     this.wrapper.style.width = (((2 * planet.left) + planet.width) * 0.3) + 'px';
-    this.container.style.width = planet.width + "px";
-    this.container.style.height = planet.height + "px";
+    this.container.style.width = planet.width + 'px';
+    this.container.style.height = planet.height + 'px';
     Visualization.applyStyles(this.telescope, planet);
     Visualization.applyStyles(this.skyline, sky);
 

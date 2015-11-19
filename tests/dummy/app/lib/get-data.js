@@ -13,12 +13,12 @@ export default function getData(ROWS) {
   for (var i = 1; i <= ROWS; i++) {
 
     data.databases.push({
-      id: "cluster" + i,
+      id: 'cluster' + i,
       queries: []
     });
 
     data.databases.push({
-      id: "cluster" + i + "slave",
+      id: 'cluster' + i + 'slave',
       queries: []
     });
 
@@ -36,16 +36,16 @@ export default function getData(ROWS) {
         canvas_job_tag: null,
         canvas_pid: null,
         elapsed: Math.random() * 15,
-        query: "SELECT blah FROM something",
+        query: 'SELECT blah FROM something',
         waiting: Math.random() < 0.5
       };
 
       if (Math.random() < 0.2) {
-        q.query = "<IDLE> in transaction";
+        q.query = '<IDLE> in transaction';
       }
 
       if (Math.random() < 0.1) {
-        q.query = "vacuum";
+        q.query = 'vacuum';
       }
 
       info.queries.push(q);

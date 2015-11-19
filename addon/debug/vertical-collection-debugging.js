@@ -7,18 +7,14 @@ const {
   Mixin
   } = Ember;
 
-
 export default Mixin.create({
   showEdges: false,
   _nextVisualization: null,
 
-  toggleEdgeVisualization () {
+  toggleEdgeVisualization() {
     this.toggleProperty('showEdges');
   },
 
-  /**
-   * Overrider to implement edge updates
-   */
   _sm_scheduleUpdate(source) {
     this._super(source);
     this.visualize();
@@ -40,8 +36,8 @@ export default Mixin.create({
     // segment top break points
     this.radar.planet.setState();
 
-    let bufferSize = this.get('bufferSize');
-    let rect = this.radar.planet;
+    const bufferSize = Number(this.get('bufferSize'));
+    const rect = this.radar.planet;
 
     this.visualize();
 
@@ -50,7 +46,7 @@ export default Mixin.create({
       visibleTop: (-1 * bufferSize * rect.height) + rect.top,
       invisibleTop: (-2 * bufferSize * rect.height) + rect.top,
       viewportBottom: rect.bottom,
-      visibleBottom: (1 * bufferSize * rect.height) + rect.bottom,
+      visibleBottom: (bufferSize * rect.height) + rect.bottom,
       invisibleBottom: (2 * bufferSize * rect.height) + rect.bottom
     };
   }),

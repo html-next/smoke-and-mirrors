@@ -7,7 +7,6 @@ const {
   run
   } = Ember;
 
-
 export default class Radar {
 
   constructor(state) {
@@ -177,7 +176,7 @@ export default class Radar {
     this._shift(dY, dX);
   }
 
-  adjustPosition(dY,dX) {
+  adjustPosition(dY, dX) {
     this.willAdjustPosition(dY, dX);
     this._adjustPosition(dY, dX);
     this.didAdjustPosition(dY, dX);

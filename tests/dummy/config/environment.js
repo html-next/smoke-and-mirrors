@@ -14,7 +14,7 @@ module.exports = function(environment) {
       EXTEND_PROTOTYPES: true
     },
 
-    VERSION: "0.4.4",
+    VERSION: '0.4.4',
 
     APP: {
       // Here you can pass flags/options to your application instance
@@ -56,7 +56,6 @@ module.exports = function(environment) {
     ENV.APP.LOG_VERSION = false;
     ENV.APP.LOG_VIEW_LOOKUPS = false;
   }
-
 
   if (environment === 'development') {}
 

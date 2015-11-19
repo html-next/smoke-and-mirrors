@@ -1,13 +1,16 @@
 import Ember from 'ember';
-import keyForItem from '../utils/key-for-item';
+import keyForItem from './key-for-item';
 
 const {
   computed,
   ArrayProxy,
   ObjectProxy,
   get: get
-  } = Ember;
+} = Ember;
 
+function valueForIndex(arr, index) {
+  return arr.objectAt ? arr.objectAt(index) : arr[index];
+}
 
 function changeIsPrepend(oldArray, newArray, keyPath) {
   let lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
@@ -25,11 +28,6 @@ function changeIsPrepend(oldArray, newArray, keyPath) {
 
   return oldInitialKey === newInitialKey;
 }
-
-function valueForIndex(arr, index) {
-  return arr.objectAt ? arr.objectAt(index): arr[index];
-}
-
 
 export default function proxiedArray(arrayKey, keyPath = '@identity') {
   // create the value cache for the array
@@ -57,7 +55,7 @@ export default function proxiedArray(arrayKey, keyPath = '@identity') {
       newLength = get(inbound, 'length');
       diff = newLength - outbound.get('length');
       for (let i = 0; i < diff; i++) {
-        newObjects.push(ObjectProxy.create({content: inbound[i]}));
+        newObjects.push(ObjectProxy.create({ content: inbound[i] }));
       }
       if (newObjects.length) {
         outbound.replace(0, 0, newObjects);
@@ -70,7 +68,7 @@ export default function proxiedArray(arrayKey, keyPath = '@identity') {
         if (proxiedObject) {
           proxiedObject.set('content', item);
         } else {
-          newObjects.push(ObjectProxy.create({content: item}));
+          newObjects.push(ObjectProxy.create({ content: item }));
         }
       });
 

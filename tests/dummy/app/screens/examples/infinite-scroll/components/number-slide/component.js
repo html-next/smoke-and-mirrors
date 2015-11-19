@@ -12,7 +12,7 @@ const base = (255 * 255 * 255);
 
 function setOrder(number, rgb) {
   let point = base / 6;
-  if ( number <= point ) {
+  if (number <= point) {
     return rgb;
   }
   if (number <= point * 2) {
@@ -52,7 +52,7 @@ function setOrder(number, rgb) {
 
 function numberToRGB(number) {
   let num = number;
-  number+= 385;
+  number += 385;
   let r = number > 255 ? 255 : number;
   number = r === 255 ? number - 255 : 0;
   let g = number > 255 ? 255 : number;

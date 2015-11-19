@@ -7,7 +7,6 @@ const {
   run
   } = Ember;
 
-
 export default Mixin.create({
 
   renderInParent: false,
@@ -26,7 +25,6 @@ export default Mixin.create({
     let bodyStyle = getDimensions(this._fragmentBody);
     this.didPreRender(bodyStyle);
   },
-
 
   _sm_updateFragmentStyles() {
     let parent = this.get('parent') || this.element;
@@ -78,7 +76,7 @@ export default Mixin.create({
   didInsertElement() {
     this.set('parentElementDidInsert', true);
     if (!this.get('parent')) {
-     this._sm_updateFragmentStyles();
+      this._sm_updateFragmentStyles();
     }
   },
 
@@ -122,7 +120,7 @@ export default Mixin.create({
   },
 
   appendRange(destinationElement, firstNode, lastNode) {
-    while(firstNode) {
+    while (firstNode) {
       destinationElement.insertBefore(firstNode, null);
       firstNode = firstNode !== lastNode ? lastNode.parentNode.firstChild : null;
     }
@@ -148,9 +146,6 @@ export default Mixin.create({
   }
 
 });
-
-
-
 
 function dimFromStr(str) {
   return str ? parseFloat(str) : 0;
@@ -225,7 +220,7 @@ function getDimensions(element) {
       width: getWidth(dims),
       height: getHeight(dims),
       widthWithMargin: getWidth(dims, true),
-      heightWithMargin: getHeight(dims, true),
+      heightWithMargin: getHeight(dims, true)
     }
   };
 }

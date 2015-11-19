@@ -24,13 +24,12 @@ function isGray() {
 }
 
 function getRandomNumber(min, max) {
-  return Math.floor( Math.random() * (max + 1 - min) + min );
+  return Math.floor(Math.random() * (max + 1 - min) + min);
 }
 
 function getWidth() {
   return getRandomNumber(1500, 1920);
 }
-
 
 function getDynamicHeight() {
   return getRandomNumber(300, 600);
@@ -131,7 +130,6 @@ function getDynamicImages(count) {
 }
 
 export default getImages;
-
 
 export {
   getImages,
