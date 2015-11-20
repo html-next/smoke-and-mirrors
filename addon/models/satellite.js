@@ -25,8 +25,8 @@ class Satellite {
     let cached = this.geography.getState();
     this.geography.setState();
 
-    let heightChange = cached.height - this.geography.height;
-    let widthChange = cached.width - this.geography.width;
+    let heightChange = this.geography.height - cached.height;
+    let widthChange = this.geography.width - cached.width;
 
     if (heightChange) {
       this.heightDidChange();
