@@ -2,15 +2,15 @@
   "name": "smoke-and-mirrors",
   "dependencies": {
     "animation-frame": "~0.2.4",
-    "ember": "2.1.0",
-    "ember-cli-shims": "~0.0.6",
+    "ember": "2.2.0",
+    "ember-cli-shims": "0.0.6",
     "ember-cli-test-loader": "0.2.1",
-    "ember-load-initializers": "~0.1.7",
-    "ember-qunit": "0.4.15",
-    "ember-qunit-notifications": "0.0.7",
-    "ember-resolver": "~0.1.18",
-    "jquery": "^1.11.1",
-    "loader.js": "ember-cli/loader.js#3.3.0",
+    "ember-load-initializers": "0.1.7",
+    "ember-qunit": "0.4.16",
+    "ember-qunit-notifications": "0.1.0",
+    "ember-resolver": "~0.1.20",
+    "jquery": "^1.11.3",
+    "loader.js": "ember-cli/loader.js#3.4.0",
     "qunit": "~1.20.0"
   },
   "devDependencies": {

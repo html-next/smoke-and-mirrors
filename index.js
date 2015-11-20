@@ -1,10 +1,12 @@
+// jscs: disable
 /* jshint node: true */
+
 'use strict';
 
 module.exports = {
   name: 'smoke-and-mirrors',
 
-  included : function (app) {
+  included: function(app) {
     if (!/production/.test(app.env)) {
       console.info('Smoke-and-mirrors:: Including Vertical-Collection Debug CSS');
       app.import('./vendor/debug.css');
@@ -12,7 +14,7 @@ module.exports = {
   },
 
   isDevelopingAddon: function() {
-    return false;
+    return true;
   }
 
 };
