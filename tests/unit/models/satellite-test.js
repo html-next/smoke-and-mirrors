@@ -11,8 +11,8 @@ module('Unit | Model | Satellite', {
     App.planetADiv.style.width = RELATIVE_UNIT;
     App.planetADiv.style.height = RELATIVE_UNIT;
     App.planetADiv.style.position = "absolute";
-    App.planetADiv.style.top = (RELATIVE_UNIT + 1) + "px";
-    App.planetADiv.style.left = (RELATIVE_UNIT + 1) + "px";
+    App.planetADiv.style.top = `${(RELATIVE_UNIT + 1)}px`;
+    App.planetADiv.style.left = `${(RELATIVE_UNIT + 1)}px`;
     document.body.appendChild(App.planetADiv);
   },
 
@@ -25,14 +25,11 @@ module('Unit | Model | Satellite', {
 
 test('Satellite should build correctly', function(assert) {
 
-  assert.expect(4);
+  assert.expect(3);
 
   let component = { element: App.planetADiv,
                     registerSatellite() {
                       assert.ok(true, 'The Component registerSatellite hook is called');
-                    },
-                    unregisterSatellite() {
-                      assert.ok(true, 'The Component unregisterSatellite hook is called');
                     }
                   };
   let satellite = new Satellite(component);
@@ -53,8 +50,8 @@ test('resize returns adjustment', function(assert) {
 
   assert.equal(noChangeResult, null, 'nothing has changed');
 
-  component.element.style.width = (RELATIVE_UNIT / 2) + "px";
-  component.element.style.height = (RELATIVE_UNIT / 2) + "px";
+  component.element.style.width = `${(RELATIVE_UNIT / 2)}px`;
+  component.element.style.height = `${(RELATIVE_UNIT / 2)}px`;
 
   let result = satellite.resize();
 
@@ -81,7 +78,13 @@ test('shift adjusts the positions', function(assert) {
 
 test('destroy is destructive', function(assert) {
 
-  let component = { element: App.planetADiv };
+  assert.expect(4);
+
+  let component = { element: App.planetADiv,
+                    unregisterSatellite() {
+                      assert.ok(true, 'The Component unregisterSatellite hook is called');
+                    }
+                  };
   let satellite = new Satellite(component);
   satellite.destroy();
 
