@@ -20,9 +20,9 @@ export default class Visualization {
     this.container.className = 'sm_visualization-container';
     this.wrapper.appendChild(this.container);
 
-    this.skyline = document.createElement('div');
-    this.skyline.className = 'sm_visualization-skyline';
-    this.container.appendChild(this.skyline);
+    this.sky = document.createElement('div');
+    this.sky.className = 'sm_visualization-skyline';
+    this.container.appendChild(this.sky);
 
     this.telescope = document.createElement('div');
     this.telescope.className = 'sm_visualization-telescope';
@@ -83,7 +83,7 @@ export default class Visualization {
     const edges = this.component.get('_edges');
     const {
       planet,
-      sky
+      skyline
       } = this.radar;
     const wrapperWidth = (((2 * planet.left) + planet.width) * 0.3);
 
@@ -92,7 +92,7 @@ export default class Visualization {
     this.container.style.height = `${planet.height}px`;
 
     Visualization.applyStyles(this.telescope, planet);
-    Visualization.applyStyles(this.skyline, sky);
+    Visualization.applyStyles(this.sky, skyline);
 
     Visualization.applyStyles(this.visAbove, {
       width: planet.width,

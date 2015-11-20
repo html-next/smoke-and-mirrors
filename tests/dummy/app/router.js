@@ -13,6 +13,7 @@ export default Router.map(function() {
     this.route('flexible-layout');
     this.route('scrollable-body');
     this.route('html-gl');
+    this.route('large-grid');
   });
 
   this.route('mixins', function() {
