@@ -9,11 +9,11 @@ export default Route.extend({
 
   model() {
     let pages = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 50; i++) {
       const data = {
-        numbers: getNumbers(0, 20, `${i}-`),
+        numbers: getNumbers(0, 50, `${i}-`),
         first: 0,
-        last: 20
+        last: 40
       };
       pages.push(data);
     }

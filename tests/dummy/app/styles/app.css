@@ -110,6 +110,10 @@ number-slide .index {
   color: #aaa;
 }
 
+.grid-page {
+  min-height: 500px;
+}
+
 .grid-item number-slide .index {
   font-size: 1rem;
 }

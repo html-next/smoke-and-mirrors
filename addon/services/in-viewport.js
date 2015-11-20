@@ -19,21 +19,6 @@ export default Service.extend({
     this.radar.unregister(component);
   },
 
-  updateZones() {
-    /*
-      This is needed until computed properties will
-      work with ES6 classes.
-     */
-    this.radar.satellites.forEach((satellite) => {
-      const zones = this.radar.getSatelliteZones(satellite);
-      satellite.component.setProperties({
-        zoneX: zones.x,
-        zoneY: zones.y
-      });
-    });
-  },
-
-  updater: null,
   _activateRadar() {
     const resizeDebounce = this.get('resizeDebounce');
     const minimumMovement = this.get('minimumMovement');
@@ -43,17 +28,12 @@ export default Service.extend({
       minimumMovement,
       resizeDebounce
     });
-
-    this.updater = this.updateZones.bind(this);
-
-    this.radar.didShiftSatellites = this.updater;
-    this.radar.didResizeSatellites = this.updater;
   },
 
   willDestroy() {
     this._super(...arguments);
     this.radar.destroy();
-    this.updater = null;
+    this.radar = null;
   },
 
   init() {

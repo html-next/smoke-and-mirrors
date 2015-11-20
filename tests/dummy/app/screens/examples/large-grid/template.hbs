@@ -9,16 +9,26 @@
         </div>
     </div>
     <div class="row">
-        <h3>Demo ({{model.pages.length}} pages of 20 images)</h3>
+        <h3>Demo ({{model.pages.length}} pages of 50 components)</h3>
+      (switching may take a while) <button {{action "toggleStrategy"}}>{{if usePages 'occlude individual items' 'occlude pages of items'}}</button>
+      <hr><br>
       {{!- BEGIN-SNIPPET occludable-area-example }}
         {{#each model.pages as |page|}}
-          {{#occludable-area class="grid-page"}}
+          {{#if usePages}}
+            {{#occludable-area class="grid-page"}}
+              {{#each page.numbers as |item|}}
+                <div class="grid-item">
+                  {{examples/infinite-scroll/components/number-slide number=item.prefixed index=index}}
+                </div>
+              {{/each}}
+            {{/occludable-area}}
+          {{else}}
             {{#each page.numbers as |item|}}
-            <div class="grid-item">
-              {{examples/infinite-scroll/components/number-slide number=item.prefixed index=index}}
-            </div>
+              {{#occludable-area class="grid-item"}}
+                {{examples/infinite-scroll/components/number-slide number=item.prefixed index=index}}
+              {{/occludable-area}}
             {{/each}}
-          {{/occludable-area}}
+          {{/if}}
         {{/each}}
       {{!- END-SNIPPET }}
     </div>

@@ -7,7 +7,8 @@ const {
 
 class Satellite {
 
-  constructor(component) {
+  constructor(component, radar) {
+    this.radar = radar;
     this.component = component;
     this.element = component.element;
     this.geography = new Geography(this.element);
@@ -37,11 +38,20 @@ class Satellite {
     return heightChange || widthChange ? { dX: widthChange, dY: heightChange } : null;
   }
 
-  shift(dY, dX) {
+  _shift(dY, dX) {
     this.geography.left -= dX;
     this.geography.right -= dX;
     this.geography.bottom -= dY;
     this.geography.top -= dY;
+  }
+
+  willShift() {}
+  didShift() {}
+
+  shift(dY, dX) {
+    this.willShift(dY, dX);
+    this._shift(dY, dX);
+    this.didShift(dY, dX);
   }
 
   destroy() {
@@ -53,6 +63,7 @@ class Satellite {
     this.element = null;
     this.geography.destroy();
     this.geography = null;
+    this.radar = null;
   }
 
 }

@@ -86,7 +86,7 @@ export default class Radar {
   }
 
   register(component) {
-    this.satellites.push(new Satellite(component));
+    this.satellites.push(new Satellite(component, this));
   }
 
   unregister(component) {
