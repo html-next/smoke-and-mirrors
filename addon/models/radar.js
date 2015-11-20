@@ -56,14 +56,14 @@ export default class Radar {
   getSatelliteYZone(satellite) {
     const satGeo = satellite.geography;
     let distance = 0;
-    const y_scalar = this.planet.height;
+    const yScalar = this.planet.height;
 
     if (satGeo.bottom > this.planet.top) {
       distance = satGeo.bottom - this.planet.top;
-      return Math.floor(distance / y_scalar);
+      return Math.floor(distance / yScalar);
     } else if (satGeo.top < this.planet.bottom) {
       distance = satGeo.top - this.planet.bottom;
-      return Math.ceil(distance / y_scalar);
+      return Math.ceil(distance / yScalar);
     }
 
     return 0;
@@ -72,14 +72,14 @@ export default class Radar {
   getSatelliteXZone(satellite) {
     const satGeo = satellite.geography;
     let distance = 0;
-    const x_scalar = this.planet.width;
+    const xScalar = this.planet.width;
 
     if (satGeo.right > this.planet.left) {
       distance = satGeo.right - this.planet.left;
-      return Math.floor(distance / x_scalar);
+      return Math.floor(distance / xScalar);
     } else if (satGeo.left < this.planet.right) {
       distance = satGeo.left - this.planet.right;
-      return Math.ceil(distance / x_scalar);
+      return Math.ceil(distance / xScalar);
     }
 
     return 0;

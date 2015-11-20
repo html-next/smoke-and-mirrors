@@ -21,7 +21,7 @@ export default class Visualization {
     this.wrapper.appendChild(this.container);
 
     this.sky = document.createElement('div');
-    this.sky.className = "sm_visualization-skyline";
+    this.sky.className = 'sm_visualization-skyline';
     this.container.appendChild(this.sky);
 
     this.telescope = document.createElement('div');

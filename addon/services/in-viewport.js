@@ -40,8 +40,8 @@ export default Service.extend({
     this.radar = new Radar({
       sky: document.body,
       telescope: window,
-      minimumMovement: minimumMovement,
-      resizeDebounce: resizeDebounce
+      minimumMovement,
+      resizeDebounce
     });
 
     this.updater = this.updateZones.bind(this);

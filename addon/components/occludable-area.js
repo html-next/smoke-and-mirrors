@@ -8,7 +8,7 @@ const {
   } = Ember;
 
 export default Component.extend(ViewportMixin, {
-  layout: layout,
+  layout,
   hasRendered: false,
   isRendered: false,
   occludeAt: 2,
@@ -39,16 +39,14 @@ export default Component.extend(ViewportMixin, {
 
     if (!willRender) {
       if (this.get('isRendered')) {
-        this.element.style.height = this.satellite.geography.height + 'px';
-        this.element.style.width = this.satellite.geography.width + 'px';
+        this.element.style.height = `${this.satellite.geography.height}px`;
+        this.element.style.width = `${this.satellite.geography.width}px`;
         this.set('isRendered', false);
       }
-    } else {
-      if (!this.get('isRendered')) {
-        this.element.style.height = '';
-        this.element.style.width ='';
-        this.set('isRendered', true);
-      }
+    } else if (!this.get('isRendered')) {
+      this.element.style.height = '';
+      this.element.style.width = '';
+      this.set('isRendered', true);
     }
 
     return willRender;

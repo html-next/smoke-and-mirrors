@@ -125,8 +125,8 @@ function generateDynamicImageSrc(index) {
     large: parts.join('/'),
     small: preview.join('/'),
     id: generateImageId(index),
-    width: width,
-    height: height,
+    width,
+    height,
     previewWidth: smallWidth,
     previewHeight: smallHeight
   };
