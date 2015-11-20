@@ -25,7 +25,16 @@ module('Unit | Model | Satellite', {
 
 test('Satellite should build correctly', function(assert) {
 
-  let component = { element: App.planetADiv };
+  assert.expect(4);
+
+  let component = { element: App.planetADiv,
+                    registerSatellite() {
+                      assert.ok(true, 'The Component registerSatellite hook is called');
+                    },
+                    unregisterSatellite() {
+                      assert.ok(true, 'The Component unregisterSatellite hook is called');
+                    }
+                  };
   let satellite = new Satellite(component);
 
   assert.equal(satellite.component, component, 'component set');
