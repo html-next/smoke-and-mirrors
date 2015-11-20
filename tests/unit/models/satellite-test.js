@@ -8,8 +8,8 @@ module('Unit | Model | Satellite', {
 
   beforeEach(assert) {
     App.planetADiv = document.createElement('div');
-    App.planetADiv.style.width = RELATIVE_UNIT;
-    App.planetADiv.style.height = RELATIVE_UNIT;
+    App.planetADiv.style.width = `${RELATIVE_UNIT}px`;
+    App.planetADiv.style.height = `${RELATIVE_UNIT}px`;
     App.planetADiv.style.position = "absolute";
     App.planetADiv.style.top = `${(RELATIVE_UNIT + 1)}px`;
     App.planetADiv.style.left = `${(RELATIVE_UNIT + 1)}px`;
