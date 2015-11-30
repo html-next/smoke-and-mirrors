@@ -62,7 +62,7 @@ test('next and prev work as expected', function(assert) {
 
   App.componentA.next = function() { return App.componentB; };
   App.componentB.prev = function() { return App.componentA; };
-  
+
   let testListSatelliteA = new ListSatellite(App.componentA, [App.componentA, App.componentB]);
   let testListSatelliteB = new ListSatellite(App.componentB, [App.componentA, App.componentB]);
 
@@ -70,5 +70,24 @@ test('next and prev work as expected', function(assert) {
   assert.equal(testListSatelliteB.next(), null, "Nothing is after Component B");
   assert.equal(testListSatelliteA.prev(), null, "Nothing is before Component A");
   assert.equal(testListSatelliteB.prev(), true, "Component A is before Component B");
+
+});
+
+test('destroy works properly', function(assert) {
+
+  assert.expect(6);
+
+  App.componentA.unregisterSatellite = function() {
+    assert.ok(true, 'The Component unregisterSatellite hook is called');
+  }
+  let testListSatellite = new ListSatellite(App.componentA, [App.componentA, App.componentB]);
+
+  testListSatellite.destroy();
+
+  assert.equal(testListSatellite.component, null, "component destroyed" );
+  assert.equal(testListSatellite.satellite, null, "satellite destroyed" );
+  assert.equal(testListSatellite.element, null, "element destroyed" );
+  assert.equal(testListSatellite.geography, null, "geography destroyed" );
+  assert.equal(testListSatellite.list, null, "list destroyed" );
 
 });
