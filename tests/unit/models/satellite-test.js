@@ -27,11 +27,12 @@ test('Satellite should build correctly', function(assert) {
 
   assert.expect(3);
 
-  let component = { element: App.planetADiv,
-                    registerSatellite() {
-                      assert.ok(true, 'The Component registerSatellite hook is called');
-                    }
-                  };
+  let component = {
+    element: App.planetADiv,
+    registerSatellite() {
+      assert.ok(true, 'The Component registerSatellite hook is called');
+    }
+  };
   let satellite = new Satellite(component);
 
   assert.equal(satellite.component, component, 'component set');
@@ -41,10 +42,16 @@ test('Satellite should build correctly', function(assert) {
 
 test('resize returns adjustment', function(assert) {
 
-  assert.expect(3);
+  assert.expect(5);
 
   let component = { element: App.planetADiv };
   let satellite = new Satellite(component);
+  satellite.heightDidChange = function() {
+    assert.ok(true, "heightDidChange hook called");
+  };
+  satellite.widthDidChange = function() {
+    assert.ok(true, "widthDidChange hook called");
+  };
 
   let noChangeResult = satellite.resize();
 
@@ -55,30 +62,51 @@ test('resize returns adjustment', function(assert) {
 
   let result = satellite.resize();
 
-  // Need assertions to test if heightDidChange() and widthDidChange() are called
-
   assert.equal(result.dX, -(RELATIVE_UNIT / 2), 'width is adjusted -50px');
   assert.equal(result.dY, -(RELATIVE_UNIT / 2), 'height is not adjusted');
 
 });
 
-test('shift adjusts the positions', function(assert) {
+test('shift', function(assert) {
 
-  assert.expect(2);
+  assert.expect(3);
 
   let component = { element: App.planetADiv };
   let satellite = new Satellite(component);
 
+  satellite.willShift = function() {
+    assert.ok(true, "willShift hook called");
+  }
+  satellite._shift = function() {
+    assert.ok(true, "_shift hook called");
+  }
+  satellite.didShift = function() {
+    assert.ok(true, "didShift hook called");
+  }
+
   satellite.shift(RELATIVE_UNIT, RELATIVE_UNIT);
 
-  assert.equal(satellite.geography.top, 1, "element is now 1px from top");
-  assert.equal(satellite.geography.left, 1, "element is now 1px from left");
+});
+
+test('_shift', function(assert) {
+
+  assert.expect(4);
+
+  let component = { element: App.planetADiv };
+  let satellite = new Satellite(component);
+
+  satellite._shift(10, 10);
+
+  assert.equal(satellite.geography.left, RELATIVE_UNIT - 9, "left adjusted");
+  assert.equal(satellite.geography.right, RELATIVE_UNIT * 2 - 9, "right adjusted");
+  assert.equal(satellite.geography.bottom, RELATIVE_UNIT * 2 - 9, "bottom adjusted");
+  assert.equal(satellite.geography.top, RELATIVE_UNIT - 9, "top adjusted");
 
 });
 
 test('destroy is destructive', function(assert) {
 
-  assert.expect(4);
+  assert.expect(5);
 
   let component = { element: App.planetADiv,
                     unregisterSatellite() {
@@ -86,6 +114,11 @@ test('destroy is destructive', function(assert) {
                     }
                   };
   let satellite = new Satellite(component);
+
+  satellite.geography.destroy = function() {
+    assert.ok(true, "geography.destroy called");
+  };
+
   satellite.destroy();
 
   assert.notOk(satellite.geography, 'geography destroyed and set to null');

@@ -13,14 +13,18 @@ module('Unit | Model | ListSatellite', {
     App.planetBDiv = document.createElement('div');
     document.body.appendChild(App.planetBDiv);
 
-    App.componentA = {  element: App.planetADiv,
-                        next() {},
-                        prev() {},
-                        satellite: true };
-    App.componentB = {  element: App.planetBDiv,
-                        next() {},
-                        prev() {},
-                        satellite: true };
+    App.componentA = {
+      element: App.planetADiv,
+      next() {},
+      prev() {},
+      satellite: true
+    };
+    App.componentB = {
+      element: App.planetBDiv,
+      next() {},
+      prev() {},
+      satellite: true
+    };
 
   },
 
@@ -75,12 +79,16 @@ test('next and prev work as expected', function(assert) {
 
 test('destroy works properly', function(assert) {
 
-  assert.expect(6);
+  assert.expect(7);
 
   App.componentA.unregisterSatellite = function() {
     assert.ok(true, 'The Component unregisterSatellite hook is called');
   }
   let testListSatellite = new ListSatellite(App.componentA, [App.componentA, App.componentB]);
+
+  testListSatellite.geography.destroy = function() {
+    assert.ok(true, "geography.destroy hook called");
+  };
 
   testListSatellite.destroy();
 
