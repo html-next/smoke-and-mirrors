@@ -53,7 +53,7 @@
     "ember-export-application-global": "^1.0.4",
     "ember-disable-prototype-extensions": "^1.0.0",
     "ember-run-raf": "^1.0.5",
-    "ember-suave": "1.2.2",
+    "ember-suave": "1.2.3",
     "eslint": "^1.9.0",
     "eslint-config-ember": "^0.2.0",
     "ghooks": "^1.0.0",

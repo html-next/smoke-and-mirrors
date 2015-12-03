@@ -48,7 +48,7 @@ module('Unit | Model | Radar', {
 
 });
 
-test('create empty radar', function(assert) {
+test('create empty radar', (assert) => {
 
   assert.expect(13);
 
@@ -69,7 +69,7 @@ test('create empty radar', function(assert) {
   assert.equal(testRadar.resizeDebounce, 64, "resizeDebounce set");
 });
 
-test('should build correctly with a state', function(assert) {
+test('should build correctly with a state', (assert) => {
 
   assert.expect(13);
 
@@ -100,7 +100,7 @@ test('should build correctly with a state', function(assert) {
 
 });
 
-test('Satellite Zones', function(assert) {
+test('Satellite Zones', (assert) => {
 
   assert.expect(6);
 
@@ -119,7 +119,7 @@ test('Satellite Zones', function(assert) {
 
 });
 
-test('register and unregister component', function(assert) {
+test('register and unregister component', (assert) => {
 
   assert.expect(5);
 
@@ -139,7 +139,7 @@ test('register and unregister component', function(assert) {
 
 });
 
-test('isEarthquake', function(assert) {
+test('isEarthquake', (assert) => {
 
   assert.expect(2);
 
@@ -148,7 +148,7 @@ test('isEarthquake', function(assert) {
 
 });
 
-test('_resize', function(assert) {
+test('_resize', (assert) => {
 
   assert.expect(2);
 
@@ -162,7 +162,7 @@ test('_resize', function(assert) {
 
 });
 
-test('resizeSatellites', function(assert) {
+test('resizeSatellites', (assert) => {
 
   assert.expect(3);
 
@@ -180,7 +180,7 @@ test('resizeSatellites', function(assert) {
 
 });
 
-test('updateSkyline', function(assert) {
+test('updateSkyline', (assert) => {
 
   assert.expect(1);
 
@@ -193,7 +193,7 @@ test('updateSkyline', function(assert) {
 
 });
 
-test('shiftSatellites', function(assert) {
+test('shiftSatellites', (assert) => {
 
   assert.expect(3);
 
@@ -211,7 +211,7 @@ test('shiftSatellites', function(assert) {
 
 });
 
-test('_shift', function(assert) {
+test('_shift', (assert) => {
 
   assert.expect(6);
 
@@ -235,7 +235,7 @@ test('_shift', function(assert) {
 
 });
 
-test('silentNight', function(assert) {
+test('silentNight', (assert) => {
 
   assert.expect(7);
 
@@ -255,7 +255,7 @@ test('silentNight', function(assert) {
   assert.equal(App.radar.skyline.bottom, 3 * RELATIVE_UNIT, "skyline bottom correctly set");
 });
 
-test('rebuild', function(assert) {
+test('rebuild', (assert) => {
 
   assert.expect(4);
 
@@ -275,7 +275,7 @@ test('rebuild', function(assert) {
 
 });
 
-test('filterMovement detects it should shift', function(assert) {
+test('filterMovement detects it should shift', (assert) => {
 
   assert.expect(3);
 
@@ -292,7 +292,7 @@ test('filterMovement detects it should shift', function(assert) {
 
 });
 
-test('filterMovement detects it should not shift', function(assert) {
+test('filterMovement detects it should not shift', (assert) => {
 
   assert.expect(2);
 
@@ -309,7 +309,7 @@ test('filterMovement detects it should not shift', function(assert) {
 
 });
 
-test('updateScrollPosition detects it should adjust', function(assert) {
+test('updateScrollPosition detects it should adjust', (assert) => {
 
   assert.expect(3);
 
@@ -325,7 +325,7 @@ test('updateScrollPosition detects it should adjust', function(assert) {
 
 });
 
-test('updateScrollPosition detects it should not adjust', function(assert) {
+test('updateScrollPosition detects it should not adjust', (assert) => {
 
   assert.expect(2);
 
@@ -341,7 +341,7 @@ test('updateScrollPosition detects it should not adjust', function(assert) {
 
 });
 
-test('_adjustPosition', function(assert) {
+test('_adjustPosition', (assert) => {
 
   assert.expect(5);
 
@@ -358,7 +358,7 @@ test('_adjustPosition', function(assert) {
 
 });
 
-test('adjustPosition', function(assert) {
+test('adjustPosition', (assert) => {
 
   assert.expect(3);
 
@@ -376,7 +376,7 @@ test('adjustPosition', function(assert) {
 
 });
 
-test('_teardownHooks', function(assert) {
+test('_teardownHooks', (assert) => {
 
   assert.expect(6);
 
@@ -391,7 +391,7 @@ test('_teardownHooks', function(assert) {
 
 });
 
-test('destroy', function(assert) {
+test('destroy', (assert) => {
 
   assert.expect(12);
 

@@ -36,7 +36,7 @@ module('Unit | Model | ListSatellite', {
 
 });
 
-test('should build correctly', function(assert) {
+test('should build correctly', (assert) => {
 
   assert.expect(4);
 
@@ -49,7 +49,7 @@ test('should build correctly', function(assert) {
 
 });
 
-test('next and prev return null when only one component', function(assert) {
+test('next and prev return null when only one component', (assert) => {
 
   assert.expect(2);
 
@@ -60,7 +60,7 @@ test('next and prev return null when only one component', function(assert) {
 
 });
 
-test('next and prev work as expected', function(assert) {
+test('next and prev work as expected', (assert) => {
 
   assert.expect(4);
 
@@ -77,7 +77,7 @@ test('next and prev work as expected', function(assert) {
 
 });
 
-test('destroy works properly', function(assert) {
+test('destroy works properly', (assert) => {
 
   assert.expect(7);
 
