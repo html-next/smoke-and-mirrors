@@ -66,7 +66,7 @@ function numberToRGB(number) {
 }
 
 export default Component.extend({
-  tagName: 'number-slide',
+  tagName: 'number-slide-horizontal',
   attributeBindings: ['style'],
   style: computed('number', function() {
     let num = parseInt(this.get('number'), 10);

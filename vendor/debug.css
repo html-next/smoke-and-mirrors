@@ -76,3 +76,80 @@
   background: rgba(0, 100, 230, 0.6);
 }
 
+/**!
+  Visualization Classes for debugging the horizontal-collection
+  */
+
+.hor_sm_visualization-wrapper {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  background: rgba(30, 30, 30, 0.95);
+}
+
+.hor_sm_visualization-container {
+  zoom: 10%;
+  left: 0;
+  position: relative;
+}
+
+.hor_sm_visualization-telescope {
+  position: absolute;
+  background: rgba(100, 230, 100, 0.65);
+}
+
+.hor_sm_visualization-skyline {
+  position: absolute;
+  background: rgba(255, 255, 255, .15);
+}
+
+.hor_sm_visualization-visible {
+  position: absolute;
+  background: rgba(100, 230, 100, 0.4);
+}
+
+.hor_sm_visualization-hidden {
+  position: absolute;
+  background: rgba(100, 230, 100, 0.2);
+}
+
+.hor_sm_visualization-satellite {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid #bbb;
+  border-top: 0px;
+  color: #fff;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.hor_sm_visualization-mirror {
+  position: absolute;
+  background: rgba(100, 250, 100, 0.5);
+  box-sizing: border-box;
+  border: 1px solid #bbb;
+  border-top: 0px;
+  color: #fff;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.hor_sm_visualization-mirror[hasErrors=true] {
+  background: rgba(255, 50, 50, 1);
+}
+
+.hor_sm_visualization-satellite[viewState="culled"] {
+  background: rgba(230, 230, 230, 0.6);
+}
+
+.hor_sm_visualization-satellite[viewState="hidden"] {
+  background: rgba(230, 100, 230, 0.6);
+}
+
+.hor_sm_visualization-satellite[viewState="visible"] {
+  background: rgba(0, 100, 230, 0.6);
+}
