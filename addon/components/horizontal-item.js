@@ -166,7 +166,7 @@ export default Component.extend({
     this.element.style.visibility = 'hidden';
   },
 
-  defaultWidth: 75,
+  defaultWidth: 200,
   index: null,
   content: null,
 
@@ -232,12 +232,9 @@ export default Component.extend({
     let tag = this.get('itemTagName');
 
     this.set('tagName', tag);
-    tag = tag.toLowerCase();
 
-    const isTableChild = tag === 'tr' || tag === 'td' || tag === 'th';
-
-    // table children don't respect min-width :'(
-    this.widthProperty = isTableChild || this.alwaysUseDefaultWidth ? 'width' : 'minWidth';
+    this.widthProperty = this.alwaysUseDefaultWidth ? 'width' : 'minWidth';
+    debugger;
     this.register(this);
   }
 

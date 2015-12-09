@@ -1,4 +1,4 @@
-{{#if __smIsLoadingBefore}}
+{{#if __smIsLoadingSpaceBefore}}
   {{component loadingBeforeComponent}}
 {{/if}}
 {{#each _content key='@index' as |item index|}}
@@ -18,6 +18,6 @@
 {{else}}
   {{yield to="inverse"}}
 {{/each}}
-{{#if __smIsLoadingAfter}}
+{{#if __smIsLoadingSpaceAfter}}
   {{component loadingAfterComponent}}
 {{/if}}
