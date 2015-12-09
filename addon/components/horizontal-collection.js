@@ -26,7 +26,7 @@ const HorizontalCollection = Component.extend(OcclusionMixin, {
    * This width is replaced with the actual rendered width once content
    * is rendered for the first time.
    */
-  defaultWidth: 75,
+  defaultWidth: 200,
   alwaysUseDefaultWidth: false,
 
   /*

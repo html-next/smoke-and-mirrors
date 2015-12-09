@@ -634,7 +634,8 @@ export default Mixin.create({
       $container.css({
         '-webkit-overflow-scrolling': 'touch',
         'overflow-scrolling': 'touch',
-        'overflow-x': 'scroll'
+        'overflow-x': 'scroll',
+        'overflow-y': 'hidden'
       });
 
     }
@@ -645,11 +646,11 @@ export default Mixin.create({
 
   setupHandlers() {
     let container = this._container;
-    let onScrollMethod = (dY) => {
+    let onScrollMethod = (dY, dX) => {
       if (!this.__isInitialized || this._isPrepending) {
         return;
       }
-      this.set('_scrollIsForward', dY > 0);
+      this.set('_scrollIsForward', dX > 0);
       this.__smScheduleUpdate('scroll');
     };
 
