@@ -80,6 +80,11 @@ nav a {
   position: relative;
 }
 
+.horizontal .image-slide {
+  margin: 0;
+  display: inline-flex;
+}
+
 number-slide {
   display: -webkit-box;
   display: -moz-box;

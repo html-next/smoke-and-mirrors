@@ -369,7 +369,7 @@ export default Mixin.create({
    @param {Number} invisibleTop The top/left of the viewport to search against
    @returns {Number} the index into childViews of the first view to render
    **/
-  _findFirstRenderedComponent(invisibleTop) {
+  _findFirstRenderedComponent(invisibleLeft) {
     let childComponents = this.get('children');
     let maxIndex = childComponents.length - 1;
     let minIndex = 0;
@@ -386,7 +386,7 @@ export default Mixin.create({
       let component = childComponents[midIndex];
       let componentRight = component.satellite.geography.right;
 
-      if (componentRight > invisibleTop) {
+      if (componentRight > invisibleLeft) {
         maxIndex = midIndex - 1;
       } else {
         minIndex = midIndex + 1;
