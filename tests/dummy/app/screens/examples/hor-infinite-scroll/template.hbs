@@ -1,0 +1,42 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-8">
+            <h3>Demo</h3>
+          {{!- BEGIN-SNIPPET hor-infinite-scroll-example }}
+            <div class="table-wrapper dark">
+              {{#horizontal-collection
+                showEdges=true
+                content=model.numbers
+                defaultWidth=270
+                alwaysUseDefaultWidth=true
+                useContentProxy=false
+                firstReached="loadBefore"
+                lastReached="loadAfter"
+                as |item index|
+              }}
+                  <div class="image-slide">
+                    {{examples/infinite-scroll/components/number-slide number=item.number index=index}}
+                  </div>
+              {{/horizontal-collection}}
+            </div>
+          {{!- END-SNIPPET }}
+        </div>
+        <div class="col-sm-4">
+            <h3>Infinite Scroll</h3>
+            <p>
+                The Vertical Collection can be used to quickly build a robust infinite scroll.
+            </p>
+          <p>
+              Your infinite scroll can be bi-directional, loading new content above or
+              below.
+          </p>
+          <p>
+              Combined with `idForFirstItem`, this makes it very easy to load a user
+              in-media-res: ideal for caching their position in a long feed for when
+              they return.
+          </p>
+            <h4>Code for Demo</h4>
+          {{code-snippet name="hor-infinite-scroll-example.hbs"}}
+        </div>
+    </div>
+</div>
