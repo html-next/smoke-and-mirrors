@@ -49,8 +49,8 @@ const HorizontalCollection = Component.extend(OcclusionMixin, {
 
 });
 
-Ember.runInDebug(() => {
-  HorizontalCollection.reopen(DebugMixin);
-});
+// Ember.runInDebug(() => {
+//   HorizontalCollection.reopen(DebugMixin);
+// });
 
 export default HorizontalCollection;

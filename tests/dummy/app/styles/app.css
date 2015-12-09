@@ -47,6 +47,14 @@ nav a {
   background: #fff;
 }
 
+.table-wrapper.horizontal {
+  height: 290px;
+  max-height: 290px;
+  overflow-y: hidden;
+  overflow-x: scroll;
+  white-space : nowrap;
+}
+
 .table-wrapper.dark, .bg-dark {
   background: #2f3f40;
 }
@@ -65,10 +73,10 @@ nav a {
 }
 
 .image-slide {
-  width: 250px;
+  width: 270px;
   height: 270px;
   margin: 0 auto;
-  padding: 10px 0;
+  padding: 10px 10px;
   position: relative;
 }
 
@@ -90,22 +98,41 @@ number-slide {
   color: #fff;
 }
 
-.grid-item number-slide {
+number-slide-horizontal {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  flex-flow: row;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  width: 250px;
+  height: 250px;
+  background: #1f2f30;
+  border: 1px solid #bbb;
+  box-shadow: 1px 1px 5px 0 #d0d0d0;
+  color: #fff;
+}
+
+.grid-item number-slide, .grid-item number-slide-horizontal {
    width: 100px;
    height: 100px;
    margin: 0 auto;
  }
 
-number-slide .number {
+number-slide .number, number-slide-horizontal .number {
   font-size: 7.5rem;
   font-weight: 900;
 }
 
-.grid-item number-slide .number {
+.grid-item number-slide .number, .grid-item number-slide-hr .number {
   font-size: 2rem;
 }
 
-number-slide .index {
+number-slide .index, number-slide-horizontal .index {
   font-size: 2rem;
   color: #aaa;
 }
@@ -114,7 +141,7 @@ number-slide .index {
   min-height: 500px;
 }
 
-.grid-item number-slide .index {
+.grid-item number-slide .index, .grid-item number-slide-horizontal .index {
   font-size: 1rem;
 }
 
