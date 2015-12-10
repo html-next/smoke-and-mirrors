@@ -3,11 +3,12 @@
         <div class="col-sm-5">
             <h3>Demo</h3>
           {{!- BEGIN-SNIPPET hor-infinite-scroll-example }}
-            <div class="table-wrapper horizontal dark">
-              {{#horizontal-collection
+            <div class="table-wrapper hor dark">
+              {{#sm-collection
                 showEdges=true
                 content=model.numbers
                 defaultWidth=270
+                vertical=false
                 alwaysUseDefaultWidth=true
                 useContentProxy=false
                 firstReached="loadBefore"
@@ -17,7 +18,7 @@
                   <div class="image-slide">
                     {{examples/hor-infinite-scroll/components/number-slide number=item.number index=index}}
                   </div>
-              {{/horizontal-collection}}
+              {{/sm-collection}}
             </div>
           {{!- END-SNIPPET }}
         </div>

@@ -4,20 +4,21 @@
             <h3>Demo</h3>
           {{!- BEGIN-SNIPPET infinite-scroll-example }}
             <div class="table-wrapper dark">
-              {{#vertical-collection
+              {{#sm-collection
                 showEdges=true
                 content=model.numbers
-                defaultHeight=270
-                alwaysUseDefaultHeight=true
+                defaultDim=270
+                alwaysUseDefaultDim=true
                 useContentProxy=false
-                firstReached="loadAbove"
-                lastReached="loadBelow"
+                vertical=true
+                firstReached="loadBefore"
+                lastReached="loadAfter"
                 as |item index|
               }}
                   <div class="image-slide">
                     {{examples/infinite-scroll/components/number-slide number=item.number index=index}}
                   </div>
-              {{/vertical-collection}}
+              {{/sm-collection}}
             </div>
           {{!- END-SNIPPET }}
         </div>

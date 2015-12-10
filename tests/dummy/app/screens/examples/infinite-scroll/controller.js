@@ -11,7 +11,7 @@ export default Controller.extend({
 
   actions: {
 
-    loadAbove() {
+    loadBefore() {
       // console.info('LOAD ABOVE: ' + (new Date()).getTime());
       let first = this.get('model.first');
       let numbers = getNumbers(first - 20, 20);
@@ -21,7 +21,7 @@ export default Controller.extend({
       this.set('model.first', first - 20);
     },
 
-    loadBelow() {
+    loadAfter() {
       // console.info('LOAD BELOW: ' + (new Date()).getTime());
       let last = this.get('model.last');
       let numbers = getNumbers(last, 20);
