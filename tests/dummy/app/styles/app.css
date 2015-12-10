@@ -47,7 +47,7 @@ nav a {
   background: #fff;
 }
 
-.table-wrapper.horizontal {
+.table-wrapper.hor {
   height: 290px;
   max-height: 290px;
   overflow-y: hidden;
@@ -103,7 +103,7 @@ number-slide {
   color: #fff;
 }
 
-number-slide-horizontal {
+.horizontal number-slide {
   display: -webkit-box;
   display: -moz-box;
   display: -ms-flexbox;
@@ -122,22 +122,22 @@ number-slide-horizontal {
   color: #fff;
 }
 
-.grid-item number-slide, .grid-item number-slide-horizontal {
+.grid-item number-slide {
    width: 100px;
    height: 100px;
    margin: 0 auto;
  }
 
-number-slide .number, number-slide-horizontal .number {
+number-slide .number {
   font-size: 7.5rem;
   font-weight: 900;
 }
 
-.grid-item number-slide .number, .grid-item number-slide-hr .number {
+.grid-item number-slide .number {
   font-size: 2rem;
 }
 
-number-slide .index, number-slide-horizontal .index {
+number-slide .index {
   font-size: 2rem;
   color: #aaa;
 }
@@ -146,7 +146,7 @@ number-slide .index, number-slide-horizontal .index {
   min-height: 500px;
 }
 
-.grid-item number-slide .index, .grid-item number-slide-horizontal .index {
+.grid-item number-slide .index {
   font-size: 1rem;
 }
 

@@ -34,6 +34,7 @@ const VerticalCollection = Component.extend(OcclusionMixin, {
    * calculated firmly
    */
   _defaultHeight: null,
+  vertical: true,
 
   // –––––––––––––– Optional Settings
 

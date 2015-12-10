@@ -80,7 +80,7 @@
   Visualization Classes for debugging the horizontal-collection
   */
 
-  .hor_sm_visualization-wrapper {
+  .sm_hor_visualization-wrapper {
     width: 100%;
     position: fixed;
     bottom: 0;
@@ -91,7 +91,7 @@
     background: rgba(30, 30, 30, 0.95);
   }
 
-  .hor_sm_visualization-container {
+  .sm_hor_visualization-container {
     zoom: 10%;
     bottom: 0;
     position: relative;
@@ -117,45 +117,3 @@
     text-align: center;
     font-size: 1.5rem;
   }
-
-  .hor_sm_visualization-container .sm_visualization-skyline {
-
-  }
-
-/*.hor_sm_visualization-wrapper {
-  width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  align-items: top;
-  justify-content: center;
-  background: rgba(30, 30, 30, 0.95);
-}
-
-.hor_sm_visualization-container {
-  zoom: 10%;
-  top: 0;
-  position: relative;
-}
-
-.sm_visualization-satellite.horizontal {
-  position: absolute;
-  box-sizing: border-box;
-  border: 1px solid #bbb;
-  border-left: 0;
-  color: #fff;
-  text-align: center;
-  font-size: 1.5rem;
-}
-
-.sm_visualization-mirror.horizontal {
-  position: absolute;
-  background: rgba(100, 250, 100, 0.5);
-  box-sizing: border-box;
-  border: 1px solid #bbb;
-  border-left: 0;
-  color: #fff;
-  text-align: center;
-  font-size: 1.5rem;
-}*/
