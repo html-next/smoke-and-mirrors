@@ -234,7 +234,6 @@ export default Component.extend({
     this.set('tagName', tag);
 
     this.widthProperty = this.alwaysUseDefaultWidth ? 'width' : 'minWidth';
-    debugger;
     this.register(this);
   }
 
