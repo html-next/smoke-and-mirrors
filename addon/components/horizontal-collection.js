@@ -5,7 +5,7 @@ import DebugMixin from '../debug/horizontal-collection-debugging';
 
 const {
   Component
-} = Ember;
+  } = Ember;
 
 const HorizontalCollection = Component.extend(OcclusionMixin, {
   /*

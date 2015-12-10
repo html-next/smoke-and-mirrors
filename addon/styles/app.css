@@ -2,14 +2,18 @@
 occlusion-collection,
 vertical-collection,
 occlusion-item,
-vertical-item,
+vertical-item {
+  display: block;
+  width: 100%;
+  position: static;
+}
+
 horizontal-item,
 horizontal-occlusion-collection,
 horizontal-occlusion-item {
   display: inline-block;
-  width: 100%;
   position: static;
-  }
+}
 
 vertical-item::after {
   display: block;
@@ -21,7 +25,7 @@ vertical-item::after {
   position: relative;
 }
 
-horizontal-item::after, horizontal-item::before {
+horizontal-item::after {
   display: inline-block;
   content: ' ';
   width: 0;

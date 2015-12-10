@@ -153,15 +153,15 @@ export default class Radar {
   }
 
   silentNight() {
-    const _height = this.sky.height;
-    const _width = this.sky.width;
+    const _height = this.skyline.height;
+    const _width = this.skyline.width;
 
     this.updateSkyline();
 
     const {
       height,
       width
-      } = this.sky;
+    } = this.skyline;
     const dY = height - _height;
     const dX = width - _width;
 
