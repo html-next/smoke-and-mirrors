@@ -239,6 +239,7 @@ export default Component.extend({
 
     // table children don't respect min-height :'(
     this.heightProperty = isTableChild || this.alwaysUseDefaultDim ? 'height' : 'minHeight';
+    this.widthProperty = isTableChild || this.alwaysUseDefaultWidth ? 'width' : 'minWidth';
 
     this.register(this);
   }

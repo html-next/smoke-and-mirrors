@@ -10,7 +10,7 @@ export default function getTagDescendant(tag) {
     return 'vertical-item';
   case 'horizontal-collection':
     return 'horizontal-item';
-  case 'collection':
+  case 'sm-collection':
     return 'collection-item';
   case 'tbody':
   case 'table':
