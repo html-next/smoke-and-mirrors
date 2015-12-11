@@ -1,17 +1,20 @@
 /* includes legacy support for older tagNames */
-occlusion-collection,
+occlusion-collection.vertical,
 sm-collection.vertical,
-occlusion-item,
+.vertical occlusion-item,
 .vertical collection-item {
   display: block;
   width: 100%;
   position: static;
 }
 
+occlusion-collection.horizontal,
 sm-collection.horizontal,
+.horizontal occlusion-item,
 .horizontal collection-item {
   display: inline-block;
-  position: static;
+  position:static;
+  height: 50%;
 }
 
 .vertical collection-item::after {
@@ -21,13 +24,5 @@ sm-collection.horizontal,
   height: 0;
   float: none;
   clear: both;
-  position: relative;
-}
-
-.horizontal collection-item::after {
-  display: inline-block;
-  content: ' ';
-  width: 0;
-  height: 100%;
   position: relative;
 }
