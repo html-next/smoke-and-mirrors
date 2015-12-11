@@ -2,7 +2,7 @@
 occlusion-collection,
 sm-collection.vertical,
 occlusion-item,
-collection-item {
+.vertical collection-item {
   display: block;
   width: 100%;
   position: static;

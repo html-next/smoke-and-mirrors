@@ -14,10 +14,10 @@ export default class Visualization {
 
   setupViewport() {
     this.wrapper = document.createElement('div');
-    this.wrapper.className = this.component.vertical ? 'sm_visualization-wrapper' : 'sm_hor_visualization-wrapper';
+    this.wrapper.className = this.component.vertical ? 'sm_visualization-wrapper vertical' : 'sm_visualization-wrapper horizontal';
 
     this.container = document.createElement('div');
-    this.container.className = this.component.vertical ? 'sm_visualization-container' : 'sm_hor_visualization-wrapper';
+    this.container.className = 'sm_visualization-container';
     this.wrapper.appendChild(this.container);
 
     this.sky = document.createElement('div');
