@@ -87,7 +87,7 @@ export default Mixin.create({
   /*
    * If set, if scrollPosition is empty
    * at initialization, the component will
-   * render starting at the bottom.
+   * render starting at the end.
    */
   renderFromLast: false,
   __isInitializingFromLast: false,
@@ -316,8 +316,9 @@ export default Mixin.create({
   },
 
   __smActionCache: null,
-  __smIsLoadingSpaceBefore: false,
-  __smIsLoadingSpaceAfter: false,
+  __smIsLoadingBefore: false,
+  __smIsLoadingAfter: false,
+
   sendActionOnce(name, context) {
     if (!this.canSendActions(name, context)) {
       return;
@@ -482,11 +483,10 @@ export default Mixin.create({
     if (currentStartBound < currentViewportBound) {
       currentStartBound = currentViewportBound;
     }
-
     let startComponentIndex = this._findFirstRenderedComponent(currentStartBound);
     let endComponentIndex = startComponentIndex;
     let lastIndex = childComponents.length - 1;
-    let topVisibleSpotted = false;
+    let firstVisibleSpotted = false;
     let toCull = [];
     let toHide = [];
     let toShow = [];
@@ -537,8 +537,8 @@ export default Mixin.create({
           });
         }
 
-        if (!topVisibleSpotted) {
-          topVisibleSpotted = true;
+        if (!firstVisibleSpotted) {
+          firstVisibleSpotted = true;
           this.set('_firstVisibleIndex', endComponentIndex);
           this.sendActionOnce('firstVisibleChanged', {
             item: component,
@@ -824,7 +824,7 @@ export default Mixin.create({
       return {};
     }
 
-    // segment top break points
+    // segment start break points
     this.radar.planet.setState();
 
     let bufferSize = this.get('bufferSize');
@@ -840,12 +840,12 @@ export default Mixin.create({
       };
     } else {
       return {
-        viewportLeft: rect.left,
-        visibleLeft: (-1 * bufferSize * rect.width) + rect.left,
-        invisibleLeft: (-2 * bufferSize * rect.width) + rect.left,
-        viewportRight: rect.right,
-        visibleRight: (bufferSize * rect.width) + rect.right,
-        invisibleRight: (2 * bufferSize * rect.width) + rect.right
+        viewportStart: rect.left,
+        visibleStart: (-1 * bufferSize * rect.width) + rect.left,
+        invisibleStart: (-2 * bufferSize * rect.width) + rect.left,
+        viewportEnd: rect.right,
+        visibleEnd: (bufferSize * rect.width) + rect.right,
+        invisibleEnd: (2 * bufferSize * rect.width) + rect.right
       };
     }
   }),
