@@ -2,17 +2,18 @@ export default
   /*!- BEGIN-SNIPPET vertical-collection-defaults-example */
 {
   // basics (item will tagMatch)
-  tagName: 'vertical-collection',
-  itemTagName: 'vertical-item',
+  tagName: 'sm-collection',
+  itemTagName: 'collection-item',
 
   // required
   content: null,
-  defaultHeight: 75, // Integer: attempts to work with em, rem, px
+  defaultDim: 75, // Integer: attempts to work with em, rem, px
+  vertical: true,
 
   // performance
   useContentProxy: false,
   key: '@identity',
-  alwaysUseDefaultHeight: false,
+  alwaysUseDefaultDim: false,
   bufferSize: 1,
   resizeDebounce: 64,
   // exposeAttributeState: false, currently disabled entirely,

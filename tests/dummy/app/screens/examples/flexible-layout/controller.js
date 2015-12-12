@@ -11,14 +11,14 @@ export default Controller.extend({
 
   actions: {
 
-    loadAbove() {
+    loadBefore() {
       let images = getDynamicImages(10);
       let model = this.get('model.images');
       let newModel =  images.concat(model);
       this.set('model.images', newModel);
     },
 
-    loadBelow() {
+    loadAfter() {
       let images =  getDynamicImages(10);
       let model = this.get('model.images');
       let newModel =  model.concat(images);
