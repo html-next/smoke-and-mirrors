@@ -190,7 +190,7 @@ export default Component.extend({
   willInsertElement() {
     this._super();
     const _dim = this.get('_dim');
-    const dimProp = this.vertical ?  this.get('heightProperty') : this.get('widthProperty');
+    const dimProp = this.vertical ? this.get('heightProperty') : this.get('widthProperty');
     let defaultDim = this.get('defaultDim');
 
     if (typeof defaultDim === 'number') {

@@ -50,16 +50,15 @@ export default Mixin.create({
         visibleEnd: (bufferSize * rect.height) + rect.bottom,
         invisibleEnd: (2 * bufferSize * rect.height) + rect.bottom
       };
-    } else {
-      return {
-        viewportStart: rect.left,
-        visibleStart: (-1 * bufferSize * rect.width) + rect.left,
-        invisibleStart: (-2 * bufferSize * rect.width) + rect.left,
-        viewportEnd: rect.right,
-        visibleEnd: (bufferSize * rect.width) + rect.right,
-        invisibleEnd: (2 * bufferSize * rect.width) + rect.right
-      };
     }
+    return {
+      viewportStart: rect.left,
+      visibleStart: (-1 * bufferSize * rect.width) + rect.left,
+      invisibleStart: (-2 * bufferSize * rect.width) + rect.left,
+      viewportEnd: rect.right,
+      visibleEnd: (bufferSize * rect.width) + rect.right,
+      invisibleEnd: (2 * bufferSize * rect.width) + rect.right
+    };
   }),
 
   _removeComponents(toCull, toHide) {
