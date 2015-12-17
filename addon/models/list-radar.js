@@ -1,10 +1,13 @@
 import Radar from './radar';
-import ListSatellite from './list-satellite';
+import VirtualItem from '../models/virtual-item';
 
 export default class ListRadar extends Radar {
 
-  register(component) {
-    this.satellites.push(new ListSatellite(component, this));
+  register(options) {
+    options.radar = this;
+    const satellite = new VirtualItem(options);
+    this.satellites.push(satellite);
+    return satellite;
   }
 
   _resize() {

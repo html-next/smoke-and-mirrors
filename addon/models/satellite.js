@@ -1,20 +1,29 @@
-import Ember from 'ember';
 import Geography from './geography';
-
-const {
-  guidFor
-  } = Ember;
+import VirtualElement from './element';
 
 class Satellite {
 
-  constructor(component, radar) {
+  constructor({ id, radar, element, dimensions:defaultDimensions, scalar }) {
+    this.isVirtual = !!element;
     this.radar = radar;
-    this.component = component;
-    this.element = component.element;
+    this.element = new VirtualElement(defaultDimensions, element);
     this.geography = new Geography(this.element);
-    this.key = guidFor(component);
-    if (component.registerSatellite) {
-      component.registerSatellite(this);
+    this.key = id;
+    this.scalar = scalar;
+  }
+
+  virtualize() {
+    this.isVirtual = true;
+    this.element.element = null;
+    this.geography.element = null;
+  }
+
+  realize(element) {
+    this.element.element = element;
+    this.geography.element = element;
+    if (this.isVirtual) {
+      this.isVirtual = false;
+      this.geography.setState();
     }
   }
 
@@ -55,15 +64,60 @@ class Satellite {
     this.didShift(dY, dX);
   }
 
-  destroy() {
-    if (this.component.unregisterSatellite) {
-      this.component.unregisterSatellite();
+  getZones() {
+    return {
+      y: this.getYZone(),
+      x: this.getXZone()
+    };
+  }
+
+  getYZone() {
+    const satGeo = this.geography;
+    const { planet } = this.radar;
+    let distance = 0;
+    const yScalar = planet.height * this.scalar;
+
+    if (satGeo.bottom > planet.top) {
+      distance = satGeo.bottom - planet.top;
+      return Math.floor(distance / yScalar);
+    } else if (satGeo.top < planet.bottom) {
+      distance = satGeo.top - planet.bottom;
+      return Math.ceil(distance / yScalar);
     }
-    this.component = null;
-    this.satellite = null;
+
+    return 0;
+  }
+
+  getXZone() {
+    const satGeo = this.geography;
+    const { planet } = this.radar;
+    let distance = 0;
+    const xScalar = planet.width * this.scalar;
+
+    if (satGeo.right > planet.left) {
+      distance = satGeo.right - planet.left;
+      return Math.floor(distance / xScalar);
+    } else if (satGeo.left < planet.right) {
+      distance = satGeo.left - planet.right;
+      return Math.ceil(distance / xScalar);
+    }
+
+    return 0;
+  }
+
+  destroy() {
+    // teardown internal objects
+    this.element.destroy();
     this.element = null;
     this.geography.destroy();
     this.geography = null;
+
+    // teardown hooks
+    this.willShift = null;
+    this.didShift = null;
+    this.heightDidChange = null;
+    this.widthDidChange = null;
+
     this.radar = null;
   }
 

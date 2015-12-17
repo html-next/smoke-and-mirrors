@@ -1,7 +1,7 @@
 {
   "name": "smoke-and-mirrors",
   "version": "0.5.3",
-  "description": "Ambitious infinite-scroll and rendering for ambitious applications.",
+  "description": "Ambitious infinite-scroll and svelte rendering for ambitious applications.",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -53,6 +53,7 @@
     "infinite",
     "infinite-scroll",
     "collection",
+    "svelte",
     "grid",
     "list-view",
     "recycling",

@@ -117,7 +117,11 @@ export default class Radar {
   }
 
   register(component) {
-    this.satellites.push(new Satellite(component, this));
+    this.satellites.push(new Satellite({
+      element: component.element,
+      radar: this,
+      id: guidFor(component)
+    }));
   }
 
   unregister(component) {
