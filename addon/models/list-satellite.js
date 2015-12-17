@@ -2,35 +2,31 @@ import Satellite from './satellite';
 
 export default class ListSatellite extends Satellite {
 
-  constructor(component, list) {
-    super(component);
-    this.list = list;
-  }
-
-  heightDidChange(dX) {
-    this.list._adjust(this, { dX, dY: 0 });
+  constructor(options, previousSatellite) {
+    super(options);
+    this._nextSatellite = null;
+    this._prevSatellite = previousSatellite;
+    previousSatellite._nextSatellite = this;
   }
 
   next() {
-    let nextComponent = this.component.next();
-    return nextComponent ? nextComponent.satellite : null;
+    return this._nextSatellite || null;
   }
 
   prev() {
-    let prevComponent = this.component.prev();
-    return prevComponent ? prevComponent.satellite : null;
+    return this._prevSatellite || null;
   }
 
   destroy() {
-    if (this.component.unregisterSatellite) {
-      this.component.unregisterSatellite();
+    super.destroy();
+    if (this._nextSatellite) {
+      this._nextSatellite._prevSatellite = this._prevSatellite;
     }
-    this.component = null;
-    this.satellite = null;
-    this.element = null;
-    this.geography.destroy();
-    this.geography = null;
-    this.list = null;
+    if (this._prevSatellite) {
+      this._prevSatellite._nextSatellite = this._nextSatellite;
+    }
+    this._nextSatellite = null;
+    this._prevSatellite = null;
   }
 
 }
