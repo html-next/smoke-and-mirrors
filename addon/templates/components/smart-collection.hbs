@@ -1,0 +1,15 @@
+{{#if __smIsLoadingAbove~}}
+  {{component loadingAboveComponent}}
+{{~/if}}
+<div style="width: 100%; height: {{__smSpacerAboveHeight}}px;"></div>
+{{#each itemsRendered key='@identity' as |item index|~}}
+  {{~#if shouldRender~}}
+    {{~yield item index~}}
+  {{~/if~}}
+{{else}}
+  {{yield to="inverse"}}
+{{/each}}
+<div style="width: 100%; height: {{__smSpacerBelowHeight}}px;"></div>
+{{#if __smIsLoadingBelow}}
+  {{component loadingBelowComponent}}
+{{/if}}
