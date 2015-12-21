@@ -10,6 +10,10 @@ const {
   get
   } = Ember;
 
+const {
+  SafeString
+  } = Ember.Handlebars;
+
 const Collection = Component.extend({
 
   layout,
@@ -19,6 +23,76 @@ const Collection = Component.extend({
   _virtualItemCache: null,
   _virtualItemArray: null,
   _activeKeysCache: null,
+
+  _spacerAbove: null,
+  _spacerAboveStyle: computed('spacerAbove.width', 'spacerAbove.height', function() {
+    let dim = this.get('spacerAbove');
+    return new SafeString(`width: ${dim.width}; height: ${dim.height};`);
+  }),
+  spacerAbove: computed({
+    get() {
+      if (!this._spacerAbove) {
+        this._spacerAbove = {
+          height: '0px',
+          width: '100%'
+        };
+      }
+      return this._spacerAbove;
+    },
+    set(v) {
+      if (v) {
+        if (v.hasOwnProperty('height')) {
+          let height = v.height || 0;
+          this._spacerAbove.height = `${height}px`;
+        } else if (v.hasOwnProperty('width')) {
+          this._spacerAbove.width = `${v.width}px` || (v.width === '0px' ? 0 : '100%');
+        } else {
+          let height = v || 0;
+          this._spacerAbove.height = `${height}px`;
+        }
+      } else {
+        this._spacerAbove = {
+          height: '0px',
+          width: '100%'
+        };
+      }
+    }
+  }),
+
+  _spacerBelow: null,
+  _spacerBelowStyle: computed('spacerBelow.width', 'spacerBelow.height', function() {
+    let dim = this.get('spacerBelow');
+    return new SafeString(`width: ${dim.width}; height: ${dim.height};`);
+  }),
+  spacerBelow: computed({
+    get() {
+      if (!this._spacerBelow) {
+        this._spacerBelow = {
+          height: '0px',
+          width: '100%'
+        };
+      }
+      return this._spacerBelow;
+    },
+    set(v) {
+      if (v) {
+        if (v.hasOwnProperty('height')) {
+          let height = v.height || 0;
+          this._spacerBelow.height = `${height}px`;
+        } else if (v.hasOwnProperty('width')) {
+          this._spacerBelow.width = `${v.width}px` || (v.width === '0px' ? 0 : '100%');
+        } else {
+          let height = v || 0;
+          this._spacerBelow.height = `${height}px`;
+        }
+      } else {
+        this._spacerBelow = {
+          height: '0px',
+          width: '100%'
+        };
+      }
+    }
+  }),
 
   createItem(options) {
     options.scalar = this.get('bufferSize');
