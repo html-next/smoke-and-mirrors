@@ -41,13 +41,23 @@ export default Mixin.create({
 
     this.visualize();
 
+    if (this.vertical) {
+      return {
+        viewportStart: rect.top,
+        visibleStart: (-1 * bufferSize * rect.height) + rect.top,
+        invisibleStart: (-2 * bufferSize * rect.height) + rect.top,
+        viewportEnd: rect.bottom,
+        visibleEnd: (bufferSize * rect.height) + rect.bottom,
+        invisibleEnd: (2 * bufferSize * rect.height) + rect.bottom
+      };
+    }
     return {
-      viewportTop: rect.top,
-      visibleTop: (-1 * bufferSize * rect.height) + rect.top,
-      invisibleTop: (-2 * bufferSize * rect.height) + rect.top,
-      viewportBottom: rect.bottom,
-      visibleBottom: (bufferSize * rect.height) + rect.bottom,
-      invisibleBottom: (2 * bufferSize * rect.height) + rect.bottom
+      viewportStart: rect.left,
+      visibleStart: (-1 * bufferSize * rect.width) + rect.left,
+      invisibleStart: (-2 * bufferSize * rect.width) + rect.left,
+      viewportEnd: rect.right,
+      visibleEnd: (bufferSize * rect.width) + rect.right,
+      invisibleEnd: (2 * bufferSize * rect.width) + rect.right
     };
   }),
 
@@ -86,4 +96,3 @@ export default Mixin.create({
   }
 
 });
-

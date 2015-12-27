@@ -47,6 +47,14 @@ nav a {
   background: #fff;
 }
 
+.table-wrapper.hor {
+  height: 290px;
+  max-height: 290px;
+  overflow-y: hidden;
+  overflow-x: scroll;
+  white-space : nowrap;
+}
+
 .table-wrapper.dark, .bg-dark {
   background: #2f3f40;
 }
@@ -65,11 +73,16 @@ nav a {
 }
 
 .image-slide {
-  width: 250px;
+  width: 270px;
   height: 270px;
   margin: 0 auto;
-  padding: 10px 0;
+  padding: 10px;
   position: relative;
+}
+
+.horizontal .image-slide {
+  margin: 0;
+  display: inline-flex;
 }
 
 number-slide {
@@ -78,6 +91,25 @@ number-slide {
   display: -ms-flexbox;
   display: -webkit-flex;
   display: flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  width: 250px;
+  height: 250px;
+  background: #1f2f30;
+  border: 1px solid #bbb;
+  box-shadow: 1px 1px 5px 0 #d0d0d0;
+  color: #fff;
+}
+
+.horizontal number-slide {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  flex-flow: row;
   -webkit-align-items: center;
   align-items: center;
   -webkit-justify-content: center;

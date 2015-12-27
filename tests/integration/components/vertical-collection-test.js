@@ -2,7 +2,7 @@ import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 import Ember from 'ember';
 
-moduleForComponent('vertical-collection', 'Integration | Component | vertical collection', {
+moduleForComponent('sm-collection', 'Integration | Component | sm-collection', {
   integration: true
 });
 
@@ -16,13 +16,13 @@ test('The Collection Renders', function(assert) {
   // Template block usage:
   this.render(hbs`
   <div style="height: 500px; width: 500px;">
-    {{#vertical-collection content=items as |item|}}
+    {{#sm-collection content=items as |item|}}
       {{item.text}}
-    {{/vertical-collection}}
+    {{/sm-collection}}
   </div>
   `);
 
-  assert.equal(this.$().find('vertical-item').length, 1);
+  assert.equal(this.$().find('collection-item').length, 1);
 });
 
 /*

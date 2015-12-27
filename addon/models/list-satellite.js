@@ -11,6 +11,10 @@ export default class ListSatellite extends Satellite {
     this.list._adjust(this, { dX, dY: 0 });
   }
 
+  widthDidChange(dY) {
+    this.list._adjust(this, { dX: 0, dY });
+  }
+
   next() {
     let nextComponent = this.component.next();
     return nextComponent ? nextComponent.satellite : null;

@@ -2,35 +2,34 @@
     <div class="row">
         <div class="col-sm-5">
             <h3>Demo</h3>
-          {{!- BEGIN-SNIPPET infinite-scroll-example }}
-            <div class="table-wrapper dark">
+          {{!- BEGIN-SNIPPET hor-infinite-scroll-example }}
+            <div class="table-wrapper hor dark">
               {{#sm-collection
                 showEdges=true
                 content=model.numbers
                 defaultDim=270
+                vertical=false
                 alwaysUseDefaultDim=true
                 useContentProxy=false
-                vertical=true
                 firstReached="loadBefore"
                 lastReached="loadAfter"
                 as |item index|
               }}
                   <div class="image-slide">
-                    {{examples/infinite-scroll/components/number-slide number=item.number index=index}}
+                    {{examples/hor-infinite-scroll/components/number-slide number=item.number index=index}}
                   </div>
               {{/sm-collection}}
             </div>
           {{!- END-SNIPPET }}
         </div>
         <div class="col-sm-7">
-            <h3>Infinite Scroll (Vertical)</h3>
-            <h5>{{#link-to 'examples.hor-infinite-scroll'}}See Horizontal Scrolling{{/link-to}}</h5>
+            <h3>Infinite Scroll (Horizontal)</h3>
+            <h5>{{#link-to 'examples.infinite-scroll'}}See Vertical Scrolling{{/link-to}}</h5>
             <p>
-                The Vertical Collection can be used to quickly build a robust infinite scroll.
+                The Horizontal Collection can be used to quickly build a robust infinite scroll.
             </p>
           <p>
-              Your infinite scroll can be bi-directional, loading new content above or
-              below.
+              Your infinite scroll can be bi-directional, loading new content to the left or right.
           </p>
           <p>
               Combined with `idForFirstItem`, this makes it very easy to load a user
@@ -38,7 +37,7 @@
               they return.
           </p>
             <h4>Code for Demo</h4>
-          {{code-snippet name="infinite-scroll-example.hbs"}}
+          {{code-snippet name="hor-infinite-scroll-example.hbs"}}
         </div>
     </div>
 </div>

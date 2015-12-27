@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import layout from '../templates/components/vertical-item';
+import layout from '../templates/components/collection-item';
 
 const {
   Component
@@ -20,22 +20,23 @@ const STATE_TRANSITIONS_DOWN = [
 ];
 
 /*
- A vertical-item is one that intelligently removes
- its content when scrolled off the screen vertically.
+ A collection-item is one that intelligently removes
+ its content when scrolled off the screen.
 
- @class vertical-item
+ @class collection-item
  @extends Ember.Component
  @namespace Ember
  **/
 export default Component.extend({
   layout,
-  tagName: 'vertical-item',
-  itemTagName: 'vertical-item',
+  tagName: 'collection-item',
+  itemTagName: 'collection-item',
 
   heightProperty: 'minHeight',
-  alwaysUseDefaultHeight: false,
+  widthProperty: 'minWidth',
+  alwaysUseDefaultDim: false,
 
-  classNames: ['vertical-item'],
+  classNames: ['collection-item'],
 
   next() {
     const element = this.element.nextElementSibling;
@@ -108,10 +109,10 @@ export default Component.extend({
    * @private
    */
   __smTeardown() {
-    const heightProp = this.heightProperty;
+    const dimProp = this.vertical ? this.heightProperty : this.widthProperty;
 
-    if (!this.alwaysUseDefaultHeight && this.element && this.get('contentInserted')) {
-      this.element.style[heightProp] = `${this.satellite.geography.height}px`;
+    if (!this.alwaysUseDefaultDim && this.element && this.get('contentInserted')) {
+      this.element.style[dimProp] = this.vertical ? `${this.satellite.geography.height}px` : `${this.satellite.geography.width}px`;
     }
     this.setProperties({ contentCulled: true, contentHidden: false, contentInserted: false });
   },
@@ -131,28 +132,28 @@ export default Component.extend({
    * @private
    */
   __smReveal() {
-    const heightProp = this.heightProperty;
+    const dimProp = this.vertical ? this.heightProperty : this.widthProperty;
 
     this.setProperties({ contentHidden: false, contentVisible: true, contentInserted: true });
-    if (!this.alwaysUseDefaultHeight) {
-      this.element.style[heightProp] = null;
+    if (!this.alwaysUseDefaultDim) {
+      this.element.style[dimProp] = null;
     }
     this.element.style.visibility = 'visible';
   },
 
-  _hasRealHeight: false,
-  _updateHeight() {
-    const needsRealHeight = !this.get('alwaysUseDefaultHeight');
+  _hasRealDim: false,
+  _updateDim() {
+    const needsRealDim = !this.get('alwaysUseDefaultDim');
 
-    if (needsRealHeight && !this._hasRealHeight) {
+    if (needsRealDim && !this._hasRealDim) {
       this.satellite.resize();
-      this._hasRealHeight = true;
+      this._hasRealDim = true;
     }
   },
 
-  updateHeight() {
-    this._hasRealHeight = false;
-    this._updateHeight();
+  updateDim() {
+    this._hasRealDim = false;
+    this._updateDim();
   },
 
   /*
@@ -161,12 +162,12 @@ export default Component.extend({
    * @private
    */
   __smObscure() {
-    this._updateHeight();
+    this._updateDim();
     this.setProperties({ contentHidden: true, contentVisible: false, contentInserted: true });
     this.element.style.visibility = 'hidden';
   },
 
-  defaultHeight: 75,
+  defaultDim: 75,
   index: null,
   content: null,
 
@@ -179,7 +180,7 @@ export default Component.extend({
     this.satellite = null;
   },
 
-  _height: 0,
+  _dim: 0,
 
   didInsertElement() {
     this._super();
@@ -188,16 +189,16 @@ export default Component.extend({
 
   willInsertElement() {
     this._super();
-    const _height = this.get('_height');
-    const heightProp = this.get('heightProperty');
-    let defaultHeight = this.get('defaultHeight');
+    const _dim = this.get('_dim');
+    const dimProp = this.vertical ? this.get('heightProperty') : this.get('widthProperty');
+    let defaultDim = this.get('defaultDim');
 
-    if (typeof defaultHeight === 'number') {
-      defaultHeight = `${defaultHeight}px`;
+    if (typeof defaultDim === 'number') {
+      defaultDim = `${defaultDim}px`;
     }
 
     this.element.style.visibility = 'hidden';
-    this.element.style[heightProp] = _height ? `${_height}px` : defaultHeight;
+    this.element.style[dimProp] = _dim ? `${_dim}px` : defaultDim;
   },
 
   willDestroyElement() {
@@ -237,7 +238,9 @@ export default Component.extend({
     const isTableChild = tag === 'tr' || tag === 'td' || tag === 'th';
 
     // table children don't respect min-height :'(
-    this.heightProperty = isTableChild || this.alwaysUseDefaultHeight ? 'height' : 'minHeight';
+    this.heightProperty = isTableChild || this.alwaysUseDefaultDim ? 'height' : 'minHeight';
+    this.widthProperty = isTableChild || this.alwaysUseDefaultWidth ? 'width' : 'minWidth';
+
     this.register(this);
   }
 

@@ -1,14 +1,23 @@
 /* includes legacy support for older tagNames */
-occlusion-collection,
-vertical-collection,
-occlusion-item,
-vertical-item {
+occlusion-collection.vertical,
+sm-collection.vertical,
+.vertical occlusion-item,
+.vertical collection-item {
   display: block;
   width: 100%;
   position: static;
-  }
+}
 
-vertical-item::after {
+occlusion-collection.horizontal,
+sm-collection.horizontal,
+.horizontal occlusion-item,
+.horizontal collection-item {
+  display: inline-block;
+  position:static;
+  height: 50%;
+}
+
+.vertical collection-item::after {
   display: block;
   content: ' ';
   width: 100%;
@@ -17,4 +26,3 @@ vertical-item::after {
   clear: both;
   position: relative;
 }
-

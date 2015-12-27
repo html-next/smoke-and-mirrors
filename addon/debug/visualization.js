@@ -14,7 +14,7 @@ export default class Visualization {
 
   setupViewport() {
     this.wrapper = document.createElement('div');
-    this.wrapper.className = 'sm_visualization-wrapper';
+    this.wrapper.className = this.component.vertical ? 'sm_visualization-wrapper vertical' : 'sm_visualization-wrapper horizontal';
 
     this.container = document.createElement('div');
     this.container.className = 'sm_visualization-container';
@@ -28,44 +28,49 @@ export default class Visualization {
     this.telescope.className = 'sm_visualization-telescope';
     this.container.appendChild(this.telescope);
 
-    this.visAbove = document.createElement('div');
-    this.visAbove.className = 'sm_visualization-visible';
-    this.container.appendChild(this.visAbove);
+    this.visBefore = document.createElement('div');
+    this.visBefore.className = 'sm_visualization-visible';
+    this.container.appendChild(this.visBefore);
 
-    this.visBelow = document.createElement('div');
-    this.visBelow.className = 'sm_visualization-visible';
-    this.container.appendChild(this.visBelow);
+    this.visAfter = document.createElement('div');
+    this.visAfter.className = 'sm_visualization-visible';
+    this.container.appendChild(this.visAfter);
 
-    this.hiddenAbove = document.createElement('div');
-    this.hiddenAbove.className = 'sm_visualization-hidden';
-    this.container.appendChild(this.hiddenAbove);
+    this.hiddenBefore = document.createElement('div');
+    this.hiddenBefore.className = 'sm_visualization-hidden';
+    this.container.appendChild(this.hiddenBefore);
 
-    this.hiddenBelow = document.createElement('div');
-    this.hiddenBelow.className = 'sm_visualization-hidden';
-    this.container.appendChild(this.hiddenBelow);
+    this.hiddenAfter = document.createElement('div');
+    this.hiddenAfter.className = 'sm_visualization-hidden';
+    this.container.appendChild(this.hiddenAfter);
 
     document.body.appendChild(this.wrapper);
   }
 
   applySatelliteStyles(element, geography) {
     const left = (this.radar.planet.width - this.radar.planet.left - geography.left);
+    const top = (this.radar.planet.height - this.radar.planet.top);
+
     element.style.width = `${geography.width}px`;
-    element.style.height = `${geography.height}px`;
-    element.style.top = `${geography.top}px`;
-    element.style.left = `${left}px`;
+    element.style.height = this.component.vertical ? `${geography.height}px` : `${this.radar.planet.height}px`;
+    element.style.top = this.component.vertical ? `${geography.top}px` : `${top}px`;
+    element.style.left = this.component.vertical ? `${left}px` : `${geography.left}px`;
   }
 
   applySatelliteMirrorStyles(element, componentElement, compare) {
     const geography = new Geography(componentElement);
     const left = ((this.radar.planet.width * 2) - this.radar.planet.left - geography.left);
+    const top = ((this.radar.planet.height * 2) - this.radar.planet.top);
     let errorLevel = false;
 
     element.style.width = `${geography.width}px`;
-    element.style.height = `${geography.height}px`;
-    element.style.top = `${geography.top}px`;
-    element.style.left = `${left}px`;
+    element.style.height = this.component.vertical ? `${geography.height}px` : `${this.radar.planet.height}px`;
+    element.style.top = this.component.vertical ? `${geography.top}px` : `${top}px`;
+    element.style.left = this.component.vertical ? `${left}px` : `${geography.left}px`;
 
-    if (Math.abs(geography.top - compare.top) > 35) {
+    if (this.component.vertical && Math.abs(geography.top - compare.top) > 35) {
+      errorLevel = true;
+    } else if (!(this.component.vertical) && Math.abs(geography.left - compare.left) > 35) {
       errorLevel = true;
     }
 
@@ -85,42 +90,82 @@ export default class Visualization {
       planet,
       skyline
       } = this.radar;
-    const wrapperWidth = (((2 * planet.left) + planet.width) * 0.3);
 
-    this.wrapper.style.width = `${wrapperWidth}px`;
+    if (this.component.vertical) {
+      const wrapperWidth = (((2 * planet.left) + planet.width) * 0.3);
+      this.wrapper.style.width = `${wrapperWidth}px`;
+    } else {
+      const wrapperHeight = (((2 * planet.top) + planet.height) * 0.3);
+      this.wrapper.style.height = `${wrapperHeight}px`;
+    }
+
     this.container.style.width = `${planet.width}px`;
     this.container.style.height = `${planet.height}px`;
 
     Visualization.applyStyles(this.telescope, planet);
     Visualization.applyStyles(this.sky, skyline);
 
-    Visualization.applyStyles(this.visAbove, {
-      width: planet.width,
-      top: edges.visibleTop,
-      left: planet.left,
-      height: edges.viewportTop - edges.visibleTop
-    });
+    if (this.component.vertical) {
+      Visualization.applyStyles(this.visBefore, {
+        width: planet.width,
+        top: edges.visibleStart,
+        left: planet.left,
+        height: edges.viewportStart - edges.visibleStart
+      });
 
-    Visualization.applyStyles(this.visBelow, {
-      width: planet.width,
-      top: edges.viewportBottom,
-      left: planet.left,
-      height: edges.visibleBottom - edges.viewportBottom
-    });
+      Visualization.applyStyles(this.visAfter, {
+        width: planet.width,
+        top: edges.viewportEnd,
+        left: planet.left,
+        height: edges.visibleEnd - edges.viewportEnd
+      });
 
-    Visualization.applyStyles(this.hiddenAbove, {
-      width: planet.width,
-      top: edges.invisibleTop,
-      left: planet.left,
-      height: edges.visibleTop - edges.invisibleTop
-    });
+      Visualization.applyStyles(this.hiddenBefore, {
+        width: planet.width,
+        top: edges.invisibleStart,
+        left: planet.left,
+        height: edges.visibleStart - edges.invisibleStart
+      });
 
-    Visualization.applyStyles(this.hiddenBelow, {
-      width: planet.width,
-      top: edges.visibleBottom,
-      left: planet.left,
-      height: edges.invisibleBottom - edges.visibleBottom
-    });
+      Visualization.applyStyles(this.hiddenAfter, {
+        width: planet.width,
+        top: edges.visibleEnd,
+        left: planet.left,
+        height: edges.invisibleEnd - edges.visibleEnd
+      });
+    } else {
+      // Override placement of sky
+      this.sky.style.height = `${planet.height}px`;
+      this.sky.style.top = `${planet.top}px`;
+
+      Visualization.applyStyles(this.visBefore, {
+        width: edges.viewportStart - edges.visibleStart,
+        top: planet.top,
+        left: edges.visibleStart,
+        height: planet.height
+      });
+
+      Visualization.applyStyles(this.visAfter, {
+        width: edges.visibleEnd - edges.viewportEnd,
+        top: planet.top,
+        left: edges.viewportEnd,
+        height: planet.height
+      });
+
+      Visualization.applyStyles(this.hiddenBefore, {
+        width: edges.visibleStart - edges.invisibleStart,
+        top: planet.top,
+        left: edges.invisibleStart,
+        height: planet.height
+      });
+
+      Visualization.applyStyles(this.hiddenAfter, {
+        width: edges.invisibleEnd - edges.visibleEnd,
+        top: planet.top,
+        left: edges.visibleEnd,
+        height: planet.height
+      });
+    }
   }
 
   makeSatellite() {
@@ -131,13 +176,13 @@ export default class Visualization {
       satellite = this.cache.pop();
     } else {
       satellite = document.createElement('div');
-      satellite.className = 'sm_visualization-satellite';
+      satellite.className = this.component.vertical ? 'sm_visualization-satellite' : 'sm_visualization-satellite horizontal';
     }
     if (satellite.mirrorSatellite) {
       mirror = satellite.mirrorSatellite;
     } else {
       mirror = document.createElement('div');
-      mirror.className = 'sm_visualization-mirror';
+      mirror.className = this.component.vertical ? 'sm_visualization-mirror' : 'sm_visualization-mirror horizontal';
       mirror.siblingSatellite = satellite;
       satellite.mirrorSatellite = mirror;
     }

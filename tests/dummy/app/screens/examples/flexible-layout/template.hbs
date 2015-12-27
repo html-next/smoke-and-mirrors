@@ -3,19 +3,20 @@
         <div class="col-sm-7">
           {{!- BEGIN-SNIPPET flexible-layout-example }}
             <div class="table-wrapper">
-              {{#vertical-collection
+              {{#sm-collection
                 content=model.images
-                defaultHeight=300
-                alwaysUseDefaultHeight=false
+                defaultDim=300
+                alwaysUseDefaultDim=false
                 visibleBuffer=2
+                vertical=true
                 useContentProxy=false
-                lastReached="loadBelow"
+                lastReached="loadAfter"
                 as |image|
               }}
                   <div class="image-slide flexible">
                     {{async-image src=image.small}}
                   </div>
-              {{/vertical-collection}}
+              {{/sm-collection}}
             </div>
           {{!- END-SNIPPET }}
         </div>

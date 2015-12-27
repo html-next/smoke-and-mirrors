@@ -2,10 +2,11 @@
     <div class="row">
         <div class="col-sm-7">
           {{!- BEGIN-SNIPPET scrollable-body-example }}
-          {{#vertical-collection
+          {{#sm-collection
             content=model.images
-            defaultHeight=270
-            alwaysUseDefaultHeight=true
+            defaultDim=270
+            vertical=true
+            alwaysUseDefaultDim=true
             containerSelector="body"
             lastReached="loadBelow"
             as |image|
@@ -13,7 +14,7 @@
                 <div class="image-slide">
                   {{async-image src=image.small}}
                 </div>
-            {{/vertical-collection}}
+            {{/sm-collection}}
           {{!- END-SNIPPET }}
         </div>
         <div class="col-sm-5">

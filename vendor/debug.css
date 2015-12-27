@@ -1,22 +1,39 @@
 /**!
-  Visualization Classes for debugging the vertical-collection
+  Visualization Classes for debugging the sm-collection
   */
 
 .sm_visualization-wrapper {
-  height: 100%;
   position: fixed;
-  top: 0;
   left: 0;
   display: flex;
-  align-items: center;
-  justify-content: left;
   background: rgba(30, 30, 30, 0.95);
+}
+
+.sm_visualization-wrapper.vertical {
+  height: 100%;
+  top: 0;
+  justify-content: left;
+  align-items: center;
+}
+
+.sm_visualization-wrapper.horizontal {
+  width: 100%;
+  bottom: 0;
+  align-items: top;
+  justify-content: center;
 }
 
 .sm_visualization-container {
   zoom: 10%;
-  left: 0;
   position: relative;
+}
+
+.vertical .sm_visualization-container {
+  left: 0;
+}
+
+.horizontal .sm_visualization-container {
+  bottom: 0;
 }
 
 .sm_visualization-telescope {
@@ -75,4 +92,3 @@
 .sm_visualization-satellite[viewState="visible"] {
   background: rgba(0, 100, 230, 0.6);
 }
-

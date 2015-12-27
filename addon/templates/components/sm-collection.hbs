@@ -5,19 +5,20 @@
   <div style="width: 100%; height: {{__smSpacerBeforeDim}}px;"></div>
 {{/if}}
 {{#each _content key='@index' as |item index|}}
-  {{#vertical-item
+  {{#collection-item
     itemTagName=itemTagName
-    defaultHeight=defaultHeight
-    alwaysUseDefaultHeight=alwaysUseDefaultHeight
+    defaultDim=defaultDim
+    alwaysUseDefaultDim=alwaysUseDefaultDim
     content=item
     index=index
     register=(action register)
     unregister=(action unregister)
+    vertical=vertical
   }}
     {{#if shouldRenderList}}
       {{yield item index}}
     {{/if}}
-  {{/vertical-item}}
+  {{/collection-item}}
 {{else}}
   {{yield to="inverse"}}
 {{/each}}

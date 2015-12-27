@@ -38,7 +38,7 @@ export default Mixin.create({
   containerSelector: null,
 
   /*
-   * The name of the view to render either above or below the existing content when
+   * The name of the view to render either before or after the existing content when
    * more items are being loaded.  For more information about how and when this is
    * used, see the `Actions` section below.
    *
@@ -87,7 +87,7 @@ export default Mixin.create({
   /*
    * If set, if scrollPosition is empty
    * at initialization, the component will
-   * render starting at the bottom.
+   * render starting at the end.
    */
   renderFromLast: false,
   __isInitializingFromLast: false,
@@ -106,8 +106,8 @@ export default Mixin.create({
    * with the provided id is at the top left
    * on screen.
    *
-   * If the item cannot be found, scrollTop
-   * is set to 0.
+   * If the item cannot be found, scrollTop and ScrollLeft
+   * are set to 0.
    */
   idForFirstItem: null,
 
@@ -316,8 +316,9 @@ export default Mixin.create({
   },
 
   __smActionCache: null,
-  __smIsLoadingAbove: false,
-  __smIsLoadingBelow: false,
+  __smIsLoadingBefore: false,
+  __smIsLoadingAfter: false,
+
   sendActionOnce(name, context) {
     if (!this.canSendActions(name, context)) {
       return;
@@ -366,10 +367,10 @@ export default Mixin.create({
    item that will render it's content.
 
    @method _findFirstRenderedComponent
-   @param {Number} invisibleTop The top/left of the viewport to search against
+   @param {Number} invisibleStart The top/left of the viewport to search against
    @returns {Number} the index into childViews of the first view to render
    **/
-  _findFirstRenderedComponent(invisibleTop) {
+  _findFirstRenderedComponent(invisibleStart) {
     let childComponents = this.get('children');
     let maxIndex = childComponents.length - 1;
     let minIndex = 0;
@@ -384,9 +385,9 @@ export default Mixin.create({
 
       // in case of not full-window scrolling
       let component = childComponents[midIndex];
-      let componentBottom = component.satellite.geography.bottom;
+      let componentEnd = this.vertical ? component.satellite.geography.bottom : component.satellite.geography.right;
 
-      if (componentBottom > invisibleTop) {
+      if (componentEnd > invisibleStart) {
         maxIndex = midIndex - 1;
       } else {
         minIndex = midIndex + 1;
@@ -424,8 +425,8 @@ export default Mixin.create({
     }
   },
 
-  __smSpacerAboveHeight: 0,
-  __smSpacerBelowHeight: 0,
+  __smSpacerBeforeDim: 0,
+  __smSpacerAfterDim: 0,
 
   _removeComponents(toCull, toHide) {
     toCull.forEach((v) => {
@@ -438,8 +439,8 @@ export default Mixin.create({
 
   /*
    *
-   * The big question is can we render from the bottom
-   * without the bottom most item being taken off screen?
+   * The big question is can we render from the end
+   * without the end most item being taken off screen?
    *
    * Triggers on scroll.
    *
@@ -476,101 +477,100 @@ export default Mixin.create({
 
     }
 
-    let currentViewportBound = this.radar.skyline.top;
-    let currentUpperBound = edges.invisibleTop;
+    let currentViewportBound = this.vertical ? this.radar.skyline.top : this.radar.skyline.left;
+    let currentStartBound = edges.invisibleStart;
 
-    if (currentUpperBound < currentViewportBound) {
-      currentUpperBound = currentViewportBound;
+    if (currentStartBound < currentViewportBound) {
+      currentStartBound = currentViewportBound;
     }
-
-    let topComponentIndex = this._findFirstRenderedComponent(currentUpperBound);
-    let bottomComponentIndex = topComponentIndex;
+    let startComponentIndex = this._findFirstRenderedComponent(currentStartBound);
+    let endComponentIndex = startComponentIndex;
     let lastIndex = childComponents.length - 1;
-    let topVisibleSpotted = false;
+    let firstVisibleSpotted = false;
     let toCull = [];
     let toHide = [];
     let toShow = [];
 
-    while (bottomComponentIndex <= lastIndex) {
+    while (endComponentIndex <= lastIndex) {
 
-      let component = childComponents[bottomComponentIndex];
+      let component = childComponents[endComponentIndex];
 
-      let componentTop = component.satellite.geography.top;
-      let componentBottom = component.satellite.geography.bottom;
+      let componentStart = this.vertical ? component.satellite.geography.top : component.satellite.geography.left;
+      let componentEnd = this.vertical ? component.satellite.geography.bottom : component.satellite.geography.right;
 
       // end the loop if we've reached the end of components we care about
-      if (componentTop > edges.invisibleBottom) {
+      if (componentStart > edges.invisibleEnd) {
         break;
       }
 
-      // above the upper invisible boundary
-      if (componentBottom < edges.invisibleTop) {
+      // before the start invisible boundary
+      if (componentEnd < edges.invisibleStart) {
         toCull.push(component);
 
-        // above the upper reveal boundary
-      } else if (componentBottom < edges.visibleTop) {
+        // before the start reveal boundary
+      } else if (componentEnd < edges.visibleStart) {
         toHide.push(component);
 
-        // above the upper screen boundary
-      } else if (componentBottom < edges.viewportTop) {
+        // before the start screen boundary
+      } else if (componentEnd < edges.viewportStart) {
         toShow.push(component);
-        if (bottomComponentIndex === 0) {
+        if (endComponentIndex === 0) {
           this.sendActionOnce('firstReached', {
             item: component,
-            index: bottomComponentIndex
+            index: endComponentIndex
           });
         }
 
-        // above the lower screen boundary
-      } else if (componentTop < edges.viewportBottom) {
+        // before the end screen boundary
+      } else if (componentStart < edges.viewportEnd) {
         toShow.push(component);
-        if (bottomComponentIndex === 0) {
+        if (endComponentIndex === 0) {
           this.sendActionOnce('firstReached', {
             item: component,
-            index: bottomComponentIndex
+            index: endComponentIndex
           });
         }
-        if (bottomComponentIndex === lastIndex) {
+        if (endComponentIndex === lastIndex) {
           this.sendActionOnce('lastReached', {
             item: component,
-            index: bottomComponentIndex
+            index: endComponentIndex
           });
         }
 
-        if (!topVisibleSpotted) {
-          topVisibleSpotted = true;
-          this.set('_firstVisibleIndex', bottomComponentIndex);
+        if (!firstVisibleSpotted) {
+          firstVisibleSpotted = true;
+          this.set('_firstVisibleIndex', endComponentIndex);
           this.sendActionOnce('firstVisibleChanged', {
             item: component,
-            index: bottomComponentIndex
+            index: endComponentIndex
           });
         }
         this.sendActionOnce('lastVisibleChanged', {
           item: component,
-          index: bottomComponentIndex
+          index: endComponentIndex
         });
 
-        // above the lower reveal boundary
-      } else if (componentTop < edges.visibleBottom) {
+        // before the end reveal boundary
+      } else if (componentStart < edges.visibleEnd) {
         toShow.push(component);
-        if (bottomComponentIndex === lastIndex) {
+        if (endComponentIndex === lastIndex) {
           this.sendActionOnce('lastReached', {
             item: component,
-            index: bottomComponentIndex
+            index: endComponentIndex
           });
         }
 
-        // above the lower invisible boundary
-      } else { // (componentTop <= edges.invisibleBottom) {
+        // before the end invisible boundary
+      } else { // (componentStart <= edges.invisibleEnd) {
         toHide.push(component);
       }
 
-      bottomComponentIndex++;
+      endComponentIndex++;
     }
 
     toCull = toCull
-      .concat((childComponents.slice(0, topComponentIndex)))
-      .concat(childComponents.slice(bottomComponentIndex));
+      .concat((childComponents.slice(0, startComponentIndex)))
+      .concat(childComponents.slice(endComponentIndex));
 
     toCull.forEach((i) => {
       i.cull();
@@ -596,8 +596,8 @@ export default Mixin.create({
     if (this._isFirstRender) {
       this._isFirstRender = false;
       this.sendActionOnce('didMountCollection', {
-        firstVisible: { item: childComponents[topComponentIndex], index: topComponentIndex },
-        lastVisible: { item: childComponents[bottomComponentIndex - 1], index: bottomComponentIndex - 1 }
+        firstVisible: { item: childComponents[startComponentIndex], index: startComponentIndex },
+        lastVisible: { item: childComponents[endComponentIndex - 1], index: endComponentIndex - 1 }
       });
     }
   },
@@ -631,11 +631,19 @@ export default Mixin.create({
       let $container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
       container = $container.get(0);
 
-      $container.css({
-        '-webkit-overflow-scrolling': 'touch',
-        'overflow-scrolling': 'touch',
-        'overflow-y': 'scroll'
-      });
+      if (this.vertical) {
+        $container.css({
+          '-webkit-overflow-scrolling': 'touch',
+          'overflow-scrolling': 'touch',
+          'overflow-y': 'scroll'
+        });
+      } else {
+        $container.css({
+          '-webkit-overflow-scrolling': 'touch',
+          'overflow-scrolling': 'touch',
+          'overflow-x': 'scroll'
+        });
+      }
 
     }
 
@@ -645,11 +653,12 @@ export default Mixin.create({
 
   setupHandlers() {
     let container = this._container;
-    let onScrollMethod = (dY) => {
+    let onScrollMethod = (dY, dX) => {
       if (!this.__isInitialized || this._isPrepending) {
         return;
       }
-      this.set('_scrollIsForward', dY > 0);
+      let position = this.vertical ? dY : dX;
+      this.set('_scrollIsForward', position > 0);
       this.__smScheduleUpdate('scroll');
     };
 
@@ -672,7 +681,11 @@ export default Mixin.create({
     const idForFirstItem = this.get('idForFirstItem');
 
     if (this.scrollPosition) {
-      this.radar.scrollContainer.scrollTop = this.scrollPosition;
+      if (this.vertical) {
+        this.radar.scrollContainer.scrollTop = this.scrollPosition;
+      } else {
+        this.radar.scrollContainer.scrollLeft = this.scrollPosition;
+      }
     } else if (this.get('renderFromLast')) {
       const last = this.$().get(0).lastElementChild;
 
@@ -689,7 +702,12 @@ export default Mixin.create({
           firstVisibleIndex = i;
         }
       }
-      this.radar.scrollContainer.scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
+
+      if (this.vertical) {
+        this.radar.scrollContainer.scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultDim();
+      } else {
+        this.radar.scrollContainer.scrollLeft = (firstVisibleIndex || 0) * this.__getEstimatedDefaultDim();
+      }
     }
 
     this._nextMaintenance = run.next(this, () => {
@@ -749,50 +767,50 @@ export default Mixin.create({
     }
   },
 
-  __getEstimatedDefaultHeight() {
-    let _defaultHeight = this.get('_defaultHeight');
+  __getEstimatedDefaultDim() {
+    let _defaultDim = this.get('_defaultDim');
 
-    if (_defaultHeight) {
-      return _defaultHeight;
+    if (_defaultDim) {
+      return _defaultDim;
     }
 
-    let defaultHeight = `${this.get('defaultHeight')}`;
+    let defaultDim = `${this.get('defaultDim')}`;
 
-    if (defaultHeight.indexOf('em') === -1) {
-      _defaultHeight = parseInt(defaultHeight, 10);
-      this.set('_defaultHeight', _defaultHeight);
-      return _defaultHeight;
+    if (defaultDim.indexOf('em') === -1) {
+      _defaultDim = parseInt(defaultDim, 10);
+      this.set('_defaultDim', _defaultDim);
+      return _defaultDim;
     }
 
     let element;
 
     // use body if rem
-    if (defaultHeight.indexOf('rem') !== -1) {
+    if (defaultDim.indexOf('rem') !== -1) {
       element = window.document.body;
-      _defaultHeight = 1;
+      _defaultDim = 1;
     } else {
       element = this.get('element');
       if (!element || !element.parentNode) {
         element = window.document.body;
       } else {
-        _defaultHeight = 1;
+        _defaultDim = 1;
       }
     }
 
     const fontSize = window.getComputedStyle(element).getPropertyValue('font-size');
 
-    if (_defaultHeight) {
-      _defaultHeight = parseFloat(defaultHeight) * parseFloat(fontSize);
-      this.set('_defaultHeight', _defaultHeight);
-      return _defaultHeight;
+    if (_defaultDim) {
+      _defaultDim = parseFloat(defaultDim) * parseFloat(fontSize);
+      this.set('_defaultDim', _defaultDim);
+      return _defaultDim;
     }
 
-    return parseFloat(defaultHeight) * parseFloat(fontSize);
+    return parseFloat(defaultDim) * parseFloat(fontSize);
   },
 
   /*
    * Calculates pixel boundaries between visible, invisible,
-   * and culled content based on the "viewport" height,
+   * and culled content based on the "viewport" dimensions,
    * and the bufferSize.
    *
    * computes off of `containerSize` although `containerSize`
@@ -806,19 +824,30 @@ export default Mixin.create({
       return {};
     }
 
-    // segment top break points
+    // segment start break points
     this.radar.planet.setState();
 
     let bufferSize = this.get('bufferSize');
     let rect = this.radar.planet;
-    return {
-      viewportTop: rect.top,
-      visibleTop: (-1 * bufferSize * rect.height) + rect.top,
-      invisibleTop: (-2 * bufferSize * rect.height) + rect.top,
-      viewportBottom: rect.bottom,
-      visibleBottom: (bufferSize * rect.height) + rect.bottom,
-      invisibleBottom: (2 * bufferSize * rect.height) + rect.bottom
-    };
+    if (this.vertical) {
+      return {
+        viewportStart: rect.top,
+        visibleStart: (-1 * bufferSize * rect.height) + rect.top,
+        invisibleStart: (-2 * bufferSize * rect.height) + rect.top,
+        viewportEnd: rect.bottom,
+        visibleEnd: (bufferSize * rect.height) + rect.bottom,
+        invisibleEnd: (2 * bufferSize * rect.height) + rect.bottom
+      };
+    } else {
+      return {
+        viewportStart: rect.left,
+        visibleStart: (-1 * bufferSize * rect.width) + rect.left,
+        invisibleStart: (-2 * bufferSize * rect.width) + rect.left,
+        viewportEnd: rect.right,
+        visibleEnd: (bufferSize * rect.width) + rect.right,
+        invisibleEnd: (2 * bufferSize * rect.width) + rect.right
+      };
+    }
   }),
 
   /*
@@ -836,6 +865,9 @@ export default Mixin.create({
 
     let collectionTagName = (this.get('tagName') || '').toLowerCase();
     let itemTagName = this.get('itemTagName');
+    let direction = this.vertical ? ['vertical'] : ['horizontal'];
+
+    this.set('classNames', direction);
 
     if (!itemTagName) {
       if (collectionTagName === 'occlusion-collection') {
