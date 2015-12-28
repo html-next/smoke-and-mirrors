@@ -207,7 +207,17 @@ const Collection = Component.extend({
 
   idForFirstItem: null,
   setInitialItemState() {
+    if (this.get('items.length')) {
+      const virtualItems = this._virtualItemCache;
+      const keyPath = this.get('key');
+      let idForFirst = this.get('idForFirstItem');
 
+      if (!idForFirst) {
+        idForFirst = get(getIndex(this.get('items'), 0), keyPath);
+      }
+
+      this.radar.scrollTo(virtualItems.get(idForFirst), false);
+    }
   },
 
   itemsRendered: null,
@@ -227,12 +237,23 @@ const Collection = Component.extend({
     this.itemsBelow = Ember.A();
 
     this.radar = new ListRadar();
+    this.radar.didShiftSatellites = () => {
+      this.flushRenderQueue();
+    };
 
     this.updateVirtualItems();
     this.setInitialItemState();
+    window.SmartCollection = this;
   }
 
 });
+
+function getIndex(array, index) {
+  if (!array) {
+    return null;
+  }
+  return array.objectAt ? array.objectAt(index) : array[index];
+}
 
 Collection.reopenClass({
   positionalParams: ['items']
