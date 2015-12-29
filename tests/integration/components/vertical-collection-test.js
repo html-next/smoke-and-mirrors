@@ -1,6 +1,7 @@
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 import Ember from 'ember';
+import wait from 'ember-test-helpers/wait';
 
 moduleForComponent('vertical-collection', 'Integration | Component | vertical collection', {
   integration: true
@@ -22,7 +23,30 @@ test('The Collection Renders', function(assert) {
   </div>
   `);
 
-  assert.equal(this.$().find('vertical-item').length, 1);
+  return wait().then(() => {
+    assert.equal(this.$().find('vertical-item').length, 1);
+  });
+});
+
+test('The Collection Renders when content is empty', function(assert) {
+  assert.expect(1);
+
+  // Set any properties with this.set('myProperty', 'value');
+  // Handle any actions with this.on('myAction', function(val) { ... });
+  this.set('items', Ember.A([]));
+
+  // Template block usage:
+  this.render(hbs`
+  <div style="height: 500px; width: 500px;">
+    {{#vertical-collection content=items as |item|}}
+      {{item.text}}
+    {{/vertical-collection}}
+  </div>
+  `);
+
+  return wait().then(() => {
+    assert.equal(this.$().find('vertical-item').length, 0);
+  });
 });
 
 /*

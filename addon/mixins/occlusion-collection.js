@@ -302,8 +302,14 @@ export default Mixin.create({
     const isProxied = this.get('useContentProxy');
 
     if (name === 'didMountCollection') {
-      context.firstVisible.item = getContent(context.firstVisible.item, isProxied);
-      context.lastVisible.item = getContent(context.lastVisible.item, isProxied);
+      if (context.firstVisible.item) {
+        context.firstVisible.item = getContent(context.firstVisible.item, isProxied);
+      }
+
+      if (context.lastVisible.item) {
+        context.lastVisible.item = getContent(context.lastVisible.item, isProxied);
+      }
+
       return context;
     }
 
