@@ -22,11 +22,12 @@ class Satellite {
   widthDidChange(/* delta */) {}
 
   resize() {
-    let cached = this.geography.getState();
+    const cached = this.geography.getState();
+
     this.geography.setState();
 
-    let heightChange = this.geography.height - cached.height;
-    let widthChange = this.geography.width - cached.width;
+    const heightChange = this.geography.height - cached.height;
+    const widthChange = this.geography.width - cached.width;
 
     if (heightChange) {
       this.heightDidChange();

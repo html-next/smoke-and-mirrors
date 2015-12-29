@@ -49,6 +49,7 @@ export default class Visualization {
 
   applySatelliteStyles(element, geography) {
     const left = (this.radar.planet.width - this.radar.planet.left - geography.left);
+
     element.style.width = `${geography.width}px`;
     element.style.height = `${geography.height}px`;
     element.style.top = `${geography.top}px`;

@@ -12,12 +12,14 @@ export default class ListSatellite extends Satellite {
   }
 
   next() {
-    let nextComponent = this.component.next();
+    const nextComponent = this.component.next();
+
     return nextComponent ? nextComponent.satellite : null;
   }
 
   prev() {
-    let prevComponent = this.component.prev();
+    const prevComponent = this.component.prev();
+
     return prevComponent ? prevComponent.satellite : null;
   }
 

@@ -90,15 +90,19 @@ export default class Radar {
   }
 
   unregister(component) {
-    let key = guidFor(component);
+    const key = guidFor(component);
+
     if (!this.satellites) {
       return;
     }
+
     const satellite = this.satellites.find((sat) => {
       return sat.key === key;
     });
+
     if (satellite) {
-      let index = this.satellites.indexOf(satellite);
+      const index = this.satellites.indexOf(satellite);
+
       this.satellites.splice(index, 1);
       satellite.destroy();
     }
@@ -186,25 +190,28 @@ export default class Radar {
   filterMovement() {
     // cache the scroll offset, and discard the cycle if
     // movement is within (x) threshold
-    let scrollY = this.scrollContainer.scrollTop;
-    let scrollX = this.scrollContainer.scrollLeft;
-    let _scrollY = this.scrollY;
-    let _scrollX = this.scrollX;
+    const scrollY = this.scrollContainer.scrollTop;
+    const scrollX = this.scrollContainer.scrollLeft;
+    const _scrollY = this.scrollY;
+    const _scrollX = this.scrollX;
 
     if (this.isEarthquake(_scrollY, scrollY) || this.isEarthquake(_scrollX, scrollX)) {
       this.scrollY = scrollY;
       this.scrollX = scrollX;
-      let dY = scrollY - _scrollY;
-      let dX = scrollX - _scrollX;
+
+      const dY = scrollY - _scrollY;
+      const dX = scrollX - _scrollX;
+
       this.shiftSatellites(dY, dX);
     }
   }
 
   updateScrollPosition() {
-    let _posX = this.posX;
-    let _posY = this.posY;
-    let posX = document.body.scrollLeft;
-    let posY = document.body.scrollTop;
+    const _posX = this.posX;
+    const _posY = this.posY;
+    const posX = document.body.scrollLeft;
+    const posY = document.body.scrollTop;
+
     if (this.isEarthquake(_posY, posY) || this.isEarthquake(_posX, posX)) {
       this.posY = posY;
       this.posX = posX;

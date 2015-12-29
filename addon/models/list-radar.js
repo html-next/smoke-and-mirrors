@@ -9,7 +9,8 @@ export default class ListRadar extends Radar {
 
   _resize() {
     this.satellites.forEach((c) => {
-      let change = c.resize();
+      const change = c.resize();
+
       if (change) {
         ListRadar.adjustSatelliteList(c, change);
       }
