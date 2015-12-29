@@ -23,7 +23,7 @@ module('Unit | Model | Satellite', {
 
 });
 
-test('Satellite should build correctly', function(assert) {
+test('Satellite should build correctly', (assert) => {
 
   assert.expect(3);
 
@@ -40,7 +40,7 @@ test('Satellite should build correctly', function(assert) {
 
 });
 
-test('resize returns adjustment', function(assert) {
+test('resize returns adjustment', (assert) => {
 
   assert.expect(5);
 
@@ -67,7 +67,7 @@ test('resize returns adjustment', function(assert) {
 
 });
 
-test('shift', function(assert) {
+test('shift', (assert) => {
 
   assert.expect(3);
 
@@ -88,7 +88,7 @@ test('shift', function(assert) {
 
 });
 
-test('_shift', function(assert) {
+test('_shift', (assert) => {
 
   assert.expect(4);
 
@@ -104,7 +104,7 @@ test('_shift', function(assert) {
 
 });
 
-test('destroy is destructive', function(assert) {
+test('destroy is destructive', (assert) => {
 
   assert.expect(5);
 
