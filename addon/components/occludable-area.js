@@ -34,6 +34,7 @@ export default Component.extend({
     this.satellite = satellite;
     satellite.didShift = () => {
       const zones = satellite.radar.getSatelliteZones(satellite);
+
       this._shouldRender(zones);
     };
   },

@@ -49,11 +49,13 @@
     "ember-cli-sri": "^1.2.0",
     "ember-cli-uglify": "^1.2.0",
     "ember-code-snippet": "^1.1.0",
+    "ember-disable-prototype-extensions": "^1.0.0",
     "ember-disable-proxy-controllers": "^1.0.1",
     "ember-export-application-global": "^1.0.4",
-    "ember-disable-prototype-extensions": "^1.0.0",
+    "ember-resolver": "2.0.3",
     "ember-run-raf": "^1.0.5",
-    "ember-suave": "1.2.2",
+    "ember-suave": "1.2.3",
+    "ember-try": "~0.0.8",
     "eslint": "^1.9.0",
     "eslint-config-ember": "^0.2.0",
     "ghooks": "^1.0.0",
@@ -62,9 +64,8 @@
     "grunt-cli": "0.1.13",
     "jit-grunt": "0.9.0",
     "js-string-escape": "^1.0.0",
-    "jscs": "^2.5.1",
-    "time-grunt": "1.0.0",
-    "ember-try": "~0.0.8"
+    "jscs": "2.7.0",
+    "time-grunt": "1.0.0"
   },
   "keywords": [
     "occlusion",

@@ -254,7 +254,7 @@ export default Mixin.create({
 
   keyForItem(item, index) {
     let key;
-    let keyPath = this.get('key');
+    const keyPath = this.get('key');
 
     switch (keyPath) {
     case '@index':
@@ -299,7 +299,7 @@ export default Mixin.create({
   },
 
   prepareActionContext(name, context) {
-    let isProxied = this.get('useContentProxy');
+    const isProxied = this.get('useContentProxy');
 
     if (name === 'didMountCollection') {
       context.firstVisible.item = getContent(context.firstVisible.item, isProxied);
@@ -328,9 +328,11 @@ export default Mixin.create({
       return;
     }
 
-    let contextCache = this.__smActionCache;
+    const contextCache = this.__smActionCache;
+
     if (contextCache.hasOwnProperty(name)) {
-      let contextKey = this.keyForContext(context);
+      const contextKey = this.keyForContext(context);
+
       if (contextCache[name] === contextKey) {
         return;
       }
@@ -370,7 +372,7 @@ export default Mixin.create({
    @returns {Number} the index into childViews of the first view to render
    **/
   _findFirstRenderedComponent(invisibleTop) {
-    let childComponents = this.get('children');
+    const childComponents = this.get('children');
     let maxIndex = childComponents.length - 1;
     let minIndex = 0;
     let midIndex;
@@ -383,8 +385,8 @@ export default Mixin.create({
       midIndex = Math.floor((minIndex + maxIndex) / 2);
 
       // in case of not full-window scrolling
-      let component = childComponents[midIndex];
-      let componentBottom = component.satellite.geography.bottom;
+      const component = childComponents[midIndex];
+      const componentBottom = component.satellite.geography.bottom;
 
       if (componentBottom > invisibleTop) {
         maxIndex = midIndex - 1;
@@ -397,10 +399,12 @@ export default Mixin.create({
   },
 
   children: computed('_children.@each.index', function() {
-    let children = this.get('_children');
-    let output = new Array(get(children, 'length'));
+    const children = this.get('_children');
+    const output = new Array(get(children, 'length'));
+
     children.forEach((item) => {
-      let index = get(item, 'index');
+      const index = get(item, 'index');
+
       output[index] = item;
     });
     return output;
@@ -415,7 +419,8 @@ export default Mixin.create({
   },
 
   unregister(child) {
-    let children = this.get('_children');
+    const children = this.get('_children');
+
     if (children) {
       children.removeObject(child);
       if (this.__isInitialized && !this.get('isDestroying') && !this.get('isDestroyed')) {
@@ -450,8 +455,8 @@ export default Mixin.create({
       return;
     }
 
-    let edges = this.get('_edges');
-    let childComponents = this.get('children');
+    const edges = this.get('_edges');
+    const childComponents = this.get('children');
 
     if (this._isFirstRender) {
       if (this.get('renderAllInitially')) {
@@ -462,7 +467,8 @@ export default Mixin.create({
         // set scroll
         if (this.get('__isInitializingFromLast')) {
           this._nextMaintenance = run.schedule('afterRender', this, function() {
-            let last = this.$().get(0).lastElementChild;
+            const last = this.$().get(0).lastElementChild;
+
             this.set('__isInitializingFromLast', false);
             if (last) {
               last.scrollIntoView(false);
@@ -476,27 +482,27 @@ export default Mixin.create({
 
     }
 
-    let currentViewportBound = this.radar.skyline.top;
+    const currentViewportBound = this.radar.skyline.top;
     let currentUpperBound = edges.invisibleTop;
 
     if (currentUpperBound < currentViewportBound) {
       currentUpperBound = currentViewportBound;
     }
 
-    let topComponentIndex = this._findFirstRenderedComponent(currentUpperBound);
+    const topComponentIndex = this._findFirstRenderedComponent(currentUpperBound);
     let bottomComponentIndex = topComponentIndex;
-    let lastIndex = childComponents.length - 1;
+    const lastIndex = childComponents.length - 1;
     let topVisibleSpotted = false;
     let toCull = [];
-    let toHide = [];
-    let toShow = [];
+    const toHide = [];
+    const toShow = [];
 
     while (bottomComponentIndex <= lastIndex) {
 
-      let component = childComponents[bottomComponentIndex];
+      const component = childComponents[bottomComponentIndex];
 
-      let componentTop = component.satellite.geography.top;
-      let componentBottom = component.satellite.geography.bottom;
+      const componentTop = component.satellite.geography.top;
+      const componentBottom = component.satellite.geography.bottom;
 
       // end the loop if we've reached the end of components we care about
       if (componentTop > edges.invisibleBottom) {
@@ -585,7 +591,8 @@ export default Mixin.create({
     // set scroll
     if (this.get('__isInitializingFromLast')) {
       this._nextMaintenance = run.schedule('afterRender', this, function() {
-        let last = this.$().get(0).lastElementChild;
+        const last = this.$().get(0).lastElementChild;
+
         this.set('__isInitializingFromLast', false);
         if (last) {
           last.scrollIntoView(false);
@@ -622,13 +629,14 @@ export default Mixin.create({
 
   // –––––––––––––– Setup/Teardown
   setupContainer() {
-    let containerSelector = this.get('containerSelector');
-
+    const containerSelector = this.get('containerSelector');
     let container;
+
     if (containerSelector === 'body') {
       container = window;
     } else {
-      let $container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
+      const $container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
+
       container = $container.get(0);
 
       $container.css({
@@ -644,8 +652,8 @@ export default Mixin.create({
   },
 
   setupHandlers() {
-    let container = this._container;
-    let onScrollMethod = (dY) => {
+    const container = this._container;
+    const onScrollMethod = (dY) => {
       if (!this.__isInitialized || this._isPrepending) {
         return;
       }
@@ -653,7 +661,7 @@ export default Mixin.create({
       this.__smScheduleUpdate('scroll');
     };
 
-    let onResizeMethod = () => {
+    const onResizeMethod = () => {
       this.notifyPropertyChange('_edges');
     };
 
@@ -756,7 +764,7 @@ export default Mixin.create({
       return _defaultHeight;
     }
 
-    let defaultHeight = `${this.get('defaultHeight')}`;
+    const defaultHeight = `${this.get('defaultHeight')}`;
 
     if (defaultHeight.indexOf('em') === -1) {
       _defaultHeight = parseInt(defaultHeight, 10);
@@ -809,8 +817,9 @@ export default Mixin.create({
     // segment top break points
     this.radar.planet.setState();
 
-    let bufferSize = this.get('bufferSize');
-    let rect = this.radar.planet;
+    const bufferSize = this.get('bufferSize');
+    const rect = this.radar.planet;
+
     return {
       viewportTop: rect.top,
       visibleTop: (-1 * bufferSize * rect.height) + rect.top,
@@ -834,7 +843,7 @@ export default Mixin.create({
       lastVisibleChanged: null
     };
 
-    let collectionTagName = (this.get('tagName') || '').toLowerCase();
+    const collectionTagName = (this.get('tagName') || '').toLowerCase();
     let itemTagName = this.get('itemTagName');
 
     if (!itemTagName) {
@@ -849,7 +858,8 @@ export default Mixin.create({
   },
 
   _reflectContentChanges() {
-    let content = this.get('_content');
+    const content = this.get('_content');
+
     content.contentArrayDidChange = (items, offset /* removeCount, addCount*/) => {
       if (offset <= this.get('_firstVisibleIndex')) {
         this.__prependComponents();
@@ -861,8 +871,9 @@ export default Mixin.create({
   },
 
   _didReceiveAttrs(attrs) {
-    let oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
-    let newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
+    const oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
+    const newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
+
     if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
       this.__prependComponents();
     } else {
@@ -872,7 +883,7 @@ export default Mixin.create({
   },
 
   _changeIsPrepend(oldArray, newArray) {
-    let lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
+    const lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
 
     // if either array is empty or the new array is not longer, do not treat as prepend
     if (!get(newArray, 'length') || !get(oldArray, 'length') || lengthDifference <= 0) {
@@ -880,10 +891,10 @@ export default Mixin.create({
     }
 
     // if the keys at the correct indexes are the same, this is a prepend
-    let oldInitialItem = valueForIndex(oldArray, 0);
-    let oldInitialKey = this.keyForItem(oldInitialItem, 0);
-    let newInitialItem = valueForIndex(newArray, lengthDifference);
-    let newInitialKey = this.keyForItem(newInitialItem, lengthDifference);
+    const oldInitialItem = valueForIndex(oldArray, 0);
+    const oldInitialKey = this.keyForItem(oldInitialItem, 0);
+    const newInitialItem = valueForIndex(newArray, lengthDifference);
+    const newInitialKey = this.keyForItem(newInitialItem, lengthDifference);
 
     return oldInitialKey === newInitialKey;
   },

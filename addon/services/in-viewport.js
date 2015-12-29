@@ -22,6 +22,7 @@ export default Service.extend({
   _activateRadar() {
     const resizeDebounce = this.get('resizeDebounce');
     const minimumMovement = this.get('minimumMovement');
+
     this.radar = new Radar({
       sky: document.body,
       telescope: window,

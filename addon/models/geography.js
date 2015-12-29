@@ -83,8 +83,8 @@ export default class Geography {
       distanceX = 0;
     }
 
-    let zoneY = distanceY < 0 ? Math.floor(distanceY / planet.height) : Math.ceil(distanceY / planet.height);
-    let zoneX = distanceX < 0 ? Math.floor(distanceX / planet.width) : Math.ceil(distanceX / planet.width);
+    const zoneY = distanceY < 0 ? Math.floor(distanceY / planet.height) : Math.ceil(distanceY / planet.height);
+    const zoneX = distanceX < 0 ? Math.floor(distanceX / planet.width) : Math.ceil(distanceX / planet.width);
 
     return {
       zoneX,

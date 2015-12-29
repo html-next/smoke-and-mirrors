@@ -14,8 +14,9 @@ export default Mixin.create({
   renderInParent: false,
   parent: null, // parent element
   destination: computed('renderInParent', 'parent', function() {
-    let renderInParent = this.get('renderInParent');
-    let parent = this.get('parent');
+    const renderInParent = this.get('renderInParent');
+    const parent = this.get('parent');
+
     this.__smAppendBody((parent || this.element).cloneNode(false));
     return renderInParent ? (parent || this.element) : this._fragmentBody;
   }),
@@ -24,20 +25,23 @@ export default Mixin.create({
   didMoveElement() {},
 
   __smGetComputedStyle() {
-    let bodyStyle = getDimensions(this._fragmentBody);
+    const bodyStyle = getDimensions(this._fragmentBody);
+
     this.didPreRender(bodyStyle);
   },
 
   __smUpdateFragmentStyles() {
-    let parent = this.get('parent') || this.element;
+    const parent = this.get('parent') || this.element;
+
     if (parent === this.element) {
       if (!this.get('parentElementDidInsert')) {
         return;
       }
     }
 
-    let parentWrapper = parent.parentNode;
-    let computedStyle = getDimensions(parentWrapper);
+    const parentWrapper = parent.parentNode;
+    const computedStyle = getDimensions(parentWrapper);
+
     applyDimensions(this._fragmentWrapper, computedStyle);
 
     this.__smGetComputedStyle();
@@ -50,7 +54,8 @@ export default Mixin.create({
     if (this._fragment) {
       return;
     }
-    let fragment = document.createElement('div');
+    const fragment = document.createElement('div');
+
     fragment.style.position = 'absolute';
     fragment.style.maxWidth = '9999px';
     fragment.style.top = '0px';
@@ -100,15 +105,16 @@ export default Mixin.create({
   },
 
   destinationDidChange: observer('destination', function() {
-    let destinationElement = this.get('destination');
+    const destinationElement = this.get('destination');
+
     if (destinationElement !== this._firstNode.parentNode) {
       run.schedule('render', this, 'appendToDestination');
     }
   }),
 
   appendToDestination() {
-    let destinationElement = this.get('destination');
-    let currentActiveElement = document.activeElement;
+    const destinationElement = this.get('destination');
+    const currentActiveElement = document.activeElement;
 
     this.appendRange(destinationElement, this._firstNode, this._lastNode);
     if (document.activeElement !== currentActiveElement) {
@@ -133,7 +139,8 @@ export default Mixin.create({
     let node = lastNode;
 
     do {
-      let next = node.previousSibling;
+      const next = node.previousSibling;
+
       if (node.parentNode) {
         node.parentNode.removeChild(node);
         if (node === firstNode) {
