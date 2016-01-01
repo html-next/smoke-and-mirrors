@@ -447,6 +447,13 @@ export default Mixin.create({
     });
   },
 
+  _childrenRegistered() {
+    const firstChild = this.get('children')[0];
+
+    return firstChild.satellite &&
+        firstChild.satellite.geography;
+  },
+
   /*
    *
    * The big question is can we render from the bottom
@@ -457,7 +464,8 @@ export default Mixin.create({
    * @private
    */
   _updateChildStates(/* source */) {  // eslint: complexity
-    if (!this.get('shouldRenderList')) {
+    if (!this.get('shouldRenderList') ||
+        !this._childrenRegistered()) {
       return;
     }
 
