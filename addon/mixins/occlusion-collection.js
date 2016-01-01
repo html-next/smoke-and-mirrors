@@ -450,7 +450,8 @@ export default Mixin.create({
   _childrenRegistered() {
     const firstChild = this.get('children')[0];
 
-    return firstChild.satellite &&
+    return firstChild &&
+      firstChild.satellite &&
         firstChild.satellite.geography;
   },
 
