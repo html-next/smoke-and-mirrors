@@ -120,7 +120,6 @@ export default class Radar {
   }
 
   killTween() {
-    console.log('killing tween');
     if (this.tween) {
       this.tween.kill();
       this.tween = null;
@@ -145,7 +144,7 @@ export default class Radar {
         {
           scrollLeft: offset,
           onUpdate() {
-            radar.scrollX = radar.scrollContainer.scrollLeft = Math.round(tweenData.scrollLeft);
+            radar.setScrollState(null, tweenData.scrollLeft, true);
           }
         });
     }
@@ -169,34 +168,27 @@ export default class Radar {
         {
           scrollTop: offset,
           onUpdate() {
-            radar.scrollY = radar.scrollContainer.scrollTop = Math.round(tweenData.scrollTop);
+            radar.setScrollState(tweenData.scrollTop, null, true);
           }
         });
     }
   }
 
-  setScrollState(y, x) {
-    let dX = 0;
-    let dY = 0;
-
-    if (x || x === 0) {
-      dX = x - this.scrollContainer.scrollLeft;
-      this.scrollContainer.scrollLeft = x;
-      this.posX = document.body.scrollLeft;
-      this.scrollX += dX;
-      this.skyline.left -= dX;
-      this.skyline.right -= dX;
-    }
+  setScrollState(y, x, check) {
     if (y || y === 0) {
-      dY = y - this.scrollContainer.scrollTop;
-      this.scrollContainer.scrollTop = y;
-      this.posY = document.body.scrollTop;
-      this.scrollY += dY;
-      this.skyline.bottom -= dY;
-      this.skyline.top -= dY;
+      if (check && Math.abs(this.scrollY - y) > 3) {
+        this.killTween();
+        return;
+      }
+      this.scrollY = this.scrollContainer.scrollTop = Math.round(y);
     }
-
-    this.shiftSatellites(dY, dX);
+    if (x || x === 0) {
+      if (check && Math.abs(this.scrollY - x) > 3) {
+        this.killTween();
+        return;
+      }
+      this.scrollX = this.scrollContainer.scrollLeft = Math.round(x);
+    }
   }
 
   scrollToPosition(offsetY, offsetX, jumpTo) {
@@ -219,8 +211,7 @@ export default class Radar {
           scrollTop: offsetY,
           scrollLeft: offsetX,
           onUpdate() {
-            radar.scrollY = radar.scrollContainer.scrollTop = Math.round(tweenData.scrollTop);
-            radar.scrollX = radar.scrollContainer.scrollLeft = Math.round(tweenData.scrollLeft);
+            radar.setScrollState(tweenData.scrollTop, tweenData.scrollLeft, true);
           }
         });
     }
