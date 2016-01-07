@@ -44,8 +44,7 @@ export default class ListRadar extends Radar {
           scrollTop: satellite.geography.top,
           scrollLeft: satellite.geography.left,
           onUpdate() {
-            radar.scrollY = radar.scrollContainer.scrollTop = Math.round(tweenData.scrollTop);
-            radar.scrollX = radar.scrollContainer.scrollLeft = Math.round(tweenData.scrollLeft);
+            radar.setScrollState(tweenData.scrollTop, tweenData.scrollLeft);
           }
         });
       return this.tween;
