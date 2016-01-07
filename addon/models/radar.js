@@ -1,6 +1,8 @@
 import Ember from 'ember';
 import Satellite from './satellite';
 import Geography from './geography';
+import TweenLite from 'tweenlite';
+import jQuery from 'jquery';
 
 const {
   guidFor,
@@ -42,6 +44,7 @@ export default class Radar {
 
   constructor(state) {
     this.satellites = [];
+    this.tween = null;
     this.setState(state || {});
   }
 
@@ -114,6 +117,113 @@ export default class Radar {
     }
 
     return 0;
+  }
+
+  killTween() {
+    console.log('killing tween');
+    if (this.tween) {
+      this.tween.kill();
+      this.tween = null;
+    }
+  }
+
+  scrollToX(offset, jumpTo) {
+    if (!this.scrollContainer) {
+      return false;
+    }
+    this.killTween();
+    if (jumpTo) {
+      this.setScrollState(null, offset);
+    } else {
+      const tweenData = {
+        scrollLeft: this.scrollX || 0
+      };
+      const radar = this;
+      this.tween = TweenLite.to(
+        tweenData,
+        0.35,
+        {
+          scrollLeft: offset,
+          onUpdate() {
+            radar.scrollX = radar.scrollContainer.scrollLeft = Math.round(tweenData.scrollLeft);
+          }
+        });
+    }
+  }
+
+  scrollToY(offset, jumpTo) {
+    if (!this.scrollContainer) {
+      return false;
+    }
+    this.killTween();
+    if (jumpTo) {
+      this.setScrollState(offset, null);
+    } else {
+      const tweenData = {
+        scrollTop: this.scrollY || 0
+      };
+      const radar = this;
+      this.tween = TweenLite.to(
+        tweenData,
+        0.35,
+        {
+          scrollTop: offset,
+          onUpdate() {
+            radar.scrollY = radar.scrollContainer.scrollTop = Math.round(tweenData.scrollTop);
+          }
+        });
+    }
+  }
+
+  setScrollState(y, x) {
+    let dX = 0;
+    let dY = 0;
+
+    if (x || x === 0) {
+      dX = x - this.scrollContainer.scrollLeft;
+      this.scrollContainer.scrollLeft = x;
+      this.posX = document.body.scrollLeft;
+      this.scrollX += dX;
+      this.skyline.left -= dX;
+      this.skyline.right -= dX;
+    }
+    if (y || y === 0) {
+      dY = y - this.scrollContainer.scrollTop;
+      this.scrollContainer.scrollTop = y;
+      this.posY = document.body.scrollTop;
+      this.scrollY += dY;
+      this.skyline.bottom -= dY;
+      this.skyline.top -= dY;
+    }
+
+    this.shiftSatellites(dY, dX);
+  }
+
+  scrollToPosition(offsetY, offsetX, jumpTo) {
+    if (!this.scrollContainer) {
+      return false;
+    }
+    this.killTween();
+    if (jumpTo) {
+      this.setScrollState(offsetY, offsetX);
+    } else {
+      const tweenData = {
+        scrollTop: this.scrollY || 0,
+        scrollLeft: this.scrollX || 0
+      };
+      const radar = this;
+      this.tween = TweenLite.to(
+        tweenData,
+        0.35,
+        {
+          scrollTop: offsetY,
+          scrollLeft: offsetX,
+          onUpdate() {
+            radar.scrollY = radar.scrollContainer.scrollTop = Math.round(tweenData.scrollTop);
+            radar.scrollX = radar.scrollContainer.scrollLeft = Math.round(tweenData.scrollLeft);
+          }
+        });
+    }
   }
 
   register(component) {

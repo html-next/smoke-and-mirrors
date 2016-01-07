@@ -42,8 +42,10 @@
     "ember-disable-proxy-controllers": "^1.0.1",
     "ember-export-application-global": "^1.0.5",
     "ember-load-initializers": "^0.5.1",
-    "ember-resolver": "^2.0.3",
+    "ember-getowner-polyfill": "1.0.1",
+    "ember-resolver": "2.0.3",
     "ember-run-raf": "^1.1.2",
+    "ember-tweenlite": "1.0.1",
     "ember-suave": "1.2.3",
     "jscs": "2.7.0",
     "loader.js": "^4.0.1"
