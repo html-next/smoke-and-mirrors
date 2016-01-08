@@ -15,10 +15,23 @@ const {
   } = Ember.Handlebars;
 
 const Collection = Component.extend({
-
   layout,
+  // tagName: 'vertical-collection',
+
+  // you available as a positionalParam
   items: null,
+
+  /*
+   * Each collection implement's it's own `radar` instance
+   * and uses it to track the position and dimensions of items
+   * in the collection.
+   */
   radar: null,
+  containerSelector: null,
+  itemDimensions: null,
+  trustDefaultDimensions: false,
+
+  key: '@identity',
 
   _virtualItemCache: null,
   _virtualItemArray: null,
@@ -96,10 +109,15 @@ const Collection = Component.extend({
 
   createItem(options) {
     options.scalar = this.get('bufferSize');
-    return this.radar.register(options);
+    const virtualItem = this.radar.register(options);
+    virtualItem.zonesDidChange = (dX, dY, zones) => {
+      console.log('zone change!', virtualItem.key, dX, dY, zones);
+    };
+    return virtualItem;
   },
 
   removeItem(virtualItem) {
+    virtualItem.zonesDidChange = null;
     this.radar.unregister(virtualItem);
   },
 
@@ -136,7 +154,7 @@ const Collection = Component.extend({
     // calculate updates and insertions
     let previousItem = null;
     for (let index = 0; index < itemLength; index++) {
-      let item = items.objectAt ? items.objectAt(index) : items[index];
+      let item = getIndex(items, index);
       let key = keyForItem(item, keyPath, index);
       let virtualItem = virtualItems.get(key);
 
@@ -216,7 +234,7 @@ const Collection = Component.extend({
         idForFirst = get(getIndex(this.get('items'), 0), keyPath);
       }
 
-      this.radar.scrollTo(virtualItems.get(idForFirst), false);
+      this.radar.scrollToKey(virtualItems.get(idForFirst), true);
     }
   },
 
