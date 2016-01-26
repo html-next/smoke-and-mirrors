@@ -255,8 +255,8 @@ export default class Radar {
 
     window.addEventListener('resize', this._resizeHandler, true);
     this.telescope.addEventListener('scroll', this._scrollHandler, true);
-    if (this.scrollContainer !== document.body) {
-      document.body.addEventListener('scroll', this._scrollAdjuster, true);
+    if (this.telescope !== window) {
+      window.addEventListener('scroll', this._scrollAdjuster, true);
     }
   }
 
@@ -265,8 +265,8 @@ export default class Radar {
     if (this.telescope) {
       this.telescope.removeEventListener('scroll', this._scrollHandler, true);
     }
-    if (this.scrollContainer !== document.body) {
-      document.body.removeEventListener('scroll', this._scrollAdjuster, true);
+    if (this.telescope !== window) {
+      window.removeEventListener('scroll', this._scrollAdjuster, true);
     }
     run.cancel(this._nextResize);
     run.cancel(this._nextScroll);
