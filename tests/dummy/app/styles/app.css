@@ -101,6 +101,10 @@ number-slide .number {
   font-weight: 900;
 }
 
+.make-me-tall {
+  height: 1000%;
+}
+
 .grid-item number-slide .number {
   font-size: 2rem;
 }
