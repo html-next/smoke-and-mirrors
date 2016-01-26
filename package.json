@@ -15,7 +15,7 @@
     "lint-all": "eslint -c .eslintrc app/ addon/ tests/",
     "lint-staged": "git diff --diff-filter=ACMRTUXB --cached --name-only | grep '*.js' | grep -v 'node_modules' | grep -v 'tests' | xargs eslint -c .eslintrc"
   },
-  "repository": "https://github.com/runspired/smoke-and-mirrors",
+  "repository": "https://github.com/runspired/smoke-and-mirrors.git",
   "engines": {
     "node": ">= 4.1.1"
   },
