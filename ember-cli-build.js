@@ -2,7 +2,6 @@
 /* global require, module */
 // jscs: disable
 var EmberAddon = require('ember-cli/lib/broccoli/ember-addon');
-var jsStringEscape = require('js-string-escape');
 
 module.exports = function(defaults) {
 
