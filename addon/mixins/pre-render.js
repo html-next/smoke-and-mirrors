@@ -13,6 +13,8 @@ export default Mixin.create({
 
   renderInParent: false,
   parent: null, // parent element
+  styles: null,
+
   destination: computed('renderInParent', 'parent', function() {
     const renderInParent = this.get('renderInParent');
     const parent = this.get('parent');
