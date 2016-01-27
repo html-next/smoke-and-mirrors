@@ -49,7 +49,6 @@
     "ember-suave": "1.2.3",
     "ember-try": "~0.0.8",
     "ghooks": "^1.0.0",
-    "js-string-escape": "^1.0.0",
     "jscs": "2.7.0"
   },
   "keywords": [
