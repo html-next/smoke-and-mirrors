@@ -121,6 +121,6 @@ Angular Style commit messages have the full form:
 
 ## Funding
 
-OSS is often a labor of love. Skyrocket is largely built with that love.
+OSS is often a labor of love. Smoke And Mirrors is largely built with that love.
 
 <a href='https://pledgie.com/campaigns/30822'><img alt='Click here to lend your support to: Smoke-and-mirrors: Ambitious infinite-scroll and svelte rendering for Ember applications and make a donation at pledgie.com !' src='https://pledgie.com/campaigns/30822.png?skin_name=chrome' border='0' ></a>
