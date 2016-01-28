@@ -1,14 +1,14 @@
+/*jshint node:true*/
 /* global require, module */
 // jscs: disable
-var EmberApp = require('ember-cli/lib/broccoli/ember-addon');
-var jsStringEscape = require('js-string-escape');
+var EmberAddon = require('ember-cli/lib/broccoli/ember-addon');
 
 module.exports = function(defaults) {
 
   defaults.snippetSearchPaths = ['tests/dummy/app'];
   defaults.snippetPaths = ['tests/dummy/snippets'];
 
-  var app = new EmberApp(defaults, {
+  var app = new EmberAddon(defaults, {
     babel: {
       includePolyfill: true
     },

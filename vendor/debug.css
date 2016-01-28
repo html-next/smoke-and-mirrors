@@ -15,6 +15,7 @@
 }
 
 .sm_visualization-container {
+  -moz-transform: scale(.1);
   zoom: 10%;
   left: 0;
   position: relative;

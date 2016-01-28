@@ -5,7 +5,7 @@ const Router = Ember.Router.extend({
   location: config.locationType
 });
 
-export default Router.map(function() {
+Router.map(function() {
 
   this.route('examples', function() {
     this.route('dbmon');
@@ -42,3 +42,5 @@ export default Router.map(function() {
   });
 
 });
+
+export default Router;
