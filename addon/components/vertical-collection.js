@@ -45,8 +45,21 @@ const VerticalCollection = Component.extend(OcclusionMixin, {
    * calculations.  This works for height or width changes, it's value is
    * never actually used.
    */
-  containerSize: null
+  containerSize: null,
 
+  _spacerAboveStyle: Ember.computed('__smSpacerAboveHeight', function () {
+    return this._spacerString(this.get('__smSpacerAboveHeight'));
+  }),
+
+  _spacerBelowStyle: Ember.computed('__smSpacerBelowHeight', function () {
+    return this._spacerString(this.get('__smSpacerBelowHeight'));
+  }),
+
+  _spacerString(height) {
+    return new Ember.Handlebars.SafeString(
+      `width: 100%; height: ${height}px;`
+    );
+  }
 });
 
 Ember.runInDebug(() => {

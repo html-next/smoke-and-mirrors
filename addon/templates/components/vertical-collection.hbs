@@ -1,7 +1,7 @@
 {{#if __smIsLoadingAbove}}
   {{component loadingAboveComponent}}
 {{/if}}
-<div style="width: 100%; height: {{__smSpacerAboveHeight}}px;"></div>
+<div style={{_spacerAboveStyle}}></div>
 {{#each _content key='@index' as |item index|}}
   {{#vertical-item
     itemTagName=itemTagName
@@ -19,7 +19,7 @@
 {{else}}
   {{yield to="inverse"}}
 {{/each}}
-<div style="width: 100%; height: {{__smSpacerBelowHeight}}px;"></div>
+<div style={{_spacerBelowStyle}}></div>
 {{#if __smIsLoadingBelow}}
   {{component loadingBelowComponent}}
 {{/if}}
