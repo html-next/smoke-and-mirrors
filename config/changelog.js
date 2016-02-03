@@ -8,7 +8,7 @@ module.exports = {
   // ember style guide: https://github.com/emberjs/ember.js/blob/master/CONTRIBUTING.md#commit-tagging
   style: 'angular', // 'ember' 'jquery'
 
-  head: 'master',
+  head: 'develop',
   base: '-last', // a branch or tag name, `-last` defaults to the version in package.json
 
   hooks: {
