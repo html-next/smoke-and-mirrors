@@ -164,6 +164,7 @@ export default class Radar {
 
   updateSkyline() {
     if (this.skyline) {
+      this.filterMovement();
       this.skyline.setState();
     }
   }

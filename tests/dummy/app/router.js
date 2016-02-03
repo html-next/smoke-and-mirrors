@@ -14,6 +14,7 @@ Router.map(function() {
     this.route('scrollable-body');
     this.route('html-gl');
     this.route('large-grid');
+    this.route('reduce-debug');
   });
 
   this.route('mixins', function() {

@@ -192,11 +192,19 @@ export default class Visualization {
     this.radar = null;
     this.component = null;
     this.satellites.forEach((satellite) => {
-      satellite.destroy();
+      satellite.mirrorSatellite = null;
+      satellite.siblingSatellite = null;
+      if (satellite.parentNode) {
+        satellite.parentNode.removeChild(satellite);
+      }
     });
     this.satellites = null;
     this.cache.forEach((satellite) => {
-      satellite.destroy();
+      satellite.mirrorSatellite = null;
+      satellite.siblingSatellite = null;
+      if (satellite.parentNode) {
+        satellite.parentNode.removeChild(satellite);
+      }
     });
     this.cache = null;
   }

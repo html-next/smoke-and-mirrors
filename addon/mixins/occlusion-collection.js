@@ -410,7 +410,6 @@ export default Mixin.create({
 
     children.forEach((item) => {
       const index = get(item, 'index');
-
       output[index] = item;
     });
     return output;
@@ -463,6 +462,10 @@ export default Mixin.create({
 
     const edges = this.get('_edges');
     const childComponents = this.get('children');
+
+    if (!get(childComponents, 'length')) {
+      return;
+    }
 
     if (this._isFirstRender) {
       if (this.get('renderAllInitially')) {
@@ -866,11 +869,13 @@ export default Mixin.create({
   _reflectContentChanges() {
     const content = this.get('_content');
 
-    content.contentArrayDidChange = (items, offset /* removeCount, addCount*/) => {
+    content.contentArrayDidChange = (items, offset, removeCount, addCount) => {
       if (offset <= this.get('_firstVisibleIndex')) {
         this.__prependComponents();
       } else {
-        this.__smScheduleUpdate('reflect changes');
+        if (!removeCount || removeCount < addCount) {
+          this.__smScheduleUpdate('reflect changes');
+        }
         run.scheduleOnce('sync', this.radar, this.radar.updateSkyline);
       }
     };
@@ -883,7 +888,9 @@ export default Mixin.create({
     if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
       this.__prependComponents();
     } else {
-      this.__smScheduleUpdate('didReveiveAttrs');
+      if (get(oldArray, 'length') <= get(newArray, 'length')) {
+        this.__smScheduleUpdate('didReveiveAttrs');
+      }
       run.scheduleOnce('sync', this.radar, this.radar.updateSkyline);
     }
   },
