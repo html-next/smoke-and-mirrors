@@ -464,6 +464,10 @@ export default Mixin.create({
     const edges = this.get('_edges');
     const childComponents = this.get('children');
 
+    if (!get(childComponents, 'length')) {
+      return;
+    }
+
     if (this._isFirstRender) {
       if (this.get('renderAllInitially')) {
         childComponents.forEach((i) => {
