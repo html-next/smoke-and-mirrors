@@ -30,10 +30,10 @@ class Satellite {
     const widthChange = this.geography.width - cached.width;
 
     if (heightChange) {
-      this.heightDidChange();
+      this.heightDidChange(-1 * heightChange);
     }
     if (widthChange) {
-      this.widthDidChange();
+      this.widthDidChange(-1 * widthChange);
     }
 
     return heightChange || widthChange ? { dX: widthChange, dY: heightChange } : null;

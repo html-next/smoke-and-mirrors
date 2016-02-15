@@ -44,10 +44,8 @@ export default Mixin.create({
     return {
       viewportTop: rect.top,
       visibleTop: (-1 * bufferSize * rect.height) + rect.top,
-      invisibleTop: (-2 * bufferSize * rect.height) + rect.top,
       viewportBottom: rect.bottom,
-      visibleBottom: (bufferSize * rect.height) + rect.bottom,
-      invisibleBottom: (2 * bufferSize * rect.height) + rect.bottom
+      visibleBottom: (bufferSize * rect.height) + rect.bottom
     };
   }),
 

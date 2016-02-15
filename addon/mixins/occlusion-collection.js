@@ -377,7 +377,7 @@ export default Mixin.create({
    @param {Number} invisibleTop The top/left of the viewport to search against
    @returns {Number} the index into childViews of the first view to render
    **/
-  _findFirstRenderedComponent(invisibleTop) {
+  _findFirstRenderedComponent(visibleTop) {
     const childComponents = this.get('children');
     let maxIndex = childComponents.length - 1;
     let minIndex = 0;
@@ -394,7 +394,7 @@ export default Mixin.create({
       const component = childComponents[midIndex];
       const componentBottom = component.satellite.geography.bottom;
 
-      if (componentBottom > invisibleTop) {
+      if (componentBottom > visibleTop) {
         maxIndex = midIndex - 1;
       } else {
         minIndex = midIndex + 1;
@@ -492,7 +492,7 @@ export default Mixin.create({
     }
 
     const currentViewportBound = this.radar.skyline.top;
-    let currentUpperBound = edges.invisibleTop;
+    let currentUpperBound = edges.visibleTop;
 
     if (currentUpperBound < currentViewportBound) {
       currentUpperBound = currentViewportBound;
@@ -503,7 +503,6 @@ export default Mixin.create({
     const lastIndex = childComponents.length - 1;
     let topVisibleSpotted = false;
     let toCull = [];
-    const toHide = [];
     const toShow = [];
 
     while (bottomComponentIndex <= lastIndex) {
@@ -514,17 +513,13 @@ export default Mixin.create({
       const componentBottom = component.satellite.geography.bottom;
 
       // end the loop if we've reached the end of components we care about
-      if (componentTop > edges.invisibleBottom) {
+      if (componentTop > edges.visibleBottom) {
         break;
       }
 
-      // above the upper invisible boundary
-      if (componentBottom < edges.invisibleTop) {
+      // above the upper reveal boundary
+      if (componentBottom < edges.visibleTop) {
         toCull.push(component);
-
-        // above the upper reveal boundary
-      } else if (componentBottom < edges.visibleTop) {
-        toHide.push(component);
 
         // above the upper screen boundary
       } else if (componentBottom < edges.viewportTop) {
@@ -565,8 +560,8 @@ export default Mixin.create({
           index: bottomComponentIndex
         });
 
-        // above the lower reveal boundary
-      } else if (componentTop < edges.visibleBottom) {
+        // above the lower reveal boundary (componentTop < edges.visibleBottom)
+      } else {
         toShow.push(component);
         if (bottomComponentIndex === lastIndex) {
           this.sendActionOnce('lastReached', {
@@ -574,10 +569,6 @@ export default Mixin.create({
             index: bottomComponentIndex
           });
         }
-
-        // above the lower invisible boundary
-      } else { // (componentTop <= edges.invisibleBottom) {
-        toHide.push(component);
       }
 
       bottomComponentIndex++;
@@ -589,9 +580,6 @@ export default Mixin.create({
 
     toCull.forEach((i) => {
       i.cull();
-    });
-    toHide.forEach((i) => {
-      i.hide();
     });
     toShow.forEach((i) => {
       i.show();
@@ -832,10 +820,8 @@ export default Mixin.create({
     return {
       viewportTop: rect.top,
       visibleTop: (-1 * bufferSize * rect.height) + rect.top,
-      invisibleTop: (-2 * bufferSize * rect.height) + rect.top,
       viewportBottom: rect.bottom,
-      visibleBottom: (bufferSize * rect.height) + rect.bottom,
-      invisibleBottom: (2 * bufferSize * rect.height) + rect.bottom
+      visibleBottom: (bufferSize * rect.height) + rect.bottom
     };
   }),
 
@@ -888,7 +874,7 @@ export default Mixin.create({
     if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
       this.__prependComponents();
     } else {
-      if (get(oldArray, 'length') <= get(newArray, 'length')) {
+      if (newArray && (!oldArray || get(oldArray, 'length') <= get(newArray, 'length'))) {
         this.__smScheduleUpdate('didReveiveAttrs');
       }
       run.scheduleOnce('sync', this.radar, this.radar.updateSkyline);
