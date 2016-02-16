@@ -10,16 +10,14 @@ test('it renders', function(assert) {
   // Set any properties with this.set('myProperty', 'value');
   // Handle any actions with this.on('myAction', function(val) { ... });" + EOL + EOL +
 
-  this.render(hbs`{{smart-collection}}`);
-
-  assert.equal(this.$().text().trim(), '');
+  this.set('people', [{name: 'Chris Thoburn'}]);
 
   // Template block usage:" + EOL +
   this.render(hbs`
-    {{#smart-collection}}
-      template block text
+    {{#smart-collection people as |person|}}
+      {{person.name}}
     {{/smart-collection}}
   `);
 
-  assert.equal(this.$().text().trim(), 'template block text');
+  assert.equal(this.$('vertical-collection').get(0).tagName, 'VERTICAL-COLLECTION');
 });

@@ -16,13 +16,13 @@
  */
 function Container() {
   Object.defineProperty(this, 'scrollTop', {
-    get: function() {
+    get() {
       return window.scrollY ||
         window.pageYOffset ||
         document.body.scrollTop ||
         document.documentElement.scrollTop;
     },
-    set: function(v) {
+    set(v) {
       return window.scrollY =
         window.pageYOffset =
           document.body.scrollTop =
@@ -30,13 +30,13 @@ function Container() {
     }
   });
   Object.defineProperty(this, 'scrollLeft', {
-    get: function() {
+    get() {
       return window.scrollX ||
         window.pageXOffset ||
         document.body.scrollLeft ||
         document.documentElement.scrollLeft;
     },
-    set: function(v) {
+    set(v) {
       return window.scrollX =
         window.pageXOffset =
           document.body.scrollLeft =

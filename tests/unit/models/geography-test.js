@@ -65,8 +65,8 @@ test('geography sets the state for an element on the page', (assert) => {
   assert.equal(state.bottom, 2 * RELATIVE_UNIT + 1, 'planetA bottom is 201');
 
   // test planet B
-  assert.planetBDiv.style.left = '0';
-  assert.planetBDiv.style.top = '0';
+  assert.planetBDiv.style.left = "0";
+  assert.planetBDiv.style.top = "0";
   document.body.appendChild(assert.planetBDiv);
 
   const geographyB = new Geography(assert.planetBDiv);
@@ -127,7 +127,7 @@ test('getZones correctly determines the Y (vertical) distance and zone.', (asser
   assert.expect(6);
 
   // test before
-  assert.planetBDiv.style.top = '0';
+  assert.planetBDiv.style.top = "0";
   assert.planetBDiv.style.left = `${RELATIVE_UNIT}px`;
   document.body.appendChild(assert.planetBDiv);
 

@@ -1,105 +1,91 @@
 import { module, test } from 'qunit';
 import ListSatellite from 'smoke-and-mirrors/models/list-satellite';
 
-const RELATIVE_UNIT = 100;
-let App = {};
-
 module('Unit | Model | ListSatellite', {
 
   beforeEach(assert) {
 
-    App.planetADiv = document.createElement('div');
-    document.body.appendChild(App.planetADiv);
-    App.planetBDiv = document.createElement('div');
-    document.body.appendChild(App.planetBDiv);
+    // stubbed components for the tests
+    let planetA = document.createElement('div');
+    document.body.appendChild(planetA);
 
-    App.componentA = {
-      element: App.planetADiv,
-      next() {},
-      prev() {},
+    let planetB = document.createElement('div');
+    document.body.appendChild(planetB);
+
+    let planetC = document.createElement('div');
+    document.body.appendChild(planetC);
+
+    assert.componentA = {
+      element: planetA,
       satellite: true
     };
-    App.componentB = {
-      element: App.planetBDiv,
-      next() {},
-      prev() {},
+
+    assert.componentB = {
+      element: planetB,
+      satellite: true
+    };
+
+    assert.componentC = {
+      element: planetC,
       satellite: true
     };
 
   },
 
   afterEach(assert) {
-    App.planetADiv.parentNode.removeChild(App.planetADiv);
-    App.planetBDiv.parentNode.removeChild(App.planetBDiv);
-    App = {};
+    function teardown(c) {
+      c.element.parentNode.removeChild(c.element);
+      c.element = null;
+    }
+    teardown(assert.componentA);
+    teardown(assert.componentB);
+    teardown(assert.componentC);
   }
 
 });
 
-test('should build correctly', (assert) => {
-
-  assert.expect(4);
-
-  let testListSatellite = new ListSatellite(App.componentA, [App.componentA, App.componentB]);
-
-  assert.equal(testListSatellite.component, App.componentA, 'compenent set');
-  assert.equal(testListSatellite.element, App.planetADiv, 'element set');
-  assert.equal(testListSatellite.radar, undefined, 'radar initialized and not set');
-  assert.deepEqual(testListSatellite.list, [App.componentA, App.componentB], 'list set');
-
-});
-
-test('next and prev return null when only one component', (assert) => {
-
+test('ListSatellite should build appropriately', (assert) => {
   assert.expect(2);
 
-  let testListSatellite = new ListSatellite(App.componentA, [App.componentA]);
+  let satA = new ListSatellite(assert.componentA);
 
-  assert.equal(testListSatellite.next(), null, 'no next element');
-  assert.equal(testListSatellite.prev(), null, 'no prev element');
+  assert.equal(satA.element.element, assert.componentA.element, "The Satellite.element VirtualElement was set from the component's element");
+  assert.equal(satA.radar, undefined, "radar initialized and not set");
 
 });
 
-test('next and prev work as expected', (assert) => {
-
+test('ListSatellite.next,prev functions as expected', (assert) => {
   assert.expect(4);
 
-  App.componentA.next = function() {
-    return App.componentB;
-  };
-  App.componentB.prev = function() {
-    return App.componentA;
-  };
+  let satA = new ListSatellite(assert.componentA);
 
-  let testListSatelliteA = new ListSatellite(App.componentA, [App.componentA, App.componentB]);
-  let testListSatelliteB = new ListSatellite(App.componentB, [App.componentA, App.componentB]);
+  assert.equal(satA.next(), null, 'The next satellite is initially unset');
+  assert.equal(satA.prev(), null, 'The prev satellite is initially unset');
 
-  assert.equal(testListSatelliteA.next(), true, 'Component B is after Component A');
-  assert.equal(testListSatelliteB.next(), null, 'Nothing is after Component B');
-  assert.equal(testListSatelliteA.prev(), null, 'Nothing is before Component A');
-  assert.equal(testListSatelliteB.prev(), true, 'Component A is before Component B');
+  let satB = new ListSatellite(assert.componentB, satA);
 
+  assert.ok(satB.prev() === satA, 'The prev satellite is properly set');
+  assert.ok(satA.next() === satB, 'The next satellite is properly set on the previous satellite');
 });
 
-test('destroy works properly', (assert) => {
+test('ListSatellite.destroy works properly', (assert) => {
 
-  assert.expect(7);
+  assert.expect(8);
 
-  App.componentA.unregisterSatellite = function() {
-    assert.ok(true, 'The Component unregisterSatellite hook is called');
-  };
-  let testListSatellite = new ListSatellite(App.componentA, [App.componentA, App.componentB]);
+  let satA = new ListSatellite(assert.componentA);
+  let satB = new ListSatellite(assert.componentB, satA);
+  let satC = new ListSatellite(assert.componentC, satB);
 
-  testListSatellite.geography.destroy = function() {
-    assert.ok(true, 'geography.destroy hook called');
-  };
+  assert.ok(satB.prev() === satA, 'The prev satellite is properly set on the satellite');
+  assert.ok(satA.next() === satB, 'The next satellite is properly set on the previous satellite');
+  assert.ok(satB.next() === satC, 'The next satellite is properly set on the satellite');
+  assert.ok(satC.prev() === satB, 'The prev satellite is properly set on the next satellite');
 
-  testListSatellite.destroy();
+  satB.destroy();
 
-  assert.equal(testListSatellite.component, null, 'component destroyed');
-  assert.equal(testListSatellite.satellite, null, 'satellite destroyed');
-  assert.equal(testListSatellite.element, null, 'element destroyed');
-  assert.equal(testListSatellite.geography, null, 'geography destroyed');
-  assert.equal(testListSatellite.list, null, 'list destroyed');
+  assert.ok(satB.prev() === null, 'The prev satellite is properly unset on the satellite');
+  assert.ok(satA.next() === satC, 'The next satellite is properly updated on the previous satellite');
+  assert.ok(satB.next() === null, 'The next satellite is properly unset on the satellite');
+  assert.ok(satC.prev() === satA, 'The prev satellite is properly updated on the next satellite');
 
 });

@@ -16,7 +16,7 @@ const {
 
 const Collection = Component.extend({
   layout,
-  // tagName: 'vertical-collection',
+  tagName: 'vertical-collection',
 
   // you available as a positionalParam
   items: null,
