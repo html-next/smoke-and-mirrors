@@ -44,7 +44,6 @@ export default Component.extend({
    *
    */
   show() {
-    console.log('show!');
     if (this._contentInserted) {
       return;
     }
@@ -67,7 +66,6 @@ export default Component.extend({
    * to teardown the instance.
    */
   cull() {
-    console.log('cull!');
     if (!this._contentInserted) {
       return;
     }
