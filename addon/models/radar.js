@@ -9,8 +9,6 @@ const {
   run
   } = Ember;
 
-
-
 export default class Radar {
 
   constructor(state) {
