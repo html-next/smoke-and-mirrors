@@ -1,1 +1,1 @@
-export { default } from 'smoke-and-mirrors/components/smart-collection';
+export { default } from 'smoke-and-mirrors/components/smart-collection/component';

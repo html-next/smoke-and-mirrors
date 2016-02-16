@@ -1,7 +1,7 @@
 import Ember from 'ember';
-import keyForItem from '../utils/key-for-item';
-import ListRadar from '../models/list-radar';
-import layout from '../templates/components/smart-collection';
+import keyForItem from '../../utils/key-for-item';
+import ListRadar from '../../models/list-radar';
+import layout from './template';
 
 const {
   Component,
