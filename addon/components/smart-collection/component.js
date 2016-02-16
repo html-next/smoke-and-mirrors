@@ -14,6 +14,19 @@ const {
   SafeString
   } = Ember.Handlebars;
 
+const ITEM_LOCATIONS = [
+  'itemsAbove',
+  'itemsRendered',
+  'itemsBelow'
+];
+
+const ITEM_STATES = [
+  'Unknown',
+  'Culled',
+  'Prepared',
+  'Rendered'
+];
+
 const Collection = Component.extend({
   layout,
   tagName: 'vertical-collection',
@@ -37,81 +50,78 @@ const Collection = Component.extend({
   _virtualItemArray: null,
   _activeKeysCache: null,
 
-  _spacerAbove: null,
-  _spacerAboveStyle: computed('spacerAbove.width', 'spacerAbove.height', function() {
-    let dim = this.get('spacerAbove');
-    return new SafeString(`width: ${dim.width}; height: ${dim.height};`);
-  }),
-  spacerAbove: computed({
-    get() {
-      if (!this._spacerAbove) {
-        this._spacerAbove = {
-          height: '0px',
-          width: '100%'
-        };
-      }
-      return this._spacerAbove;
-    },
-    set(v) {
-      if (v) {
-        if (v.hasOwnProperty('height')) {
-          let height = v.height || 0;
-          this._spacerAbove.height = `${height}px`;
-        } else if (v.hasOwnProperty('width')) {
-          this._spacerAbove.width = `${v.width}px` || (v.width === '0px' ? 0 : '100%');
-        } else {
-          let height = v || 0;
-          this._spacerAbove.height = `${height}px`;
-        }
-      } else {
-        this._spacerAbove = {
-          height: '0px',
-          width: '100%'
-        };
-      }
+  spacerAbove: computed(function() {
+    let items = this.get('itemsAbove.[]');
+    let height = 0;
+    for (let i = 0; i < items.length; i++) {
+      height += items[i].geography.height;
     }
+    return new SafeString(`height: ${height}px;`);
   }),
 
-  _spacerBelow: null,
-  _spacerBelowStyle: computed('spacerBelow.width', 'spacerBelow.height', function() {
-    let dim = this.get('spacerBelow');
-    return new SafeString(`width: ${dim.width}; height: ${dim.height};`);
-  }),
-  spacerBelow: computed({
-    get() {
-      if (!this._spacerBelow) {
-        this._spacerBelow = {
-          height: '0px',
-          width: '100%'
-        };
-      }
-      return this._spacerBelow;
-    },
-    set(v) {
-      if (v) {
-        if (v.hasOwnProperty('height')) {
-          let height = v.height || 0;
-          this._spacerBelow.height = `${height}px`;
-        } else if (v.hasOwnProperty('width')) {
-          this._spacerBelow.width = `${v.width}px` || (v.width === '0px' ? 0 : '100%');
-        } else {
-          let height = v || 0;
-          this._spacerBelow.height = `${height}px`;
-        }
-      } else {
-        this._spacerBelow = {
-          height: '0px',
-          width: '100%'
-        };
-      }
+  spacerBelow: computed(function() {
+    let items = this.get('itemsBelow.[]');
+    let height = 0;
+    for (let i = 0; i < items.length; i++) {
+      height += items[i].geography.height;
+      console.log('adding height', items[i]);
     }
+    return new SafeString(`height: ${height}px;`);
   }),
 
   createItem(options) {
     options.scalar = this.get('bufferSize');
     const virtualItem = this.radar.register(options);
     virtualItem.zonesDidChange = (dX, dY, zones) => {
-      console.log('zone change!', virtualItem.key, dX, dY, zones);
+      let state = new Array(3);
+
+      // 0:unknown, 1:culled (3), 2:prepared (2), 3:rendered (0, 1)
+      // 0:above 1:screen 2:below
+
+      // culled
+      if (zones.y >= 2) {
+        state[2] = 1;
+        state[0] = 0;
+      // prepared
+      } else if (zones.y === 1) {
+        state[2] = 2;
+        state[0] = 0;
+      // rendered
+      } else if (zones.y === 0) {
+        state[2] = 3;
+        state[0] = 1;
+      // prepared
+      } else if (zones.y === -1) {
+        state[2] = 2;
+        state[0] = 2;
+      } else {
+        state[2] = 1;
+        state[0] = 2;
+      }
+/*
+      // culled
+      if (zones.x >= 2) {
+        state[2] = state[2] > 1 ? state[2] : 1;
+        state[1] = 1;
+        // prepared
+      } else if (zones.x === 1) {
+        state[2] = state[2] === 3 ? 3 : 2;
+        state[1] = 1;
+        // rendered
+      } else if (zones.x === 0) {
+        state[2] = 3;
+        state[1] = 0;
+      } else if (zones.x === -1) {
+        state[2] = state[2] === 3 ? 3 : 2;
+        state[1] = -1;
+      } else {
+        state[2] = state[2] > 1 ? state[2] : 1;
+        state[1] = -1;
+      }
+*/
+      let from = this._stateMap.get(virtualItem);
+      let instruction = { item: virtualItem, state: { from, to: state } };
+      this.queueItemRender(instruction);
     };
     return virtualItem;
   },
@@ -196,9 +206,28 @@ const Collection = Component.extend({
     this._renderQueue.push(virtualItem);
   },
 
+  shouldRender: true,
+
   _rendered: null,
   flushRenderQueue() {
+    let data = this.getProperties('itemsAbove', 'itemsBelow', 'itemsRendered');
+    let move;
 
+    while (move = this._renderQueue.shift()) {
+      if (!move.state.from || move.state.from[0] !== move.state.to[0]) {
+        console.log('move', move.state.from, move.state.to);
+        if (move.state.from) {
+          console.log('moving item from ' + ITEM_LOCATIONS[move.state.from[0]] + ' to ' + ITEM_LOCATIONS[move.state.to[0]]);
+          data[ITEM_LOCATIONS[move.state.from[0]]].removeObject(move.item);
+        } else {
+          console.log('moving item to ' + ITEM_LOCATIONS[move.state.to[0]]);
+        }
+        data[ITEM_LOCATIONS[move.state.to[0]]].addObject(move.item);
+      }
+      this._stateMap.set(move.item, move.state.to);
+    }
+    this.notifyPropertyChange('spacerAbove');
+    this.notifyPropertyChange('spacerBelow');
   },
 
   bufferSize: 0.25,
@@ -242,6 +271,8 @@ const Collection = Component.extend({
   itemsAbove: null,
   itemsBelow: null,
 
+  _stateMap: null,
+
   init() {
     this._super();
     this._virtualItemCache = new Map();
@@ -249,6 +280,8 @@ const Collection = Component.extend({
     this._virtualItemArray = [];
     this._renderQueue = [];
     this._rendered = null;
+
+    this._stateMap = new WeakMap();
 
     this.itemsRendered = Ember.A();
     this.itemsAbove = Ember.A();
