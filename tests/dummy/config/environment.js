@@ -1,4 +1,4 @@
-/* jshint node:true */
+/* jshint node: true */
 // jscs:disable
 /* global module */
 module.exports = function(environment) {

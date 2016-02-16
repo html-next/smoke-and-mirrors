@@ -1,3 +1,5 @@
+.idea
+.DS_Store
 /bower_components
 /config/ember-try.js
 /dist
@@ -14,3 +16,4 @@
 bower.json
 ember-cli-build.js
 testem.js
+testem.json
