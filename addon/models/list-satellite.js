@@ -6,7 +6,9 @@ export default class ListSatellite extends Satellite {
     super(options);
     this._nextSatellite = null;
     this._prevSatellite = previousSatellite;
-    previousSatellite._nextSatellite = this;
+    if (previousSatellite) {
+      previousSatellite._nextSatellite = this;
+    }
   }
 
   heightDidChange(dY) {

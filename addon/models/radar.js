@@ -2,43 +2,14 @@ import Ember from 'ember';
 import Satellite from './satellite';
 import Geography from './geography';
 import TweenLite from 'tweenlite';
-import jQuery from 'jquery';
+import Container from './container';
 
 const {
   guidFor,
   run
   } = Ember;
 
-function Container() {
-  Object.defineProperty(this, 'scrollTop', {
-    get: function() {
-      return window.scrollY ||
-        window.pageYOffset ||
-          document.body.scrollTop ||
-          document.documentElement.scrollTop;
-    },
-    set: function(v) {
-      return window.scrollY =
-        window.pageYOffset =
-        document.body.scrollTop =
-        document.documentElement.scrollTop = v;
-    }
-  });
-  Object.defineProperty(this, 'scrollLeft', {
-    get: function() {
-      return window.scrollX ||
-        window.pageXOffset ||
-        document.body.scrollLeft ||
-        document.documentElement.scrollLeft;
-    },
-    set: function(v) {
-      return window.scrollX =
-        window.pageXOffset =
-          document.body.scrollLeft =
-            document.documentElement.scrollLeft = v;
-    }
-  });
-}
+
 
 export default class Radar {
 
@@ -64,7 +35,7 @@ export default class Radar {
     this.sky = state.sky;
 
     this.planet = this.telescope ? new Geography(this.telescope) : null;
-    this.scrollContainer = this.telescope === window ? new Container() : this.telescope;
+    this.scrollContainer = this.telescope === window ? Container : this.telescope;
     this.skyline = this.sky ? new Geography(this.sky) : null;
 
     this.scrollX = this.scrollContainer ? this.scrollContainer.scrollLeft : 0;
@@ -303,7 +274,7 @@ export default class Radar {
     const {
       height,
       width
-    } = this.skyline;
+      } = this.skyline;
     const dY = height - _height;
     const dX = width - _width;
 
