@@ -36,11 +36,6 @@
   background: rgba(100, 230, 100, 0.4);
 }
 
-.sm_visualization-hidden {
-  position: absolute;
-  background: rgba(100, 230, 100, 0.2);
-}
-
 .sm_visualization-satellite {
   position: absolute;
   box-sizing: border-box;
@@ -70,11 +65,7 @@
   background: rgba(230, 230, 230, 0.6);
 }
 
-.sm_visualization-satellite[viewState="hidden"] {
-  background: rgba(230, 100, 230, 0.6);
-}
-
 .sm_visualization-satellite[viewState="visible"] {
-  background: rgba(0, 100, 230, 0.6);
+  background: rgba(230, 100, 230, 0.6);
 }
 

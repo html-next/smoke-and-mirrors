@@ -36,14 +36,6 @@ export default class Visualization {
     this.visBelow.className = 'sm_visualization-visible';
     this.container.appendChild(this.visBelow);
 
-    this.hiddenAbove = document.createElement('div');
-    this.hiddenAbove.className = 'sm_visualization-hidden';
-    this.container.appendChild(this.hiddenAbove);
-
-    this.hiddenBelow = document.createElement('div');
-    this.hiddenBelow.className = 'sm_visualization-hidden';
-    this.container.appendChild(this.hiddenBelow);
-
     document.body.appendChild(this.wrapper);
   }
 
@@ -108,20 +100,6 @@ export default class Visualization {
       left: planet.left,
       height: edges.visibleBottom - edges.viewportBottom
     });
-
-    Visualization.applyStyles(this.hiddenAbove, {
-      width: planet.width,
-      top: edges.invisibleTop,
-      left: planet.left,
-      height: edges.visibleTop - edges.invisibleTop
-    });
-
-    Visualization.applyStyles(this.hiddenBelow, {
-      width: planet.width,
-      top: edges.visibleBottom,
-      left: planet.left,
-      height: edges.invisibleBottom - edges.visibleBottom
-    });
   }
 
   makeSatellite() {
@@ -174,7 +152,7 @@ export default class Visualization {
       const element = sats[index];
 
       this.applySatelliteStyles(element, sat.geography);
-      element.setAttribute('viewState', sat.component.get('viewState'));
+      element.setAttribute('viewState', sat.component._contentInserted ? 'visible' : 'culled');
       element.innerText = sat.component.get('index');
       this.applySatelliteMirrorStyles(element.mirrorSatellite, sat.component.element, sat.geography);
       element.mirrorSatellite.innerText = sat.component.get('index');
