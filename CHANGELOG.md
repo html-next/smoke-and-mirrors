@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## 0.5.1
+
+### Pull Requests
+
+- [#102](https://github.com/runspired/smoke-and-mirrors/pull/102)  patch log output  *by [Chris Thoburn](https://github.com/runspired)*
+- [#104](https://github.com/runspired/smoke-and-mirrors/pull/104)  Include ember-getowner-polyfill in dependencies.  *by [Chris Thoburn](https://github.com/runspired)*
+
 ## 0.5.0
 
 ### Pull Requests
