@@ -45,7 +45,6 @@
     "ember-disable-prototype-extensions": "^1.0.0",
     "ember-disable-proxy-controllers": "^1.0.1",
     "ember-export-application-global": "^1.0.4",
-    "ember-getowner-polyfill": "1.0.0",
     "ember-resolver": "2.0.3",
     "ember-run-raf": "^1.1.0",
     "ember-suave": "1.2.3",
@@ -69,7 +68,8 @@
   "dependencies": {
     "ember-cli-htmlbars": "^1.0.1",
     "ember-async-image": "0.0.1",
-    "ember-cli-babel": "^5.1.5"
+    "ember-cli-babel": "^5.1.5",
+    "ember-getowner-polyfill": "^1.0.0"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
