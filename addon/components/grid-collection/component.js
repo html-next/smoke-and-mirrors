@@ -98,26 +98,26 @@ const Collection = Component.extend({
         state[2] = 1;
         state[0] = 2;
       }
-/*
-      // culled
-      if (zones.x >= 2) {
-        state[2] = state[2] > 1 ? state[2] : 1;
-        state[1] = 1;
-        // prepared
-      } else if (zones.x === 1) {
-        state[2] = state[2] === 3 ? 3 : 2;
-        state[1] = 1;
-        // rendered
-      } else if (zones.x === 0) {
-        state[2] = 3;
-        state[1] = 0;
-      } else if (zones.x === -1) {
-        state[2] = state[2] === 3 ? 3 : 2;
-        state[1] = -1;
-      } else {
-        state[2] = state[2] > 1 ? state[2] : 1;
-        state[1] = -1;
-      }
+      /*
+            // culled
+            if (zones.x >= 2) {
+              state[2] = state[2] > 1 ? state[2] : 1;
+              state[1] = 1;
+              // prepared
+            } else if (zones.x === 1) {
+              state[2] = state[2] === 3 ? 3 : 2;
+              state[1] = 1;
+              // rendered
+            } else if (zones.x === 0) {
+              state[2] = 3;
+              state[1] = 0;
+            } else if (zones.x === -1) {
+              state[2] = state[2] === 3 ? 3 : 2;
+              state[1] = -1;
+            } else {
+              state[2] = state[2] > 1 ? state[2] : 1;
+              state[1] = -1;
+            }
 */
       let from = this._stateMap.get(virtualItem);
       let instruction = { item: virtualItem, state: { from, to: state } };

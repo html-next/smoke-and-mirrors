@@ -11,7 +11,7 @@ module('Unit | Model | Satellite', {
 
     div.style.width = `${RELATIVE_UNIT}px`;
     div.style.height = `${RELATIVE_UNIT}px`;
-    div.style.position = "absolute";
+    div.style.position = 'absolute';
     div.style.top = `${(RELATIVE_UNIT + 1)}px`;
     div.style.left = `${(RELATIVE_UNIT + 1)}px`;
     document.body.appendChild(div);
@@ -43,10 +43,10 @@ test('resize returns adjustment', (assert) => {
   let satellite = new Satellite(assert.component);
 
   satellite.heightDidChange = function() {
-    assert.ok(true, "heightDidChange hook called");
+    assert.ok(true, 'heightDidChange hook called');
   };
   satellite.widthDidChange = function() {
-    assert.ok(true, "widthDidChange hook called");
+    assert.ok(true, 'widthDidChange hook called');
   };
 
   let noChangeResult = satellite.resize();
@@ -71,13 +71,13 @@ test('shift', (assert) => {
   let satellite = new Satellite(component);
 
   satellite.willShift = function() {
-    assert.ok(true, "willShift hook called");
+    assert.ok(true, 'willShift hook called');
   };
   satellite._shift = function() {
-    assert.ok(true, "_shift hook called");
+    assert.ok(true, '_shift hook called');
   };
   satellite.didShift = function() {
-    assert.ok(true, "didShift hook called");
+    assert.ok(true, 'didShift hook called');
   };
 
   satellite.shift(RELATIVE_UNIT, RELATIVE_UNIT);
@@ -91,10 +91,10 @@ test('_shift', (assert) => {
 
   satellite._shift(10, 10);
 
-  assert.equal(satellite.geography.left, RELATIVE_UNIT - 9, "left adjusted");
-  assert.equal(satellite.geography.right, RELATIVE_UNIT * 2 - 9, "right adjusted");
-  assert.equal(satellite.geography.bottom, RELATIVE_UNIT * 2 - 9, "bottom adjusted");
-  assert.equal(satellite.geography.top, RELATIVE_UNIT - 9, "top adjusted");
+  assert.equal(satellite.geography.left, RELATIVE_UNIT - 9, 'left adjusted');
+  assert.equal(satellite.geography.right, RELATIVE_UNIT * 2 - 9, 'right adjusted');
+  assert.equal(satellite.geography.bottom, RELATIVE_UNIT * 2 - 9, 'bottom adjusted');
+  assert.equal(satellite.geography.top, RELATIVE_UNIT - 9, 'top adjusted');
 
 });
 

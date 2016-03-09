@@ -50,7 +50,7 @@ test('ListSatellite should build appropriately', (assert) => {
   let satA = new ListSatellite(assert.componentA);
 
   assert.equal(satA.element.element, assert.componentA.element, "The Satellite.element VirtualElement was set from the component's element");
-  assert.equal(satA.radar, undefined, "radar initialized and not set");
+  assert.equal(satA.radar, undefined, 'radar initialized and not set');
 
 });
 
