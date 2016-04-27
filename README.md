@@ -1,4 +1,4 @@
-Smoke-and-mirrors
+smoke-and-mirrors
 =================
 
 [![npm version](https://badge.fury.io/js/smoke-and-mirrors.svg)](http://badge.fury.io/js/smoke-and-mirrors)
@@ -20,6 +20,11 @@ content it needs to focus on for layout is the content the user can see.
 It will try it's best to allow you to keep the conventions, structures, and layouts you want.
 
 
+## Install
+
+```bash
+ember install smoke-and-mirrors
+```
 
 ## Support, Questions, Collaboration
 
