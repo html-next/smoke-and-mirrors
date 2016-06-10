@@ -1,0 +1,5 @@
+@mixin element() {
+  position: relative;
+  min-height: 1px;
+  box-sizing: border-box;
+}

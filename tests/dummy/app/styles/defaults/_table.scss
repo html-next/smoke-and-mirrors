@@ -1,0 +1,64 @@
+table {
+  color: $theme-light-grey;
+  width: 100%;
+}
+
+scroll-horizontal {
+  display: block;
+  position: relative;
+  width: 100vw;
+  height: 100%;
+  overflow-x: scroll;
+}
+
+table.workout {
+  font-size: .7rem;
+  height: 100%;
+  position: relative;
+
+  h4 {
+    color: $theme-green;
+  }
+}
+
+.theme-orange {
+  color: $theme-orange;
+}
+
+.theme-green {
+  color: $theme-green;
+}
+
+table.main > tbody > tr {
+  height: 9rem;
+}
+
+table.main > tbody > tr > td {
+  border-right: 1px dotted $theme-grey;
+  border-bottom: 1px dotted $theme-grey;
+  padding: $gutter-padding;
+
+  &:first-of-type,
+  &:last-of-type{
+    color: $theme-orange;
+  }
+
+  input {
+    background: none;
+    border: none;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    color: $theme-light-grey;
+    font-size: .85rem;
+  }
+}
+table.main > tbody > tr:nth-of-type(even) {
+  background: lighten($theme-dark, 3%);
+}
+table.main > tbody > tr > td:nth-of-type(even) {
+  background: lighten($theme-dark, 6%);
+}
+table.main > tbody > td:last-of-type {
+  border-right: none;
+}

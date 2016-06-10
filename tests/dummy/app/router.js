@@ -6,8 +6,9 @@ const Router = Ember.Router.extend({
 });
 
 Router.map(function() {
-
-  this.route('examples', function() {
+  // neat demos
+  /*
+  this.route('demos', { path: 'examples' }, function() {
     this.route('dbmon');
     this.route('infinite-scroll');
     this.route('flexible-layout');
@@ -17,31 +18,36 @@ Router.map(function() {
     this.route('reduce-debug');
   });
 
-  this.route('mixins', function() {
-    this.route('queues');
-    this.route('photo-loader');
-    this.route('scroller');
-    this.route('in-viewport');
-    this.route('occlusion');
-    this.route('local-storage');
-    this.route('session');
-    this.route('extended-router');
-    this.route('stack');
-    this.route('html-gl');
+  // tutorials
+  this.route('guides');
+
+  // documentation
+  this.route('docs', function() {
+
+    this.route('services', function() {
+      this.route('in-viewport');
+      this.route('photo-loader');
+    });
+
+    this.route('available-components', function() {
+      this.route('vertical-collection');
+      this.route('pre-render');
+    });
+
   });
 
-  this.route('services', function() {
-    this.route('in-viewport');
-    this.route('photo-loader');
+  // routes for acceptance tests
+  this.route('tests', function() {
+    this.route('scroll-position');
   });
 
-  this.route('available-components', function() {
-    this.route('vertical-collection');
-    this.route('async-image');
-    this.route('pre-render');
-    this.route('html-gl');
-  });
+  // all routes
+  this.route('site-index');
 
+  // 404 handling
+  this.route('unicorn', { path: '*path' });
+  this.route('faq');
+  */
 });
 
 export default Router;

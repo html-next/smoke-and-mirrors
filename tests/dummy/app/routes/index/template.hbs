@@ -1,0 +1,26 @@
+<screen>
+  <page>
+    <hbox>
+      <box xs="3"></box>
+      <box xs="6">
+        {{#sm-collection values
+          showEdges=showEdges
+          as |bar index|}}
+          <box>
+            <h1>{{index}} {{bar.id}} {{bar.title}}</h1>
+            <p>{{bar.post}}</p>
+          </box>
+        {{else}}
+          <h2>You need Data</h2>
+        {{/sm-collection}}
+      </box>
+      <box xs="3">
+        <h1>Demo!</h1>
+        <button {{action "toggleData"}}>Toggle Data</button>
+        <button {{action "toggleEdges"}}>Toggle Edges</button>
+        <button {{action "loadMoreAbove"}}>Load Above</button>
+        <button {{action "loadMoreBelow"}}>Load Below</button>
+      </box>
+    </hbox>
+  </page>
+</screen>

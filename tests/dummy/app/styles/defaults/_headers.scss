@@ -1,0 +1,37 @@
+h1.title {
+  font-size: 4rem;
+  color: #fff;
+}
+h1 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: $theme-dark-grey;
+  line-height: 2rem;
+  margin-top: 1rem;
+  margin-bottom: .25rem;
+}
+
+h2.sub-title {
+  color: #fff;
+}
+
+h2 {
+  font-size: 1.25rem;
+  font-weight: normal;
+  color: $theme-dark-grey;
+}
+
+h3 {
+  font-size: 1rem;
+  color: $theme-grey;
+}
+
+h4 {
+  font-size: .85rem;
+  color: $theme-green;
+}
+
+p {
+  font-size: .75rem;
+  color: $theme-dark-grey;
+}

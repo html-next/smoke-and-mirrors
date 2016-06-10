@@ -1,0 +1,24 @@
+$theme-dark: #0d0d0d;
+$theme-orange: #ffa600;
+$theme-blue: #00e5dd;
+$theme-green: #3ead66;
+$theme-light-green: lighten($theme-green, 50%);
+$theme-magenta: #fd00ff;
+$theme-grey: #aaaaaa;
+$theme-dark-grey: #555555;
+$theme-light-grey: #eeeeee;
+
+$theme-colors: (
+  dark: $theme-dark,
+  orange: $theme-orange,
+  blue: $theme-blue,
+  green: $theme-green,
+  light-green: $theme-light-green,
+  magenta: $theme-magenta,
+  grey: $theme-grey,
+  dark-grey: $theme-dark-grey,
+  light-grey: $theme-light-grey
+);
+
+
+$gutter-padding: 5px;

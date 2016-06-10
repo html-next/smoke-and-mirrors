@@ -1,0 +1,10 @@
+button, .button {
+  color: darken($theme-green, 30%);
+  font-weight: bold;
+  display: inline-block;
+  background: $theme-green;
+  border: 1px solid lighten($theme-green, 10%);
+  font-size: .75em;
+  padding: .25em .5em;
+  border-radius: 1px;
+}
