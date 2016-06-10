@@ -322,17 +322,23 @@ export default class Radar {
   destroy() {
     this._teardownHandlers();
     this._teardownHooks();
-    this.satellites.forEach((satellite) => {
-      satellite.destroy();
-    });
+    if(this.satellites) {
+      this.satellites.forEach((satellite) => {
+        satellite.destroy();
+      });
+    }
     this.satellites = null;
     this.telescope = null;
     this.sky = null;
 
-    this.planet.destroy();
+    if(this.planet) {
+      this.planet.destroy();
+    }
     this.planet = null;
     this.scrollContainer = null;
-    this.skyline.destroy();
+    if(this.skyline) {
+      this.skyline.destroy();
+    }
     this.skyline = null;
   }
 
