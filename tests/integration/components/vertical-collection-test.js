@@ -49,6 +49,28 @@ test('The Collection Renders when content is empty', function(assert) {
   });
 });
 
+test('Adds classes to vertical-items', function(assert) {
+  assert.expect(2);
+
+  // Set any properties with this.set('myProperty', 'value');
+  // Handle any actions with this.on('myAction', function(val) { ... });
+  this.set('items', Ember.A([Ember.Object.create({ text: 'b' })]));
+
+  // Template block usage:
+  this.render(hbs`
+  <div style="height: 500px; width: 500px;">
+    {{#vertical-collection content=items itemClassNames='cool classes' as |item|}}
+      {{item.text}}
+    {{/vertical-collection}}
+  </div>
+  `);
+
+  return wait().then(() => {
+    assert.ok(this.$('vertical-item').hasClass('cool'), 'should have cool class');
+    assert.ok(this.$('vertical-item').hasClass('classes'), 'should have classes class');
+  });
+});
+
 /*
 test("The Collection Reveals it's children when `renderAllInitially` is true.", function(assert) {
   assert.expect(1);

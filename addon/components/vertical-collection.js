@@ -45,7 +45,12 @@ const VerticalCollection = Component.extend(OcclusionMixin, {
    * calculations.  This works for height or width changes, it's value is
    * never actually used.
    */
-  containerSize: null
+  containerSize: null,
+
+  /*
+   * Classes to add to the `vertical-item`
+   */
+  itemClassNames: ''
 
 });
 

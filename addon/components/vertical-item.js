@@ -19,7 +19,6 @@ export default Component.extend({
   tagName: 'vertical-item',
   itemTagName: 'vertical-item',
 
-  heightProperty: 'minHeight',
   alwaysUseDefaultHeight: false,
 
   classNames: ['vertical-item'],
@@ -47,12 +46,11 @@ export default Component.extend({
     if (this._contentInserted) {
       return;
     }
-    const heightProp = this.heightProperty;
 
     this._contentInserted = true;
     this.set('contentInserted', true);
     if (!this.alwaysUseDefaultHeight) {
-      this.element.style[heightProp] = null;
+      this.element.style.height = undefined;
     }
     this.updateHeight();
   },
@@ -69,11 +67,13 @@ export default Component.extend({
     if (!this._contentInserted) {
       return;
     }
-    const heightProp = this.heightProperty;
 
     this.updateHeight();
     if (!this.alwaysUseDefaultHeight && this.element) {
-      this.element.style[heightProp] = `${this.satellite.geography.height}px`;
+      if (this.setHeightProp) {
+        this.element.style.height = `${this.satellite.geography.height}px`;
+      }
+      this.element.style.minHeight = `${this.satellite.geography.height}px`;
     }
 
     this._contentInserted = false;
@@ -90,16 +90,18 @@ export default Component.extend({
   },
 
   defaultHeight: 75,
-  index: null,
-  content: null,
+  index: undefined,
+  content: undefined,
+  setHeightProp: false,
 
-  radar: null,
-  satellite: null,
+  radar: undefined,
+  satellite: undefined,
+  registry: undefined,
   registerSatellite(satellite) {
     this.satellite = satellite;
   },
   unregisterSatellite() {
-    this.satellite = null;
+    this.satellite = undefined;
   },
 
   _height: 0,
@@ -112,14 +114,19 @@ export default Component.extend({
   willInsertElement() {
     this._super();
     const _height = this.get('_height');
-    const heightProp = this.get('heightProperty');
     let defaultHeight = this.get('defaultHeight');
 
     if (typeof defaultHeight === 'number') {
       defaultHeight = `${defaultHeight}px`;
     }
 
-    this.element.style[heightProp] = _height ? `${_height}px` : defaultHeight;
+    let height = _height ? `${_height}px` : defaultHeight;
+
+    this.element.style.minHeight = height;
+
+    if (this.setHeightProp) {
+      this.element.style.height = height;
+    }
   },
 
   willDestroyElement() {
@@ -130,7 +137,7 @@ export default Component.extend({
     if (this.radar) {
       this.radar.unregister(this);
     }
-    this.satellite = null;
+    this.satellite = undefined;
   },
 
   willDestroy() {
@@ -140,8 +147,8 @@ export default Component.extend({
     if (this.radar) {
       this.radar.unregister(this);
     }
-    this.satellite = null;
-    this.registry = null;
+    this.satellite = undefined;
+    this.registry = undefined;
   },
 
   init() {
@@ -155,7 +162,7 @@ export default Component.extend({
     const isTableChild = tag === 'tr' || tag === 'td' || tag === 'th';
 
     // table children don't respect min-height :'(
-    this.heightProperty = isTableChild || this.alwaysUseDefaultHeight ? 'height' : 'minHeight';
+    this.setHeightProp = isTableChild || this.alwaysUseDefaultHeight;
     this.register(this);
   }
 
