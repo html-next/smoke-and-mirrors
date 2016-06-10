@@ -3,6 +3,14 @@ Changelog
 
 ## 0.5.3
 
+## 0.5.2
+
+### Pull Requests
+
+- [#105](https://github.com/runspired/smoke-and-mirrors/pull/105)  Fixing links to runspired blog  *by [pete_the_pete](https://github.com/pete-the-pete)*
+- [#107](https://github.com/runspired/smoke-and-mirrors/pull/107)  fix addon dependency issue  *by [Chris Thoburn](https://github.com/runspired)*
+
+
 ## 0.5.1
 
 ### Pull Requests
