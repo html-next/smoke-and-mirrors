@@ -13,11 +13,11 @@ situations by providing components and primitives for performant lists and `svel
 
 Your web page is a universe, your viewport is the scene. Much like you wouldn't expect a video game to render
 out-of-scene content, your application should smartly cull the content it doesn't need to care about.  Trimming
-excess content let's the browser perform both initial renders and re-renders at far higher frame-rates, as the only
+excess content lets the browser perform both initial renders and re-renders at far higher frame-rates, as the only
 content it needs to focus on for layout is the content the user can see.
 
 `Smoke-and-mirrors` augments your existing app, it doesn't ask you to rewrite layouts or logic in order to use it.
-It will try it's best to allow you to keep the conventions, structures, and layouts you want.
+It will try its best to allow you to keep the conventions, structures, and layouts you want.
 
 
 
