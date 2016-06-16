@@ -1,5 +1,5 @@
 import Radar from './radar';
-import VirtualItem from 'virtual-item';
+import VirtualItem from './virtual-item';
 import TweenLite from 'tweenlite';
 
 export default class ListRadar extends Radar {

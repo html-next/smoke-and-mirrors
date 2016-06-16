@@ -3,6 +3,11 @@ import Satellite from './satellite';
 import Geography from './geography';
 import TweenLite from 'tweenlite';
 import Container from './container';
+import SUPPORTS_PASSIVE from '../utils/supports-passive';
+import {
+  addScrollHandler,
+  removeScrollHandler
+} from '../utils/scroll-handler';
 
 const {
   guidFor,
@@ -293,11 +298,11 @@ export default class Radar {
     });
   }
 
-  filterMovement() {
+  filterMovement(offsets) {
     // cache the scroll offset, and discard the cycle if
     // movement is within (x) threshold
-    const scrollY = this.scrollContainer.scrollTop;
-    const scrollX = this.scrollContainer.scrollLeft;
+    const scrollY = offsets.top;
+    const scrollX = offsets.left;
     const _scrollY = this.scrollY;
     const _scrollX = this.scrollX;
 
@@ -312,11 +317,11 @@ export default class Radar {
     }
   }
 
-  updateScrollPosition() {
+  updateScrollPosition(offsets) {
     const _posX = this.posX;
     const _posY = this.posY;
-    const posX = document.body.scrollLeft;
-    const posY = document.body.scrollTop;
+    const posX = offsets.left;
+    const posY = offsets.top;
 
     if (this.isEarthquake(_posY, posY) || this.isEarthquake(_posX, posX)) {
       this.posY = posY;
@@ -347,32 +352,36 @@ export default class Radar {
     this._nextScroll = null;
     this._nextAdjustment = null;
 
-    this._scrollHandler = () => {
+    this._scrollHandler = (offsets) => {
       if (this.isTracking) {
-        this._nextScroll = run.scheduleOnce('sync', this, this.filterMovement);
+        this._nextScroll = run.scheduleOnce('sync', this, this.filterMovement, offsets);
       }
     };
     this._resizeHandler = () => {
       this._nextResize = run.debounce(this, this.resizeSatellites, this.resizeDebounce);
     };
-    this._scrollAdjuster = () => {
-      this._nextAdjustment = run.scheduleOnce('sync', this, this.updateScrollPosition);
+    this._scrollAdjuster = (offsets) => {
+      this._nextAdjustment = run.scheduleOnce('sync', this, this.updateScrollPosition, offsets);
     };
 
-    window.addEventListener('resize', this._resizeHandler, true);
-    this.telescope.addEventListener('scroll', this._scrollHandler, true);
+    let handlerOpts = SUPPORTS_PASSIVE ? { capture: true, passive: true } : true;
+
+    window.addEventListener('resize', this._resizeHandler, handlerOpts);
+    addScrollHandler(this.telescope === window ? this.scrollContainer : this.telescope, this._scrollHandler);
     if (this.telescope !== window) {
-      window.addEventListener('scroll', this._scrollAdjuster, true);
+      addScrollHandler(this.scrollContainer, this._scrollAdjuster);
     }
   }
 
   _teardownHandlers() {
-    window.removeEventListener('resize', this._resizeHandler, true);
+    let handlerOpts = SUPPORTS_PASSIVE ? { capture: true, passive: true } : true;
+
+    window.removeEventListener('resize', this._resizeHandler, handlerOpts);
     if (this.telescope) {
-      this.telescope.removeEventListener('scroll', this._scrollHandler, true);
+      removeScrollHandler(this.telescope === window ? this.scrollContainer : this.telescope, this._scrollAdjuster);
     }
     if (this.telescope !== window) {
-      window.removeEventListener('scroll', this._scrollAdjuster, true);
+      removeScrollHandler(this.scrollContainer, this._scrollAdjuster);
     }
     run.cancel(this._nextResize);
     run.cancel(this._nextScroll);

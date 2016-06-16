@@ -1,10 +1,41 @@
 button, .button {
-  color: darken($theme-green, 30%);
+  color: darken($theme-dark-grey, 30%);
+  background: $theme-dark-grey;
+  border: 1px solid lighten($theme-dark-grey, 10%);
   font-weight: bold;
   display: inline-block;
-  background: $theme-green;
-  border: 1px solid lighten($theme-green, 10%);
-  font-size: .75em;
-  padding: .25em .5em;
-  border-radius: 1px;
+  font-size: 1em;
+  padding: .5em .75em;
+  border-radius: .1em;
+  margin: .5em auto;
+  cursor: pointer;
 }
+
+@each $name, $color in $theme-colors {
+  .btn-#{$name} {
+    color: darken($color, 35%);
+    background: $color;
+    border: 1px solid lighten($color, 10%);
+
+    &:hover {
+      color: darken($color, 25%);
+      background: lighten($color, 10%);
+      border: 1px solid lighten($color, 20%);
+    }
+
+    &:focus {
+      outline: none;
+      border: 1px solid lighten($color, 30%);
+    }
+
+    &:active {
+      color: darken($color, 20%);
+      background: lighten($color, 15%);
+      border: 1px solid lighten($color, 25%);
+      outline: none;
+      padding: .55em .65em .45em .85em;
+    }
+  }
+}
+
+

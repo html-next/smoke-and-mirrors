@@ -7,6 +7,7 @@ $theme-magenta: #fd00ff;
 $theme-grey: #aaaaaa;
 $theme-dark-grey: #555555;
 $theme-light-grey: #eeeeee;
+$theme-light: #f5f5f5;
 
 $theme-colors: (
   dark: $theme-dark,
@@ -17,7 +18,8 @@ $theme-colors: (
   magenta: $theme-magenta,
   grey: $theme-grey,
   dark-grey: $theme-dark-grey,
-  light-grey: $theme-light-grey
+  light-grey: $theme-light-grey,
+  light: $theme-light
 );
 
 

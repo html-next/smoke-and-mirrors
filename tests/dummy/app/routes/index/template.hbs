@@ -1,8 +1,7 @@
 <screen>
   <page>
     <hbox>
-      <box xs="3"></box>
-      <box xs="6">
+      <box xs="9" sm="10" md="11">
         {{#sm-collection values
           showEdges=showEdges
           as |bar index|}}
@@ -10,16 +9,20 @@
             <h1>{{index}} {{bar.id}} {{bar.title}}</h1>
             <p>{{bar.post}}</p>
           </box>
+
         {{else}}
-          <h2>You need Data</h2>
+
+          <centered>
+            <h2>You need Data</h2>
+          </centered>
         {{/sm-collection}}
       </box>
-      <box xs="3">
-        <h1>Demo!</h1>
-        <button {{action "toggleData"}}>Toggle Data</button>
-        <button {{action "toggleEdges"}}>Toggle Edges</button>
-        <button {{action "loadMoreAbove"}}>Load Above</button>
-        <button {{action "loadMoreBelow"}}>Load Below</button>
+      <box xs="3" sm="2" md="1" class="bg-dark">
+        <h1 class="text-light">Demo!</h1>
+        <button {{action "toggleData"}} class="btn-orange">Toggle Data</button>
+        <button {{action "toggleEdges"}} class="btn-orange">Toggle Edges</button>
+        <button {{action "loadMoreAbove"}} class="btn-orange">Load Above</button>
+        <button {{action "loadMoreBelow"}} class="btn-orange">Load Below</button>
       </box>
     </hbox>
   </page>
