@@ -1,0 +1,9 @@
+<div style="{{currentState.styles.wrapper}}">
+  <div style="{{currentState.styles.content}}">
+    {{#each actualizedItems key='@identity' as |item index|~}}
+      {{yield item index}}
+    {{else}}
+      {{yield to="inverse"}}
+    {{/each}}
+  </div>
+</div>

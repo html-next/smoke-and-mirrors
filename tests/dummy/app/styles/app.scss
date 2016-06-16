@@ -1,0 +1,87 @@
+@import 'variables';
+@import 'dbmon';
+@import 'defaults/index';
+@import 'mixins/index';
+
+body {
+  font-size: 125%;
+  margin: 0;
+  font-family: oxygen, "Helvetica Neue", "Arial", "SansSerif";
+  min-height: 100%;
+  position: relative;
+  width: 100%;
+}
+
+.site-intro {
+  border-bottom: 1px solid darken($theme-green, 5%);
+}
+
+p {
+  font-size: .85rem;
+  line-height: 1.2em;
+}
+
+.site-banner {
+
+  h1, h3 {
+    margin: 0;
+    padding: $gutter-padding;
+  }
+
+  h1 a {
+    color: $theme-green;
+    text-decoration: none;
+
+    &:visited,
+    &:hover,
+    &:focus,
+    &:active,
+    &.active {
+      color: $theme-green;
+      text-decoration: none;
+    }
+  }
+
+  h3 a {
+    font-weight: normal;
+    color: lighten($theme-green, 30%);
+
+    &:visited {
+      color: lighten($theme-green, 20%);
+    }
+
+    &:hover,
+    &:focus {
+      color: $theme-green;
+      text-decoration: none;
+    }
+
+
+    &:active, &.active {
+      color:  $theme-green;
+      text-decoration: none;
+    }
+
+  }
+
+}
+
+.has-site-banner {
+  height: calc(100vh - 3rem);
+}
+
+.liquid-container,
+.liquid-child {
+  @include element();
+  @include flexDisplay();
+  @include flexWrap(wrap);
+  @include flexDirection(row);
+  @include flex(1 0 auto);
+  max-width: 100%;
+}
+
+.hljs {
+  padding: 1em;
+  margin-bottom: 2em;
+  font-size: 1rem;
+}

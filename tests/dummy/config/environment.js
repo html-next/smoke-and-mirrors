@@ -1,4 +1,4 @@
-/* jshint node:true */
+/* jshint node: true */
 // jscs:disable
 /* global module */
 module.exports = function(environment) {
@@ -6,7 +6,7 @@ module.exports = function(environment) {
 
   var ENV = {
     modulePrefix: 'dummy',
-    podModulePrefix: 'dummy/screens',
+    podModulePrefix: 'dummy/routes',
     environment: environment,
     baseURL: '/',
     locationType: 'hash',
@@ -15,7 +15,7 @@ module.exports = function(environment) {
       EXTEND_PROTOTYPES: true
     },
 
-    VERSION: '0.4.4',
+    VERSION: '1.0.0@alpha',
 
     APP: {
       // Here you can pass flags/options to your application instance

@@ -1,7 +1,7 @@
 {
   "name": "smoke-and-mirrors",
   "version": "0.5.3",
-  "description": "Ambitious infinite-scroll and rendering for ambitious applications.",
+  "description": "Ambitious infinite-scroll and svelte rendering for ambitious applications.",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -41,10 +41,13 @@
     "ember-disable-prototype-extensions": "^1.1.0",
     "ember-disable-proxy-controllers": "^1.0.1",
     "ember-export-application-global": "^1.0.5",
+    "ember-getowner-polyfill": "1.0.1",
     "ember-load-initializers": "^0.5.1",
-    "ember-resolver": "^2.0.3",
+    "ember-resolver": "2.0.3",
     "ember-run-raf": "^1.1.2",
-    "ember-suave": "1.2.3",
+    "ember-suave": "2.0.1",
+    "ember-tweenlite": "1.0.1",
+    "flexi": "^1.1.9",
     "jscs": "2.7.0",
     "loader.js": "^4.0.1"
   },
@@ -53,6 +56,7 @@
     "infinite",
     "infinite-scroll",
     "collection",
+    "svelte",
     "grid",
     "list-view",
     "recycling",
@@ -63,8 +67,10 @@
   ],
   "dependencies": {
     "ember-cli-htmlbars": "^1.0.3",
-    "ember-getowner-polyfill": "^1.0.0",
+    "ember-cli-sass": "5.3.0",
     "rsvp": "^3.2.1",
+    "chalk": "^1.1.3",
+    "debug": "^2.2.0",
     "ember-cli-babel": "^5.1.6"
   },
   "ember-addon": {

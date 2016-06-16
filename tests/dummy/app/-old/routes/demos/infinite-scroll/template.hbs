@@ -1,0 +1,42 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-5">
+            <h3>Demo</h3>
+            <div class="table-wrapper dark">
+              {{!- BEGIN-SNIPPET smart-collection-example }}
+              {{#smart-collection
+                model.numbers
+                itemDimensions=defaultDimensions
+                class="make-me-tall"
+                trustDefaultDimensions=true
+                firstReached="loadAbove"
+                lastReached="loadBelow"
+                as |item index|
+              }}
+                  <div class="image-slide">
+                    {{examples/infinite-scroll/components/number-slide
+                      number=item.number index=index}}
+                  </div>
+              {{/smart-collection}}
+              {{!- END-SNIPPET }}
+            </div>
+        </div>
+        <div class="col-sm-7">
+            <h3>Infinite Scroll</h3>
+            <p>
+                The Vertical Collection can be used to quickly build a robust infinite scroll.
+            </p>
+          <p>
+              Your infinite scroll can be bi-directional, loading new content above or
+              below.
+          </p>
+          <p>
+              Combined with `idForFirstItem`, this makes it very easy to load a user
+              in-media-res: ideal for caching their position in a long feed for when
+              they return.
+          </p>
+            <h4>Code for Demo</h4>
+          {{code-snippet name="smart-collection-example.hbs"}}
+        </div>
+    </div>
+</div>

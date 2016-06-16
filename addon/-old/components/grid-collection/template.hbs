@@ -1,0 +1,24 @@
+<div style="{{state.styles.wrapper}}">
+  <div style="{{state.styles.content}}">
+    {{#if manager}} {{!-- Wrap items in a manager  --}}
+      {{#component manager}}
+        {{#each actualizedItems key='@identity' as |item index|~}}
+          {{~#if shouldRender~}}
+            {{~yield item index~}}
+          {{~/if~}}
+        {{else}}
+          {{yield to="inverse"}}
+        {{/each}}
+      {{/component}}
+
+    {{else}} {{!-- Output inline items --}}
+      {{#each actualizedItems key='@identity' as |item index|~}}
+        {{~#if shouldRender~}}
+          {{~yield item index~}}
+        {{~/if~}}
+      {{else}}
+        {{yield to="inverse"}}
+      {{/each}}
+    {{/if}}
+  </div>
+</div>

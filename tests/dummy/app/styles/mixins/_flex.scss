@@ -1,0 +1,78 @@
+// https://f.cloud.github.com/assets/284476/516126/49b8cd6e-be9c-11e2-964d-253a303f8f7b.png
+// https://github.com/philipwalton/flexbugs
+
+@mixin flex($values) {
+  -webkit-box-flex: $values;
+  -moz-box-flex:  $values;
+  -webkit-flex:  $values;
+  -ms-flex:  $values;
+  flex:  $values;
+}
+
+@mixin flexDisplay {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+@mixin flexWrap($val) {
+  -webkit-flex-wrap: $val;
+  -ms-flex-wrap: $val;
+  flex-wrap: $val;
+}
+
+@mixin flexAlignItems($val) {
+  -webkit-box-align: $val;
+  -webkit-align-items: $val;
+  -ms-flex-align: $val;
+  align-items: $val;
+}
+
+@mixin flexAlignSelf($val) {
+  -ms-flex-item-align: $val;
+  align-self: $val;
+}
+
+@function getJustifyValue($val) {
+  @if $val == space-between {
+    @return justify;
+  }
+  @if $val == space-around {
+    @return distribute;
+  }
+  @if $val == flex-start {
+    @return start;
+  }
+  @if $val == flex-end {
+    @return end;
+  }
+  @if $val == center {
+    @return center;
+  }
+  @return $val;
+}
+
+@mixin flexJustify($val) {
+  $adjVal: getJustifyValue($val);
+  -webkit-box-pack: $adjVal;
+  -moz-box-pack: $adjVal;
+  -ms-flex-pack: $adjVal;
+  -webkit-justify-content: $val;
+  justify-content: $val;
+}
+
+
+
+@mixin flexOrder($val) {
+  -webkit-box-ordinal-group: $val;
+  -moz-box-ordinal-group: $val;
+  -ms-flex-order: $val;
+  -webkit-order: $val;
+  order: $val;
+}
+
+@mixin flexDirection($direction: column) {
+  -webkit-flex-direction: $direction;
+  flex-direction: $direction;
+}
