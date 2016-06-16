@@ -1,3 +1,4 @@
+import EmptyObject from '../ember/empty-object';
 const MAX_ARRAY_SIZE = 200;
 
 export default class CacheList {
@@ -6,7 +7,7 @@ export default class CacheList {
     this.length = 0;
     this._indeces = new Array(MAX_ARRAY_SIZE);
     this._values = new Array(MAX_ARRAY_SIZE);
-    this._map = new Map();
+    this._map = undefined;
   }
 
   get(key) {
@@ -41,6 +42,7 @@ export default class CacheList {
       }
 
       for (let i = 0; i < MAX_ARRAY_SIZE; i++) {
+        this._map = typeof Map !== 'undefined' ? new Map() : new EmptyObject();
         this._map.set(this._indeces[i], this._values[i]);
       }
       this._indeces = undefined;

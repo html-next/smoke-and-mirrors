@@ -11,10 +11,9 @@
  * This singleton class provides a cross-browser way
  * to access and set the scrollTop and scrollLeft properties.
  *
- * This class should potentially handle geography and
- * scroll handlers as well.
  */
 function Container() {
+
   Object.defineProperty(this, 'scrollTop', {
     get() {
       return window.scrollY ||
@@ -29,6 +28,7 @@ function Container() {
             document.documentElement.scrollTop = v;
     }
   });
+
   Object.defineProperty(this, 'scrollLeft', {
     get() {
       return window.scrollX ||
@@ -43,6 +43,27 @@ function Container() {
             document.documentElement.scrollLeft = v;
     }
   });
+
 }
+
+Container.prototype.addEventListener = function addEventListener(event, handler, options) {
+  return window.addEventListener(event, handler, options);
+};
+
+Container.prototype.removeEventListener = function addEventListener(event, handler, options) {
+  return window.removeEventListener(event, handler, options);
+};
+
+Container.prototype.getBoundingClientRect = function getBoundingClientRect() {
+  return {
+    height: window.innerHeight,
+    width: window.innerWidth,
+    top: 0,
+    left: 0,
+    right: window.innerWidth,
+    bottom: window.innerHeight
+  };
+};
+
 
 export default new Container();

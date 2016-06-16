@@ -3,12 +3,12 @@ import VirtualElement from './element';
 
 class Satellite {
 
-  constructor({ id, radar, element, dimensions:defaultDimensions, scalar }) {
+  constructor({ key, radar, element, dimensions:defaultDimensions, scalar }) {
     this.isVirtual = !!element;
     this.radar = radar;
     this.element = new VirtualElement(defaultDimensions, element);
     this.geography = new Geography(this.element);
-    this.key = id;
+    this.key = key;
     this.scalar = scalar;
   }
 

@@ -6,13 +6,35 @@ export default class ListRadar extends Radar {
 
   register(options) {
     options.radar = this;
+    options.previousItem = this.length ? this.satellites[this.length - 1] : undefined;
+
     const satellite = new VirtualItem(options);
-    this.satellites.push(satellite);
+
+    this._push(satellite);
     return satellite;
   }
 
+  unregister(component) {
+    const key = guidFor(component);
+
+    if (!this.satellites) {
+      return;
+    }
+
+    const satellite = this.satellites.find((sat) => {
+      return sat.key === key;
+    });
+
+    if (satellite) {
+      const index = this.satellites.indexOf(satellite);
+
+      this.satellites.splice(index, 1);
+      satellite.destroy();
+    }
+  }
+
   getSatelliteByKey(key) {
-    for (let i = 0; i < this.satellites.length; i++) {
+    for (let i = 0; i < this.length; i++) {
       if (this.satellites[i].key === key) {
         return this.satellites[i];
       }
@@ -21,7 +43,7 @@ export default class ListRadar extends Radar {
   }
 
   scrollToKey(key, jumpTo) {
-    if (!this.scrollContainer) {
+    if (!this.telescope) {
       return false;
     }
     this.killTween();
@@ -53,13 +75,14 @@ export default class ListRadar extends Radar {
   }
 
   _resize() {
-    this.satellites.forEach((c) => {
-      const change = c.resize();
+    for (let i = 0; i < this.length; i++) {
+      let satellite = this.satellites[i];
+      const change = satellite.resize();
 
       if (change) {
-        ListRadar.adjustSatelliteList(c, change);
+        ListRadar.adjustSatelliteList(satellite, change);
       }
-    });
+    }
   }
 
   _adjust(satellite, change) {
@@ -71,5 +94,4 @@ export default class ListRadar extends Radar {
       satellite.shift(change.dY, change.dX);
     }
   }
-
 }

@@ -4,7 +4,7 @@ export default class VirtualItem extends Satellite {
 
   constructor(options) {
     super(options);
-    this._nextSatellite = null;
+    this._nextSatellite = undefined;
     this._prevSatellite = options.previousItem;
     if (this._prevSatellite) {
       this._prevSatellite._nextSatellite = this;

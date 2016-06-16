@@ -1,27 +1,17 @@
-function getRect(element) {
-  if (element === window) {
-    return {
-      height: window.innerHeight,
-      width: window.innerWidth,
-      top: 0,
-      left: 0,
-      right: window.innerWidth,
-      bottom: window.innerHeight
-    };
-  }
-
-  return element.getBoundingClientRect();
-}
 
 export default class Geography {
 
   constructor(element, state) {
     this.element = element;
+
     this.setState(state);
   }
 
   setState(state) {
-    state = state || getRect(this.element);
+    state = state || this.element.getBoundingClientRect();
+
+    // copying over ensures we preserve shape from outside sources
+    // and enables write ops as ClientRect can't be written
     this.top = state.top || 0;
     this.bottom = state.bottom || 0;
     this.left = state.left || 0;
@@ -42,7 +32,7 @@ export default class Geography {
   }
 
   destroy() {
-    this.element = null;
+    this.element = undefined;
   }
 
   /*

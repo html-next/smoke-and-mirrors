@@ -1,4 +1,4 @@
-import CacheList from './cache-list';
+import CacheList from '../../cache-list';
 
 const DEFAULT_ARRAY_SIZE = 10;
 
@@ -24,7 +24,7 @@ export class ScrollHandler {
       this.elements[index] = element;
       this.handlers.set(element, { top: undefined, left: undefined, handlers: [handler] });
     } else {
-      let handlers = this.handlers.get(element);
+      let handlers = this.handlers.get(element).handlers;
 
       handlers.push(handler);
     }

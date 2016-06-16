@@ -4,7 +4,7 @@ export default class ListSatellite extends Satellite {
 
   constructor(options, previousSatellite) {
     super(options);
-    this._nextSatellite = null;
+    this._nextSatellite = undefined;
     this._prevSatellite = previousSatellite;
     if (previousSatellite) {
       previousSatellite._nextSatellite = this;
@@ -16,11 +16,11 @@ export default class ListSatellite extends Satellite {
   }
 
   next() {
-    return this._nextSatellite || null;
+    return this._nextSatellite;
   }
 
   prev() {
-    return this._prevSatellite || null;
+    return this._prevSatellite;
   }
 
   destroy() {
@@ -31,8 +31,8 @@ export default class ListSatellite extends Satellite {
     if (this._prevSatellite) {
       this._prevSatellite._nextSatellite = this._nextSatellite;
     }
-    this._nextSatellite = null;
-    this._prevSatellite = null;
+    this._nextSatellite = undefined;
+    this._prevSatellite = undefined;
   }
 
 }
