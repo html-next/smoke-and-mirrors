@@ -273,17 +273,17 @@ export default class Radar {
     this._nextScroll = null;
     this._nextAdjustment = null;
 
-    this._scrollHandler = () => {
+    this._scrollHandler = run.bind(this, () => {
       if (this.isTracking) {
         this._nextScroll = run.scheduleOnce('sync', this, this.filterMovement);
       }
-    };
-    this._resizeHandler = () => {
+    });
+    this._resizeHandler = run.bind(this, () => {
       this._nextResize = run.debounce(this, this.resizeSatellites, this.resizeDebounce);
-    };
-    this._scrollAdjuster = () => {
+    });
+    this._scrollAdjuster = run.bind(this, () => {
       this._nextAdjustment = run.scheduleOnce('sync', this, this.updateScrollPosition);
-    };
+    });
 
     window.addEventListener('resize', this._resizeHandler, true);
     this.telescope.addEventListener('scroll', this._scrollHandler, true);
