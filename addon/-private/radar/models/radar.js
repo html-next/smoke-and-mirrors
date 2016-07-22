@@ -114,7 +114,7 @@ export default class Radar {
   }
 
   register(component) {
-    let sat = new Satellite({
+    let sat = Satellite.create({
       component,
       dimensions: undefined,
       element: component.element,

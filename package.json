@@ -62,10 +62,11 @@
     "ember-addon"
   ],
   "dependencies": {
+    "ember-cli-babel": "^5.1.6",
     "ember-cli-htmlbars": "^1.0.3",
     "ember-getowner-polyfill": "^1.0.0",
-    "rsvp": "^3.2.1",
-    "ember-cli-babel": "^5.1.6"
+    "perf-primitives": "0.0.4",
+    "rsvp": "^3.2.1"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"

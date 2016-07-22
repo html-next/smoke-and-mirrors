@@ -1,12 +1,20 @@
 import Geography from './geography';
 import VirtualElement from './element';
+import FastArray from 'perf-primitives/fast-array';
+import noop from '../utils/noop-fn';
 
-class Satellite {
+const SAT_POOL = new FastArray(200, 'Satellite Pool');
 
-  constructor({ component, dimensions:defaultDimensions, element, key, radar, scalar }) {
+export default class Satellite {
+
+  constructor(options) {
+    this.init(options);
+  }
+
+  init({ component, dimensions:defaultDimensions, element, key, radar, scalar }) {
     this.isVirtual = !element;
     this.radar = radar;
-    this.element = new VirtualElement(defaultDimensions, element);
+    this.element = VirtualElement.create(defaultDimensions, element);
     this.component = component;
     this.geography = new Geography(this.element);
     this.key = key;
@@ -80,7 +88,7 @@ class Satellite {
     this.didShift(dY, dX);
   }
 
-  destroy() {
+  _destroy() {
     if (this.component.unregisterSatellite) {
       this.component.unregisterSatellite();
     }
@@ -94,12 +102,26 @@ class Satellite {
     this.radar = undefined;
 
     // teardown hooks
-    this.willShift = undefined;
-    this.didShift = undefined;
-    this.heightDidChange = undefined;
-    this.widthDidChange = undefined;
+    this.willShift = noop;
+    this.didShift = noop;
+    this.heightDidChange = noop;
+    this.widthDidChange = noop;
   }
 
-}
+  static create(options) {
+    let sat = SAT_POOL.pop();
 
-export default Satellite;
+    if (sat) {
+      sat.init(options);
+      return sat;
+    }
+
+    return new Satellite(options);
+  }
+
+  destroy() {
+    this._destroy();
+
+    SAT_POOL.push(this);
+  }
+}

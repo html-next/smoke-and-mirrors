@@ -9,7 +9,7 @@ const {
 export default class ListRadar extends Radar {
 
   register(component) {
-    let sat = new ListSatellite({
+    let sat = ListSatellite.create({
       component,
       dimensions: undefined,
       element: component.element,
@@ -19,6 +19,7 @@ export default class ListRadar extends Radar {
     }, this);
 
     this._push(sat);
+
     return sat;
   }
 

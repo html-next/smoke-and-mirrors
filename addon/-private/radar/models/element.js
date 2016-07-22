@@ -1,3 +1,9 @@
+import FastArray from 'perf-primitives/fast-array';
+
+const ELEMENT_POOL = new FastArray(200, 'Element Pool');
+const STYLE_POOL = new FastArray(200, 'Style Pool');
+const RECT_POOL = new FastArray(200, 'Rect Pool');
+
 export const LayoutProps = [
   'position',
   'box-sizing',
@@ -28,10 +34,33 @@ export const LayoutProps = [
 ];
 
 export class Style {
-  constructor(values = {}) {
+  constructor(values) {
+    this.init(values);
+  }
+
+  init(values = {}) {
     for (let i = 0; i < LayoutProps.length; i++) {
       this[LayoutProps[i]] = values[LayoutProps[i]];
     }
+  }
+
+  static create(values) {
+    let po = STYLE_POOL.pop();
+
+    if (po) {
+      po.init(values);
+      return po;
+    }
+
+    return new Style(values);
+  }
+
+  destroy() {
+    for (let i = 0; i < LayoutProps.length; i++) {
+      this[LayoutProps[i]] = undefined;
+    }
+
+    STYLE_POOL.push(this);
   }
 }
 
@@ -45,15 +74,38 @@ const RECT_PROPS = [
 ];
 
 export class Rect {
-  constructor(values = {}) {
+  constructor(values) {
+    this.init(values);
+  }
+
+  init(values = {}) {
     for (let i = 0; i < RECT_PROPS.length; i++) {
       this[RECT_PROPS[i]] = values[RECT_PROPS[i]];
     }
   }
+
+  static create(values) {
+    let po = RECT_POOL.pop();
+
+    if (po) {
+      po.init(values);
+      return po;
+    }
+
+    return new Rect(values);
+  }
+
+  destroy() {
+    for (let i = 0; i < RECT_PROPS.length; i++) {
+      this[RECT_PROPS[i]] = undefined;
+    }
+
+    RECT_POOL.push(this);
+  }
 }
 
 function makeRect(styles) {
-  let s = new Rect();
+  let s = Rect.create();
 
   s.left = styles.left || 0;
   s.top = styles.top || 0;
@@ -66,9 +118,13 @@ function makeRect(styles) {
 }
 
 export default class VirtualElement {
-  constructor(styles = {}, element = undefined) {
+  constructor(styles, element) {
+    this.init(styles, element);
+  }
+
+  init(styles = {}, element = undefined) {
     this.element = element;
-    this.style = new Style(styles);
+    this.style = Style.create(styles);
     this.rect = makeRect(styles);
   }
 
@@ -89,10 +145,23 @@ export default class VirtualElement {
     return new Rect(this.rect);
   }
 
+  static create(styles, element) {
+    let po = ELEMENT_POOL.pop();
+
+    if (po) {
+      po.init(styles, element);
+      return po;
+    }
+
+    return new VirtualElement(styles, element);
+  }
+
   destroy() {
     this.element = undefined;
     this.style = undefined;
     this.rect = undefined;
+
+    ELEMENT_POOL.push(this);
   }
 
 }
