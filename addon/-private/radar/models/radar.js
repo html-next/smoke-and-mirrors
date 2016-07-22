@@ -286,17 +286,17 @@ export default class Radar {
     this._nextScroll = undefined;
     this._nextAdjustment = undefined;
 
-    this._scrollHandler = (offsets) => {
+    this._scrollHandler = run.bind(this, () => {
       if (this.isTracking) {
         this._nextScroll = run.scheduleOnce('sync', this, this.filterMovement, offsets);
       }
-    };
-    this._resizeHandler = () => {
+    });
+    this._resizeHandler = run.bind(this, () => {
       this._nextResize = run.debounce(this, this.resizeSatellites, this.resizeDebounce);
-    };
-    this._scrollAdjuster = (offsets) => {
-      this._nextAdjustment = run.scheduleOnce('sync', this, this.updateScrollPosition, offsets);
-    };
+    });
+    this._scrollAdjuster = run.bind(this, () => {
+      this._nextAdjustment = run.scheduleOnce('sync', this, this.updateScrollPosition);
+    });
 
     let handlerOpts = SUPPORTS_PASSIVE ? { capture: true, passive: true } : true;
 
