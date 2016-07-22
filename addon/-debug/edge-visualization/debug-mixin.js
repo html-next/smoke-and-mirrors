@@ -8,7 +8,9 @@ const {
   } = Ember;
 
 export default Mixin.create({
-  showEdges: false,
+  debug: false,
+  showEdges: computed.alias('debug'),
+
   _nextVisualization: null,
 
   toggleEdgeVisualization() {
