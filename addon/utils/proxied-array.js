@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import keyForItem from './key-for-item';
+import keyForItem from '../-private/ember/utils/key-for-item';
 
 const {
   computed,

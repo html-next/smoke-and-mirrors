@@ -285,7 +285,7 @@ export default class Radar {
 
     Container.removeEventListener('resize', this._resizeHandler, handlerOpts);
     if (this.telescope) {
-      removeScrollHandler(this.telescope, this._scrollAdjuster);
+      removeScrollHandler(this.telescope, this._scrollHandler);
     }
     if (this.telescope !== Container) {
       removeScrollHandler(Container, this._scrollAdjuster);

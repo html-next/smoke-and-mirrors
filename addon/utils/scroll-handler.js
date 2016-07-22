@@ -30,38 +30,40 @@ export class ScrollHandler {
     }
 
     if (!this.isPolling) {
-      this.isPolling = true;
       this.poll();
     }
   }
 
   removeElementHandler(element, handler) {
-    let handlers = this.handlers.get(element).handlers;
+    let elementCache = this.handlers.get(element);
 
-    if (handlers) {
-      let index = handlers.indexOf(handler);
+    if (elementCache && elementCache.handlers) {
+      let index = elementCache.handlers.indexOf(handler);
 
       if (index === -1) {
         throw new Error('Attempted to remove an unattached handler');
       }
 
-      handlers.splice(index, 1);
+      elementCache.handlers.splice(index, 1);
 
       // cleanup element entirely if needed
-      if (!handlers.length) {
+      if (!elementCache.handlers.length) {
         this.handlers.remove(element);
 
         index = this.elements.indexOf(element);
-        this.elements[index].splice(index, 1);
+        this.elements.splice(index, 1);
         this.length--;
         this.maxLength--;
       }
-    }
 
-    throw new Error('Attempted to remove an unattached handler');
+    } else {
+      throw new Error('Attempted to remove an unattached handler');
+    }
   }
 
   poll() {
+    this.isPolling = true;
+
     requestAnimationFrame(() => {
       for (let i = 0; i < this.length; i++) {
         let element = this.elements[i];
@@ -84,7 +86,8 @@ export class ScrollHandler {
         }
       }
 
-      if (this.length) {
+      this.isPolling = this.length > 0;
+      if (this.isPolling) {
         this.poll();
       }
     });
