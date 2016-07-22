@@ -1,14 +1,29 @@
 import Radar from './radar';
 import ListSatellite from './list-satellite';
+import Ember from 'ember';
+
+const {
+  guidFor
+  } = Ember;
 
 export default class ListRadar extends Radar {
 
   register(component) {
-    this.satellites.push(new ListSatellite(component, this));
+    let sat = new ListSatellite({
+      component,
+      dimensions: undefined,
+      element: component.element,
+      key: guidFor(component),
+      radar: this,
+      scalar: undefined
+    }, this);
+
+    this._push(sat);
+    return sat;
   }
 
   _resize() {
-    for (let i = 0; i < this.satellites.length; i++) {
+    for (let i = 0; i < this.length; i++) {
       let satellite = this.satellites[i];
       const change = satellite.resize();
 

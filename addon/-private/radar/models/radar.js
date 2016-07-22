@@ -13,11 +13,26 @@ const {
   run
   } = Ember;
 
+const DEFAULT_ARRAY_SIZE = 200;
+
 export default class Radar {
 
   constructor(state) {
-    this.satellites = [];
+    this.satellites = new Array(DEFAULT_ARRAY_SIZE);
+    this.length = 0;
+    this.maxLength = DEFAULT_ARRAY_SIZE;
     this.setState(state || {});
+  }
+
+  _push(satellite) {
+    let index = this.length++;
+
+    if (index === this.maxLength) {
+      this.maxLength *= 2;
+      this.satellites.length = this.maxLength;
+    }
+
+    this.satellites[index] = satellite;
   }
 
   setState(state) {
@@ -99,7 +114,18 @@ export default class Radar {
   }
 
   register(component) {
-    this.satellites.push(new Satellite(component, this));
+    let sat = new Satellite({
+      component,
+      dimensions: undefined,
+      element: component.element,
+      key: guidFor(component),
+      radar: this,
+      scalar: undefined
+    });
+
+    this._push(sat);
+
+    return sat;
   }
 
   unregister(component) {
@@ -109,15 +135,16 @@ export default class Radar {
       return;
     }
 
-    const satellite = this.satellites.find((sat) => {
-      return sat.key === key;
-    });
+    for (let i = 0; i < this.length; i++) {
+      if (this.satellites[i].key === key) {
+        const satellite = this.satellites[i];
 
-    if (satellite) {
-      const index = this.satellites.indexOf(satellite);
-
-      this.satellites.splice(index, 1);
-      satellite.destroy();
+        this.satellites.splice(i, 1);
+        this.length--;
+        this.maxLength--;
+        satellite.destroy();
+        break;
+      }
     }
   }
 
@@ -133,7 +160,7 @@ export default class Radar {
   didAdjustPosition() {}
 
   _resize() {
-    for (let i = 0; i < this.satellites.length; i++) {
+    for (let i = 0; i < this.length; i++) {
       this.satellites[i].resize();
     }
   }
@@ -156,7 +183,7 @@ export default class Radar {
 
   _shift(dY, dX) {
     // move the satellites
-    for (let i = 0; i < this.satellites.length; i++) {
+    for (let i = 0; i < this.length; i++) {
       this.satellites[i].shift(dY, dX);
     }
 
@@ -200,7 +227,7 @@ export default class Radar {
     this.posX = Container.scrollLeft;
     this.posY = Container.scrollTop;
 
-    for (let i = 0; i < this.satellites.length; i++) {
+    for (let i = 0; i < this.length; i++) {
       this.satellites[i].geography.setState();
     }
   }
@@ -313,7 +340,7 @@ export default class Radar {
     this._teardownHandlers();
     this._teardownHooks();
     if(this.satellites) {
-      for (let i = 0; i < this.satellites.length; i++) {
+      for (let i = 0; i < this.length; i++) {
         this.satellites[i].destroy();
       }
     }

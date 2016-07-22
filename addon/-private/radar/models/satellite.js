@@ -1,25 +1,50 @@
-import Ember from 'ember';
 import Geography from './geography';
-
-const {
-  guidFor
-  } = Ember;
+import VirtualElement from './element';
 
 class Satellite {
 
-  constructor(component, radar) {
+  constructor({ component, dimensions:defaultDimensions, element, key, radar, scalar }) {
+    this.isVirtual = !element;
     this.radar = radar;
+    this.element = new VirtualElement(defaultDimensions, element);
     this.component = component;
-    this.element = component.element;
     this.geography = new Geography(this.element);
-    this.key = guidFor(component);
+    this.key = key;
+    this.scalar = scalar || 1;
+
     if (component.registerSatellite) {
       component.registerSatellite(this);
     }
   }
 
+  virtualize() {
+    this.isVirtual = true;
+    this.element.element = undefined;
+    this.geography.element = undefined;
+  }
+
+  realize(element) {
+    this.element.element = element;
+    this.geography.element = element;
+
+    this.isVirtual = false;
+    this.recalc();
+  }
+
   heightDidChange(/* delta */) {}
   widthDidChange(/* delta */) {}
+
+  recalc() {
+    let cached = this.geography.getState();
+
+    this.resize();
+
+    let dY = this.geography.top - cached.top;
+    let dX = this.geography.left - cached.left;
+
+    this.willShift(dY, dX);
+    this.didShift(dY, dX);
+  }
 
   resize() {
     const cached = this.geography.getState();
@@ -36,7 +61,7 @@ class Satellite {
       this.widthDidChange(-1 * widthChange);
     }
 
-    return heightChange || widthChange ? { dX: widthChange, dY: heightChange } : null;
+    return heightChange || widthChange ? { dX: widthChange, dY: heightChange } : undefined;
   }
 
   _shift(dY, dX) {
@@ -59,12 +84,20 @@ class Satellite {
     if (this.component.unregisterSatellite) {
       this.component.unregisterSatellite();
     }
-    this.component = null;
-    this.satellite = null;
-    this.element = null;
+
+    // teardown internal objects
+    this.element.destroy();
+    this.element = undefined;
+    this.component = undefined;
     this.geography.destroy();
-    this.geography = null;
-    this.radar = null;
+    this.geography = undefined;
+    this.radar = undefined;
+
+    // teardown hooks
+    this.willShift = undefined;
+    this.didShift = undefined;
+    this.heightDidChange = undefined;
+    this.widthDidChange = undefined;
   }
 
 }

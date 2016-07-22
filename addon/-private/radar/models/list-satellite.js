@@ -2,13 +2,8 @@ import Satellite from './satellite';
 
 export default class ListSatellite extends Satellite {
 
-  constructor(component, list) {
-    super(component);
-    this.list = list;
-  }
-
   heightDidChange(dY) {
-    this.list._adjust(this, { dX: 0, dY });
+    this.radar._adjust(this, { dX: 0, dY });
   }
 
   next() {

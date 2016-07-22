@@ -66,7 +66,7 @@ function makeRect(styles) {
 }
 
 export default class VirtualElement {
-  constructor(styles, element) {
+  constructor(styles = {}, element = undefined) {
     this.element = element;
     this.style = new Style(styles);
     this.rect = makeRect(styles);
