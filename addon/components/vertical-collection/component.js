@@ -1,6 +1,5 @@
 /* global Array, parseFloat, Math */
 import Ember from 'ember';
-import OcclusionMixin from '../../mixins/occlusion-collection';
 import layout from './template';
 import DebugMixin from '../../-debug/edge-visualization/debug-mixin';
 import getTagDescendant from '../../utils/get-tag-descendant';
@@ -25,7 +24,7 @@ function getContent(obj, isProxied) {
   return get(obj, key);
 }
 
-const VerticalCollection = Component.extend(OcclusionMixin, {
+const VerticalCollection = Component.extend({
   /*
    * Defaults to `vertical-collection`.
    *
