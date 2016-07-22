@@ -1,6 +1,6 @@
 import Ember from 'ember';
-import layout from '../templates/components/pre-render';
-import PreRenderMixin from '../mixins/pre-render';
+import layout from './template';
+import PreRenderMixin from '../../mixins/pre-render';
 
 const {
   Component

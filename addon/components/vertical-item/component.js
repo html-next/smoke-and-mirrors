@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import layout from '../templates/components/vertical-item';
+import layout from './template';
 import getOwner from 'ember-getowner-polyfill';
 
 const {

@@ -1,1 +1,1 @@
-export { default } from 'smoke-and-mirrors/components/occludable-area';
+export { default } from 'smoke-and-mirrors/components/occludable-area/component';
