@@ -11,6 +11,7 @@ occlusion-item, vertical-item {
   display: block;
   width: 100%;
   position: relative;
+  min-height: 1px;
 }
 
 vertical-item::after {
