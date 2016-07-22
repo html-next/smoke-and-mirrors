@@ -2,6 +2,11 @@ import Ember from 'ember';
 import Satellite from './satellite';
 import Geography from './geography';
 import Container from './container';
+import SUPPORTS_PASSIVE from '../utils/supports-passive';
+import {
+  addScrollHandler,
+  removeScrollHandler
+} from '../utils/scroll-handler';
 
 const {
   guidFor,
@@ -30,14 +35,17 @@ export default class Radar {
     this.telescope = state.telescope;
     this.sky = state.sky;
 
-    this.planet = this.telescope ? new Geography(this.telescope) : null;
-    this.scrollContainer = this.telescope === window ? new Container() : this.telescope;
-    this.skyline = this.sky ? new Geography(this.sky) : null;
+    if (this.telescope === window || this.telescope === document.body) {
+      this.telescope = Container;
+    }
 
-    this.scrollX = this.scrollContainer ? this.scrollContainer.scrollLeft : 0;
-    this.scrollY = this.scrollContainer ? this.scrollContainer.scrollTop : 0;
-    this.posX = document.body.scrollLeft;
-    this.posY = document.body.scrollTop;
+    this.planet = this.telescope ? new Geography(this.telescope) : undefined;
+    this.skyline = this.sky ? new Geography(this.sky) : undefined;
+
+    this.scrollX = this.telescope ? this.telescope.scrollLeft : 0;
+    this.scrollY = this.telescope ? this.telescope.scrollTop : 0;
+    this.posX = Container.scrollLeft;
+    this.posY = Container.scrollTop;
 
     this.minimumMovement = state.minimumMovement || 15;
     this.resizeDebounce = state.resizeDebounce || 64;
@@ -61,9 +69,11 @@ export default class Radar {
 
     if (satGeo.bottom > this.planet.top) {
       distance = satGeo.bottom - this.planet.top;
+
       return Math.floor(distance / yScalar);
     } else if (satGeo.top < this.planet.bottom) {
       distance = satGeo.top - this.planet.bottom;
+
       return Math.ceil(distance / yScalar);
     }
 
@@ -77,9 +87,11 @@ export default class Radar {
 
     if (satGeo.right > this.planet.left) {
       distance = satGeo.right - this.planet.left;
+
       return Math.floor(distance / xScalar);
     } else if (satGeo.left < this.planet.right) {
       distance = satGeo.left - this.planet.right;
+
       return Math.ceil(distance / xScalar);
     }
 
@@ -121,9 +133,9 @@ export default class Radar {
   didAdjustPosition() {}
 
   _resize() {
-    this.satellites.forEach((c) => {
-      c.resize();
-    });
+    for (let i = 0; i < this.satellites.length; i++) {
+      this.satellites[i].resize();
+    }
   }
 
   resizeSatellites() {
@@ -134,16 +146,19 @@ export default class Radar {
 
   updateSkyline() {
     if (this.skyline) {
-      this.filterMovement();
+      this.filterMovement({
+        top: this.telescope.scrollTop,
+        left: this.telescope.scrollLeft
+      });
       this.skyline.setState();
     }
   }
 
   _shift(dY, dX) {
     // move the satellites
-    this.satellites.forEach((c) => {
-      c.shift(dY, dX);
-    });
+    for (let i = 0; i < this.satellites.length; i++) {
+      this.satellites[i].shift(dY, dX);
+    }
 
     // move the sky
     this.skyline.left -= dX;
@@ -172,8 +187,8 @@ export default class Radar {
     const dY = height - _height;
     const dX = width - _width;
 
-    this.scrollY = this.scrollContainer.scrollTop += dY;
-    this.scrollX = this.scrollContainer.scrollLeft += dX;
+    this.scrollY = this.telescope.scrollTop += dY;
+    this.scrollX = this.telescope.scrollLeft += dX;
     this.skyline.left -= dX;
     this.skyline.right -= dX;
     this.skyline.bottom -= dY;
@@ -182,18 +197,19 @@ export default class Radar {
   }
 
   rebuild() {
-    this.posX = document.body.scrollLeft;
-    this.posY = document.body.scrollTop;
-    this.satellites.forEach((satellite) => {
-      satellite.geography.setState();
-    });
+    this.posX = Container.scrollLeft;
+    this.posY = Container.scrollTop;
+
+    for (let i = 0; i < this.satellites.length; i++) {
+      this.satellites[i].geography.setState();
+    }
   }
 
-  filterMovement() {
+  filterMovement(offsets) {
     // cache the scroll offset, and discard the cycle if
     // movement is within (x) threshold
-    const scrollY = this.scrollContainer.scrollTop;
-    const scrollX = this.scrollContainer.scrollLeft;
+    const scrollY = offsets.top;
+    const scrollX = offsets.left;
     const _scrollY = this.scrollY;
     const _scrollX = this.scrollX;
 
@@ -208,11 +224,11 @@ export default class Radar {
     }
   }
 
-  updateScrollPosition() {
+  updateScrollPosition(offsets) {
     const _posX = this.posX;
     const _posY = this.posY;
-    const posX = document.body.scrollLeft;
-    const posY = document.body.scrollTop;
+    const posX = offsets.left;
+    const posY = offsets.top;
 
     if (this.isEarthquake(_posY, posY) || this.isEarthquake(_posX, posX)) {
       this.posY = posY;
@@ -237,79 +253,84 @@ export default class Radar {
   }
 
   _setupHandlers() {
-    this._resizeHandler = null;
-    this._scrollHandler = null;
-    this._nextResize = null;
-    this._nextScroll = null;
-    this._nextAdjustment = null;
+    this._resizeHandler = undefined;
+    this._scrollHandler = undefined;
+    this._nextResize = undefined;
+    this._nextScroll = undefined;
+    this._nextAdjustment = undefined;
 
-    this._scrollHandler = () => {
+    this._scrollHandler = (offsets) => {
       if (this.isTracking) {
-        this._nextScroll = run.scheduleOnce('sync', this, this.filterMovement);
+        this._nextScroll = run.scheduleOnce('sync', this, this.filterMovement, offsets);
       }
     };
     this._resizeHandler = () => {
       this._nextResize = run.debounce(this, this.resizeSatellites, this.resizeDebounce);
     };
-    this._scrollAdjuster = () => {
-      this._nextAdjustment = run.scheduleOnce('sync', this, this.updateScrollPosition);
+    this._scrollAdjuster = (offsets) => {
+      this._nextAdjustment = run.scheduleOnce('sync', this, this.updateScrollPosition, offsets);
     };
 
-    window.addEventListener('resize', this._resizeHandler, true);
-    this.telescope.addEventListener('scroll', this._scrollHandler, true);
-    if (this.telescope !== window) {
-      window.addEventListener('scroll', this._scrollAdjuster, true);
+    let handlerOpts = SUPPORTS_PASSIVE ? { capture: true, passive: true } : true;
+
+    Container.addEventListener('resize', this._resizeHandler, handlerOpts);
+    addScrollHandler(this.telescope, this._scrollHandler);
+    if (this.telescope !== Container) {
+      addScrollHandler(Container, this._scrollAdjuster);
     }
   }
 
   _teardownHandlers() {
-    window.removeEventListener('resize', this._resizeHandler, true);
+    let handlerOpts = SUPPORTS_PASSIVE ? { capture: true, passive: true } : true;
+
+    Container.removeEventListener('resize', this._resizeHandler, handlerOpts);
     if (this.telescope) {
-      this.telescope.removeEventListener('scroll', this._scrollHandler, true);
+      removeScrollHandler(this.telescope, this._scrollAdjuster);
     }
-    if (this.telescope !== window) {
-      window.removeEventListener('scroll', this._scrollAdjuster, true);
+    if (this.telescope !== Container) {
+      removeScrollHandler(Container, this._scrollAdjuster);
     }
     run.cancel(this._nextResize);
     run.cancel(this._nextScroll);
     run.cancel(this._nextAdjustment);
-    this._scrollHandler = null;
-    this._resizeHandler = null;
-    this._scrollAdjuster = null;
+    this._scrollHandler = undefined ;
+    this._resizeHandler = undefined;
+    this._scrollAdjuster = undefined;
   }
 
   // avoid retaining memory by deleting references
   // that likely contain other scopes to be torn down
   _teardownHooks() {
-    this.willShiftSatellites = null;
-    this.didShiftSatellites = null;
-    this.willResizeSatellites = null;
-    this.didResizeSatellites = null;
-    this.willAdjustPosition = null;
-    this.didAdjustPosition = null;
+    this.willShiftSatellites = undefined;
+    this.didShiftSatellites = undefined;
+    this.willResizeSatellites = undefined;
+    this.didResizeSatellites = undefined;
+    this.willAdjustPosition = undefined;
+    this.didAdjustPosition = undefined;
   }
 
   destroy() {
     this._teardownHandlers();
     this._teardownHooks();
     if(this.satellites) {
-      this.satellites.forEach((satellite) => {
-        satellite.destroy();
-      });
+      for (let i = 0; i < this.satellites.length; i++) {
+        this.satellites[i].destroy();
+      }
     }
-    this.satellites = null;
-    this.telescope = null;
-    this.sky = null;
+    this.satellites = undefined;
+    this.telescope = undefined;
+    this.sky = undefined;
 
-    if(this.planet) {
+    if (this.planet) {
       this.planet.destroy();
     }
-    this.planet = null;
-    this.scrollContainer = null;
-    if(this.skyline) {
+
+    this.planet = undefined;
+
+    if (this.skyline) {
       this.skyline.destroy();
     }
-    this.skyline = null;
-  }
 
+    this.skyline = undefined;
+  }
 }
