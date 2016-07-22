@@ -33,7 +33,6 @@ Join the [smoke-and-mirrors](https://embercommunity.slack.com/messages/smoke-and
 [![Slack Status](https://ember-community-slackin.herokuapp.com/badge.svg)](https://ember-community-slackin.herokuapp.com/)
 
 
-
 ## Features
 
 ### Infinite Scroll (bi-directional)
@@ -47,30 +46,22 @@ It works via a scrollable div or scrollable body.
  - [dynamic content sizes](http://runspired.github.io/smoke-and-mirrors/#/examples/flexible-layout)
  - [as a table](http://runspired.github.io/smoke-and-mirrors/#/examples/dbmon)
 
-#### Horizontal Scrolling
+### Svelte Everything
 
-All of the above demos work horizontally as well via the `horizontal-collection`.
+If it can be trimmer, smoke-and-mirrors likes to trim it.
 
-#### Grid Scrolling
+### Scroll Performance
 
-All of the above demos (both horizontal and vertical) work as well via
-
- - `grid-collection`
- - `horizontal-grid`
- - `vertical-grid`
-
-### Svelte Anything
-
-Under the hood, smoke-and-mirrors is using a powerful scroll-tracking abstraction for each of the components above.
- That abstraction is made available as a service.
-
-
+Under the hood, smoke-and-mirrors is using a powerful scroll-tracking 
+abstraction for each of the components above. That abstraction is made
+available as a service and will soon become it's own addon: [ember-radar](https://github.com/runspired/ember-radar)
 
 ## Dependencies
 
-`smoke-and-mirrors` is dependent on and installs `ember-run-raf`, which helps you budget and schedule the work in your
-app more intelligently.
-
+`smoke-and-mirrors` is dependent on and installs `ember-run-raf`, which helps
+ you budget and schedule the work in your app more intelligently.
+ 
+ This dependency will soon be deprecated in favor of [igniter](https://github.com/runspired/igniter).
 
 
 ## Status
@@ -83,13 +74,9 @@ app more intelligently.
 [![Coverage Status](https://coveralls.io/repos/runspired/smoke-and-mirrors/badge.svg?branch=master&service=github)](https://coveralls.io/github/runspired/smoke-and-mirrors?branch=master)
 
 
-
 ## Documentation
 
-For updated documentation, announcements, and demos running the latest release please 
-visit [http://runspired.github.io/smoke-and-mirrors/](http://runspired.github.io/smoke-and-mirrors/)
-
-
+For updated documentation and demos see [http://runspired.github.io/smoke-and-mirrors/](http://runspired.github.io/smoke-and-mirrors/)
 
 ## Contributing
 
@@ -99,7 +86,7 @@ visit [http://runspired.github.io/smoke-and-mirrors/](http://runspired.github.io
  - Use [Angular Style Commits](https://github.com/angular/angular.js/blob/v1.4.8/CONTRIBUTING.md#commit)
  - PR against `develop` (default branch).
 
-### Commmits 
+### Commits 
 
 Angular Style commit messages have the full form:
  
