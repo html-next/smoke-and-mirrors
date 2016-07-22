@@ -1,12 +1,17 @@
 /* includes legacy support for older tagNames */
 occlusion-collection,
-vertical-collection,
-occlusion-item,
-vertical-item {
+vertical-collection {
   display: block;
   width: 100%;
-  position: static;
-  }
+  min-height: 100%;
+  position: relative;
+}
+
+occlusion-item, vertical-item {
+  display: block;
+  width: 100%;
+  position: relative;
+}
 
 vertical-item::after {
   display: block;
