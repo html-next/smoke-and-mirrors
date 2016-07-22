@@ -69,7 +69,7 @@ export default Mixin.create({
    * but these values have been unified to ease a future transition in
    * the internal mechanics of the collection to utilize DOM recycling.
    */
-  bufferSize: 1,
+  bufferSize: 0.25,
 
   /*
    * useContentProxy
