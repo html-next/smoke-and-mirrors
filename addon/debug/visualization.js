@@ -1,5 +1,5 @@
 /* global document */
-import Geography from '../models/geography';
+import Geography from '../-private/radar/models/geography';
 
 export default class Visualization {
 

@@ -2,7 +2,7 @@
 import Ember from 'ember';
 import getTagDescendant from '../utils/get-tag-descendant';
 import proxied from '../utils/proxied-array';
-import ListRadar from '../models/list-radar';
+import ListRadar from '../-private/radar/models/list-radar';
 import identity from '../-private/ember/utils/identity';
 
 const {

@@ -1,4 +1,4 @@
-import CacheList from '../-private/cache-list';
+import CacheList from '../../cache-list';
 
 const DEFAULT_ARRAY_SIZE = 10;
 
