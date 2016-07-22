@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import Radar from '../models/radar';
+import Radar from '../-private/radar/models/radar';
 
 const {
   Service
