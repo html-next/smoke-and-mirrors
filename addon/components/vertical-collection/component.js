@@ -483,15 +483,6 @@ const VerticalCollection = Component.extend({
   __smSpacerAboveHeight: 0,
   __smSpacerBelowHeight: 0,
 
-  _removeComponents(toCull, toHide) {
-    toCull.forEach((v) => {
-      v.cull();
-    });
-    toHide.forEach((v) => {
-      v.hide();
-    });
-  },
-
   /*
    *
    * The big question is can we render from the bottom
@@ -960,6 +951,10 @@ const VerticalCollection = Component.extend({
       this.set('didReceiveAttrs', this._didReceiveAttrs);
     }
   }
+});
+
+VerticalCollection.reopenClass({
+  positionalParams: ['items']
 });
 
 Ember.runInDebug(() => {
