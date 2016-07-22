@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## 0.5.4
+
+### Pull Requests
+
+- [#106](https://github.com/runspired/smoke-and-mirrors/pull/106)  Patch Release  *by [Chris Thoburn](https://github.com/runspired)*
+- [#107](https://github.com/runspired/smoke-and-mirrors/pull/107)  fix addon dependency issue  *by [Chris Thoburn](https://github.com/runspired)*
+
 ## 0.5.3
 
 ## 0.5.2
