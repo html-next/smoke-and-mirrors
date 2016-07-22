@@ -1,42 +1,12 @@
 import Ember from 'ember';
 import Satellite from './satellite';
 import Geography from './geography';
+import Container from './container';
 
 const {
   guidFor,
   run
   } = Ember;
-
-function Container() {
-  Object.defineProperty(this, 'scrollTop', {
-    get: function() {
-      return window.scrollY ||
-        window.pageYOffset ||
-          document.body.scrollTop ||
-          document.documentElement.scrollTop;
-    },
-    set: function(v) {
-      return window.scrollY =
-        window.pageYOffset =
-        document.body.scrollTop =
-        document.documentElement.scrollTop = v;
-    }
-  });
-  Object.defineProperty(this, 'scrollLeft', {
-    get: function() {
-      return window.scrollX ||
-        window.pageXOffset ||
-        document.body.scrollLeft ||
-        document.documentElement.scrollLeft;
-    },
-    set: function(v) {
-      return window.scrollX =
-        window.pageXOffset =
-          document.body.scrollLeft =
-            document.documentElement.scrollLeft = v;
-    }
-  });
-}
 
 export default class Radar {
 

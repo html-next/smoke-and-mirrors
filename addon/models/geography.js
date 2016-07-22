@@ -1,27 +1,17 @@
-function getRect(element) {
-  if (element === window) {
-    return {
-      height: window.innerHeight,
-      width: window.innerWidth,
-      top: 0,
-      left: 0,
-      right: window.innerWidth,
-      bottom: window.innerHeight
-    };
-  }
-
-  return element.getBoundingClientRect();
-}
 
 export default class Geography {
 
   constructor(element, state) {
     this.element = element;
+
     this.setState(state);
   }
 
   setState(state) {
-    state = state || getRect(this.element);
+    state = state || this.element.getBoundingClientRect();
+
+    // copying over ensures we preserve shape from outside sources
+    // and enables write ops as ClientRect can't be written
     this.top = state.top || 0;
     this.bottom = state.bottom || 0;
     this.left = state.left || 0;
@@ -42,7 +32,7 @@ export default class Geography {
   }
 
   destroy() {
-    this.element = null;
+    this.element = undefined;
   }
 
   /*
@@ -61,11 +51,11 @@ export default class Geography {
     if (this.bottom < planet.top) {
       distanceY = planet.top - this.bottom;
 
-    // the top is below the viewport
+      // the top is below the viewport
     } else if (this.top > planet.bottom) {
       distanceY = planet.bottom - this.top;
 
-    // some portion is within the viewport
+      // some portion is within the viewport
     } else {
       distanceY = 0;
     }
@@ -74,11 +64,11 @@ export default class Geography {
     if (this.right < planet.left) {
       distanceX = planet.left - this.right;
 
-    // the left edge is to the right of the viewport
+      // the left edge is to the right of the viewport
     } else if (this.left > planet.right) {
       distanceX = planet.right - this.left;
 
-    // some portion is within the viewport
+      // some portion is within the viewport
     } else { // we're within the planet
       distanceX = 0;
     }
