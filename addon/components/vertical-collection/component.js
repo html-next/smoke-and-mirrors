@@ -34,6 +34,9 @@ const VerticalCollection = Component.extend({
   tagName: 'vertical-collection',
   layout,
 
+  content: computed.alias('items'),
+  items: undefined,
+
   // –––––––––––––– Required Settings
 
   /*
@@ -702,7 +705,7 @@ const VerticalCollection = Component.extend({
     this.radar.setState({
       telescope: this._container,
       resizeDebounce: this.resizeDebounce,
-      sky: container === window ? document.body : this.element,
+      sky: container === window ? window : this.element,
       minimumMovement: this.minimumMovement
     });
     this.radar.didResizeSatellites = onResizeMethod;
@@ -714,7 +717,7 @@ const VerticalCollection = Component.extend({
     const idForFirstItem = this.get('idForFirstItem');
 
     if (this.scrollPosition) {
-      this.radar.scrollContainer.scrollTop = this.scrollPosition;
+      this.radar.telescope.scrollTop = this.scrollPosition;
     } else if (this.get('renderFromLast')) {
       const last = this.$().get(0).lastElementChild;
 
@@ -731,7 +734,7 @@ const VerticalCollection = Component.extend({
           firstVisibleIndex = i;
         }
       }
-      this.radar.scrollContainer.scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
+      this.radar.telescope.scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
     }
 
     this._nextMaintenance = run.next(this, () => {
