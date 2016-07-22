@@ -1,1 +1,1 @@
-export { default } from 'smoke-and-mirrors/components/pre-render';
+export { default } from 'smoke-and-mirrors/components/pre-render/component';

@@ -1,1 +1,1 @@
-export { default } from 'smoke-and-mirrors/components/in-viewport';
+export { default } from 'smoke-and-mirrors/components/in-viewport/component';

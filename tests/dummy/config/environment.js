@@ -12,7 +12,7 @@ module.exports = function(environment) {
     locationType: 'hash',
     EmberENV: {
       FEATURES: {},
-      EXTEND_PROTOTYPES: true
+      EXTEND_PROTOTYPES: false
     },
 
     VERSION: '0.4.4',
