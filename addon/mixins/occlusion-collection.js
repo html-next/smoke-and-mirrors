@@ -578,12 +578,12 @@ export default Mixin.create({
       .concat((childComponents.slice(0, topComponentIndex)))
       .concat(childComponents.slice(bottomComponentIndex));
 
-    toCull.forEach((i) => {
-      i.cull();
-    });
-    toShow.forEach((i) => {
-      i.show();
-    });
+    for (let j = 0; j < toCull.length; j++) {
+      toCull[j].cull();
+    }
+    for (let k = 0; k < toShow.length; k++) {
+      toShow[k].show();
+    }
 
     // set scroll
     if (this.get('__isInitializingFromLast')) {
