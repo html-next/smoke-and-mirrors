@@ -6,8 +6,11 @@ import getTagDescendant from '../../utils/get-tag-descendant';
 import proxied from '../../utils/proxied-array';
 import ListRadar from '../../-private/radar/models/list-radar';
 import identity from '../../-private/ember/utils/identity';
+import keyForItem from '../../-private/ember/utils/key-for-item';
+import estimateHeight from '../../utils/estimate-height';
 
 const {
+  A,
   get,
   computed,
   Component,
@@ -48,12 +51,6 @@ const VerticalCollection = Component.extend({
    */
   defaultHeight: 75,
   alwaysUseDefaultHeight: false,
-
-  /*
-   * Cached value used once default height is
-   * calculated firmly
-   */
-  _defaultHeight: null,
 
   // –––––––––––––– Optional Settings
 
@@ -262,33 +259,6 @@ const VerticalCollection = Component.extend({
    */
   shouldRender: true,
 
-  shouldRenderList: computed('shouldRender', '__smCanRender', function() {
-    const shouldRender = this.get('shouldRender');
-    const canRender = this.get('__smCanRender');
-    const doRender = shouldRender && canRender;
-    const _shouldDidChange = this.get('__shouldRender') !== shouldRender;
-
-    // trigger a cycle
-    if (doRender && _shouldDidChange) {
-      this._nextUpdate = run.scheduleOnce('actions', this, this._updateChildStates, 'shouldRenderList');
-    }
-
-    return doRender;
-  }),
-
-  /*
-   * Internal boolean used to track whether the component
-   * has been inserted into the DOM and DOM related setup
-   * has occurred.
-   *
-   * TODO can we eliminate this?
-   *
-   * @private
-   */
-  __smCanRender: false,
-
-  __shouldRender: true,
-
   /*
    * forward is true, backwards is false
    */
@@ -300,36 +270,6 @@ const VerticalCollection = Component.extend({
   _nextMaintenance: null,
   _isPrepending: false,
   _children: null,
-
-  keyForItem(item, index) {
-    let key;
-    const keyPath = this.get('key');
-
-    switch (keyPath) {
-      case '@index':
-        // allow 0 index
-        if (!index && index !== 0) {
-          throw new Error('No index was supplied to keyForItem');
-        }
-        key = index;
-        break;
-      case '@identity':
-        key = identity(item);
-        break;
-      default:
-        if (keyPath) {
-          key = get(item, keyPath);
-        } else {
-          key = identity(item);
-        }
-    }
-
-    if (typeof key === 'number') {
-      key = String(key);
-    }
-
-    return key;
-  },
 
   // –––––––––––––– Action Helper Functions
   canSendActions(name /* context*/) {
@@ -366,10 +306,6 @@ const VerticalCollection = Component.extend({
     return !context.item ? false : context;
   },
 
-  keyForContext(context) {
-    return this.keyForItem(context.item, context.index);
-  },
-
   __smActionCache: null,
   __smIsLoadingAbove: false,
   __smIsLoadingBelow: false,
@@ -386,7 +322,7 @@ const VerticalCollection = Component.extend({
     const contextCache = this.__smActionCache;
 
     if (contextCache.hasOwnProperty(name)) {
-      const contextKey = this.keyForContext(context);
+      const contextKey = keyForItem(context.item, this.get('key'), context.index);
 
       if (contextCache[name] === contextKey) {
         return;
@@ -414,7 +350,9 @@ const VerticalCollection = Component.extend({
     };
 
     // this MUST be async or glimmer will freak
-    run.schedule('afterRender', this, this.sendAction, name, context, callback);
+    run.schedule('actions', () => {
+      run.later(this, this.sendAction, name, context, callback, 0);
+    });
   },
 
   /*
@@ -496,7 +434,7 @@ const VerticalCollection = Component.extend({
    * @private
    */
   _updateChildStates(/* source */) {  // eslint: complexity
-    if (!this.get('shouldRenderList')) {
+    if (!this.get('shouldRender')) {
       return;
     }
 
@@ -657,7 +595,6 @@ const VerticalCollection = Component.extend({
     this._super();
     this._nextMaintenance = run.next(() => {
       this.setupContainer();
-      this.set('__smCanRender', true);
       // draw initial boundaries
       this._initializeScrollState();
       this.notifyPropertyChange('_edges');
@@ -730,11 +667,11 @@ const VerticalCollection = Component.extend({
       let firstVisibleIndex;
 
       for (let i = 0; i < get(content, 'length'); i++) {
-        if (idForFirstItem === this.keyForItem(valueForIndex(content, i), i)) {
+        if (idForFirstItem === keyForItem(valueForIndex(content, i), this.get('key'), i)) {
           firstVisibleIndex = i;
         }
       }
-      this.radar.telescope.scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
+      this.radar.telescope.scrollTop = (firstVisibleIndex || 0) * this.get('_estimatedHeight');
     }
 
     this._nextMaintenance = run.next(this, () => {
@@ -744,20 +681,7 @@ const VerticalCollection = Component.extend({
 
   },
 
-  /*
-   * Remove the event handlers for this instance
-   * and teardown any temporarily cached data.
-   *
-   * if storageKey is set, caches much of it's
-   * state in order to quickly reboot to the same
-   * scroll position on relaunch.
-   */
   willDestroyElement() {
-    this._destroyCollection();
-  },
-
-  willDestroy() {
-    this._super();
     this._destroyCollection();
   },
 
@@ -794,46 +718,9 @@ const VerticalCollection = Component.extend({
     }
   },
 
-  __getEstimatedDefaultHeight() {
-    let _defaultHeight = this.get('_defaultHeight');
-
-    if (_defaultHeight) {
-      return _defaultHeight;
-    }
-
-    const defaultHeight = `${this.get('defaultHeight')}`;
-
-    if (defaultHeight.indexOf('em') === -1) {
-      _defaultHeight = parseInt(defaultHeight, 10);
-      this.set('_defaultHeight', _defaultHeight);
-      return _defaultHeight;
-    }
-
-    let element;
-
-    // use body if rem
-    if (defaultHeight.indexOf('rem') !== -1) {
-      element = window.document.body;
-      _defaultHeight = 1;
-    } else {
-      element = this.get('element');
-      if (!element || !element.parentNode) {
-        element = window.document.body;
-      } else {
-        _defaultHeight = 1;
-      }
-    }
-
-    const fontSize = window.getComputedStyle(element).getPropertyValue('font-size');
-
-    if (_defaultHeight) {
-      _defaultHeight = parseFloat(defaultHeight) * parseFloat(fontSize);
-      this.set('_defaultHeight', _defaultHeight);
-      return _defaultHeight;
-    }
-
-    return parseFloat(defaultHeight) * parseFloat(fontSize);
-  },
+  _estimatedHeight: computed('defaultHeight', function() {
+    return estimateHeight(this.get('defaultHeight'));
+  }),
 
   /*
    * Calculates pixel boundaries between visible, invisible,
@@ -869,8 +756,6 @@ const VerticalCollection = Component.extend({
    * Initialize
    */
   _prepareComponent() {
-    this.set('__shouldRender', this.get('shouldRender'));
-
     this.__smActionCache = {
       firstReached: null,
       lastReached: null,
@@ -923,6 +808,7 @@ const VerticalCollection = Component.extend({
 
   _changeIsPrepend(oldArray, newArray) {
     const lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
+    const keyPath = this.get('key');
 
     // if either array is empty or the new array is not longer, do not treat as prepend
     if (!get(newArray, 'length') || !get(oldArray, 'length') || lengthDifference <= 0) {
@@ -931,9 +817,9 @@ const VerticalCollection = Component.extend({
 
     // if the keys at the correct indexes are the same, this is a prepend
     const oldInitialItem = valueForIndex(oldArray, 0);
-    const oldInitialKey = this.keyForItem(oldInitialItem, 0);
+    const oldInitialKey = keyForItem(oldInitialItem, keyPath, 0);
     const newInitialItem = valueForIndex(newArray, lengthDifference);
-    const newInitialKey = this.keyForItem(newInitialItem, lengthDifference);
+    const newInitialKey = keyForItem(newInitialItem, keyPath, lengthDifference);
 
     return oldInitialKey === newInitialKey;
   },
@@ -944,7 +830,7 @@ const VerticalCollection = Component.extend({
     this._super(...arguments);
 
     this._prepareComponent();
-    this.set('_children', Ember.A());
+    this.set('_children', new A());
 
     if (this.get('useContentProxy')) {
       this.set('_content', proxied.call(this, 'content', this.get('key')));
