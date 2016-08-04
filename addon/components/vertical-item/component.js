@@ -3,7 +3,8 @@ import layout from './template';
 import getOwner from 'ember-getowner-polyfill';
 
 const {
-  Component
+  Component,
+  run
   } = Ember;
 
 /*
@@ -52,7 +53,7 @@ export default Component.extend({
     if (!this.alwaysUseDefaultHeight) {
       this.element.style.height = undefined;
     }
-    this.updateHeight();
+    run.schedule('afterRender', this, this.updateHeight);
   },
 
   /*
