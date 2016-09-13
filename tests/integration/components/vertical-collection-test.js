@@ -71,6 +71,39 @@ test('Adds classes to vertical-items', function(assert) {
   });
 });
 
+test('Scroll to last item when actual item sizes are significantly larger than default item size.', function(assert) {
+  assert.expect(1);
+
+  this.set('items', new Array(50).fill({ text: 'b' }));
+
+  this.render(hbs`
+  <div style="height: 200px; width: 100px;" class="scrollable">
+    {{#vertical-collection
+      defaultHeight=10
+      alwaysUseDefaultHeight=false
+      bufferSize=0
+      content=items as |item i|}}
+      <div style="height: 100px;">{{item.text}} {{i}}</div>
+    {{/vertical-collection}}
+  </div>
+  `);
+
+  const scrollable = this.$('.scrollable');
+  const waitForScroll = new Ember.RSVP.Promise((resolve) => scrollable.scroll(resolve));
+
+  return wait()
+    .then(() => {
+      // Jump to bottom.
+      scrollable.scrollTop(scrollable.get(0).scrollHeight);
+    })
+    .then(waitForScroll)
+    .then(wait)
+    .then(() => {
+      assert.equal(scrollable.find('div:last').html(), 'b 49', 'the last item in the list should be rendered');
+    });
+});
+
+
 /*
 test("The Collection Reveals it's children when `renderAllInitially` is true.", function(assert) {
   assert.expect(1);
