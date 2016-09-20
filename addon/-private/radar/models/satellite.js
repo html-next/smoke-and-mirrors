@@ -43,31 +43,44 @@ export default class Satellite {
   widthDidChange(/* delta */) {}
 
   recalc() {
-    let cached = this.geography.getState();
-
     this.resize();
+    this.reposition();
+  }
 
-    let dY = this.geography.top - cached.top;
-    let dX = this.geography.left - cached.left;
+  reposition() {
+    const cached = this.geography.getState();
+    const newPosition = this.geography.computeState();
 
-    this.willShift(dY, dX);
-    this.didShift(dY, dX);
+    let dY = newPosition.top - cached.top;
+    let dX = newPosition.left - cached.left;
+
+    this.shift(dY, dX);
   }
 
   resize() {
     const cached = this.geography.getState();
 
-    this.geography.setState();
+    const newState = this.geography.computeState();
 
-    const heightChange = this.geography.height - cached.height;
-    const widthChange = this.geography.width - cached.width;
+    const heightChange = newState.height - cached.height;
+    const widthChange = newState.width - cached.width;
 
     if (heightChange) {
       this.heightDidChange(-1 * heightChange);
     }
+
     if (widthChange) {
       this.widthDidChange(-1 * widthChange);
     }
+
+    this.geography.setState({
+      top: this.geography.top,
+      bottom: this.geography.top + newState.height,
+      left: this.geography.left,
+      right: this.geography.left + newState.width,
+      height: newState.height,
+      width: newState.width,
+    });
 
     return heightChange || widthChange ? { dX: widthChange, dY: heightChange } : undefined;
   }
