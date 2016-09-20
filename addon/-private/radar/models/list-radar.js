@@ -23,17 +23,6 @@ export default class ListRadar extends Radar {
     return sat;
   }
 
-  _resize() {
-    for (let i = 0; i < this.length; i++) {
-      let satellite = this.satellites[i];
-      const change = satellite.resize();
-
-      if (change) {
-        ListRadar.adjustSatelliteList(satellite, change);
-      }
-    }
-  }
-
   _adjust(satellite, change) {
     ListRadar.adjustSatelliteList(satellite, change);
   }
@@ -43,5 +32,4 @@ export default class ListRadar extends Radar {
       satellite.shift(change.dY, change.dX);
     }
   }
-
 }
