@@ -509,10 +509,6 @@ const VerticalCollection = Component.extend({
             index: bottomComponentIndex
           });
         }
-        this.sendActionOnce('lastVisibleChanged', {
-          item: component,
-          index: bottomComponentIndex
-        });
 
         // above the lower reveal boundary (componentTop < edges.visibleBottom)
       } else {
@@ -527,6 +523,11 @@ const VerticalCollection = Component.extend({
 
       bottomComponentIndex++;
     }
+
+    this.sendActionOnce('lastVisibleChanged', {
+      item: childComponents[bottomComponentIndex - 1],
+      index: bottomComponentIndex - 1
+    });
 
     toCull = toCull
       .concat((childComponents.slice(0, topComponentIndex)))

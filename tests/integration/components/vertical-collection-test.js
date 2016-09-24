@@ -103,6 +103,29 @@ test('Scroll to last item when actual item sizes are significantly larger than d
     });
 });
 
+test('Sends the last visible changed action', function(assert) {
+  const done = assert.async();
+
+  this.set('items', Array(50).fill({ text: 'b' }));
+  this.on('lastVisibleChanged', (item) => {
+    assert.equal(item.index, 30, 'the last visible changed should be item 30');
+    done();
+  });
+
+  this.render(hbs`
+  <div style="height: 200px; width: 100px;" class="scrollable">
+    {{#vertical-collection
+      defaultHeight=10
+      bufferSize=0
+      content=items
+      lastVisibleChanged='lastVisibleChanged' as |item|}}
+      {{item.text}}
+    {{/vertical-collection}}
+  </div>
+  `);
+
+  wait().then(() => this.$('.scrollable').scrollTop(100));
+});
 
 /*
 test("The Collection Reveals it's children when `renderAllInitially` is true.", function(assert) {
