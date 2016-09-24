@@ -13,9 +13,9 @@ export class ScrollHandler {
   }
 
   addElementHandler(element, handler) {
-    let index = this.length++;
-
     if (this.elements.indexOf(element) === -1) {
+      let index = this.length++;
+
       if (index === this.maxLength) {
         this.maxLength *= 2;
         this.elements.length = this.maxLength;

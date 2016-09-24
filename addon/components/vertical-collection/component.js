@@ -1,12 +1,10 @@
 /* global Array, parseFloat, Math */
 import Ember from 'ember';
 import layout from './template';
-import DebugMixin from '../../-debug/edge-visualization/debug-mixin';
 import getTagDescendant from '../../utils/get-tag-descendant';
 import proxied from '../../utils/proxied-array';
 import ListRadar from '../../-private/radar/models/list-radar';
 import identity from '../../-private/ember/utils/identity';
-
 const {
   get,
   computed,
@@ -681,7 +679,6 @@ const VerticalCollection = Component.extend({
         'overflow-scrolling': 'touch',
         'overflow-y': 'scroll'
       });
-
     }
 
     this._container = container;
@@ -703,9 +700,9 @@ const VerticalCollection = Component.extend({
     };
 
     this.radar.setState({
-      telescope: this._container,
+      telescope: container,
       resizeDebounce: this.resizeDebounce,
-      sky: container === window ? window : this.element,
+      sky: this.element,
       minimumMovement: this.minimumMovement
     });
     this.radar.didResizeSatellites = onResizeMethod;
@@ -958,10 +955,6 @@ const VerticalCollection = Component.extend({
 
 VerticalCollection.reopenClass({
   positionalParams: ['items']
-});
-
-Ember.runInDebug(() => {
-  VerticalCollection.reopen(DebugMixin);
 });
 
 export default VerticalCollection;
