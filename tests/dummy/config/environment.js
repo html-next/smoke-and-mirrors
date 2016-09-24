@@ -8,7 +8,7 @@ module.exports = function(environment) {
     modulePrefix: 'dummy',
     podModulePrefix: 'dummy/screens',
     environment: environment,
-    baseURL: '/',
+    rootURL: '/',
     locationType: 'hash',
     EmberENV: {
       FEATURES: {},
@@ -58,17 +58,10 @@ module.exports = function(environment) {
     ENV.APP.LOG_VIEW_LOOKUPS = false;
   }
 
-  if (environment === 'development') {}
-
   if (environment === 'test') {
     // Testem prefers this...
-    ENV.baseURL = '/';
     ENV.locationType = 'none';
     ENV.APP.rootElement = '#ember-testing';
-  }
-
-  if (environment === 'production') {
-    // ENV.baseURL = '/smoke-and-mirrors';
   }
 
   return ENV;
