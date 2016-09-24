@@ -72,8 +72,17 @@ module.exports = {
     return tree;
   },
 
+  treeForApp: function() {
+    var tree = this._super.treeForApp.apply(this, arguments);
+
+    if (/production/.test(this.app.env)) {
+      tree = new Funnel(tree, { exclude: [ /initializers/ ] });
+    }
+
+    return tree;
+  },
+
   isDevelopingAddon: function() {
     return false;
   }
-
 };
