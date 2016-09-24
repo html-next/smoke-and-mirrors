@@ -6,7 +6,7 @@ import getTagDescendant from '../../utils/get-tag-descendant';
 import proxied from '../../utils/proxied-array';
 import ListRadar from '../../-private/radar/models/list-radar';
 import identity from '../../-private/ember/utils/identity';
-
+import { stripInProduction } from 'smoke-and-mirrors/-debug/helpers';
 const {
   get,
   computed,
@@ -960,7 +960,7 @@ VerticalCollection.reopenClass({
   positionalParams: ['items']
 });
 
-Ember.runInDebug(() => {
+stripInProduction(() => {
   VerticalCollection.reopen(DebugMixin);
 });
 
