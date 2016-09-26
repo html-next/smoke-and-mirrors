@@ -5,7 +5,6 @@
           {{!- BEGIN-SNIPPET infinite-scroll-example }}
             <div class="table-wrapper dark">
               {{#vertical-collection
-                debug=false
                 content=model.numbers
                 defaultHeight=270
                 alwaysUseDefaultHeight=true
@@ -15,7 +14,7 @@
                 as |item index|
               }}
                   <div class="image-slide">
-                    {{examples/infinite-scroll/components/number-slide number=item.number index=index}}
+                    {{number-slide item=item index=index}}
                   </div>
               {{/vertical-collection}}
             </div>

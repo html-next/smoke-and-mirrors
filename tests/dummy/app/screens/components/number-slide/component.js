@@ -2,8 +2,8 @@ import Ember from 'ember';
 import layout from './template';
 
 const {
-  SafeString
-} = Ember.Handlebars;
+  htmlSafe
+} = Ember.String;
 
 const {
   Component,
@@ -68,21 +68,37 @@ function numberToRGB(number) {
 export default Component.extend({
   tagName: 'number-slide',
   attributeBindings: ['style'],
-  style: computed('number', function() {
-    let num = parseInt(this.get('number'), 10);
+  isDynamic: false,
+  style: computed('isDynamic', 'item', function() {
+    let item = this.get('item');
+    let isDynamic = this.get('isDynamic');
 
-    if (num < 0) {
-      num = 380 + num;
+    let {
+      width,
+      height,
+      number
+    } = item;
+
+    if (number < 0) {
+      number = 380 + number;
     }
-    let c = numberToRGB(num);
+    let c = numberToRGB(number);
     let b = {
       r: 255 - c.r,
       g: 255 - c.g,
       b: 255 - c.b
     };
-    return new SafeString(`background: rgb(${c.r},${c.g},${c.b}); color: rgb(${b.r},${b.g},${b.b});`);
+
+    let styleStr = `background: rgb(${c.r},${c.g},${c.b}); color: rgb(${b.r},${b.g},${b.b});`;
+
+    if (isDynamic) {
+      styleStr += `height:${height}px;`;
+    }
+
+    return htmlSafe(styleStr);
   }),
   layout,
   index: 0,
-  number: 0
+  item: null,
+  number: computed.alias('item.number')
 });

@@ -15,7 +15,7 @@ const CATEGORIES = [
   'technics'
 ];
 
-function booleanToss() {
+export function booleanToss() {
   return Math.round(Math.random());
 }
 
@@ -31,11 +31,11 @@ function getWidth() {
   return getRandomNumber(1500, 1920);
 }
 
-function getDynamicHeight() {
+export function getDynamicHeight() {
   return getRandomNumber(300, 600);
 }
 
-function getDynamicWidth(height, isPortrait) {
+export function getDynamicWidth(height, isPortrait) {
   return Math.round(isPortrait ? height / 16 * 9 : height / 9 * 16);
 }
 

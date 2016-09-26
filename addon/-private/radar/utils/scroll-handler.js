@@ -1,30 +1,30 @@
-import CacheList from '../../cache-list';
-
 const DEFAULT_ARRAY_SIZE = 10;
 
 export class ScrollHandler {
-
   constructor() {
     this.elements = new Array(DEFAULT_ARRAY_SIZE);
     this.maxLength = DEFAULT_ARRAY_SIZE;
     this.length = 0;
-    this.handlers = new CacheList();
+    this.handlers = new Array(DEFAULT_ARRAY_SIZE);
     this.isPolling = false;
   }
 
   addElementHandler(element, handler) {
-    if (this.elements.indexOf(element) === -1) {
-      let index = this.length++;
+    let index = this.elements.indexOf(element);
+
+    if (index === -1) {
+      index = this.length++;
 
       if (index === this.maxLength) {
         this.maxLength *= 2;
         this.elements.length = this.maxLength;
+        this.handlers.length = this.maxLength;
       }
 
       this.elements[index] = element;
-      this.handlers.set(element, { top: undefined, left: undefined, handlers: [handler] });
+      this.handlers[index] =  { top: undefined, left: undefined, handlers: [handler] };
     } else {
-      let handlers = this.handlers.get(element).handlers;
+      let handlers = this.handlers[index].handlers;
 
       handlers.push(handler);
     }
@@ -35,7 +35,8 @@ export class ScrollHandler {
   }
 
   removeElementHandler(element, handler) {
-    let elementCache = this.handlers.get(element);
+    let index = this.elements.indexOf(element);
+    let elementCache = this.handlers[index];
 
     if (elementCache && elementCache.handlers) {
       let index = elementCache.handlers.indexOf(handler);
@@ -48,7 +49,7 @@ export class ScrollHandler {
 
       // cleanup element entirely if needed
       if (!elementCache.handlers.length) {
-        this.handlers.remove(element);
+        this.handlers.splice(index, 1);
 
         index = this.elements.indexOf(element);
         this.elements.splice(index, 1);
@@ -67,7 +68,7 @@ export class ScrollHandler {
     requestAnimationFrame(() => {
       for (let i = 0; i < this.length; i++) {
         let element = this.elements[i];
-        let info = this.handlers.get(element);
+        let info = this.handlers[i];
         let cachedTop = element.scrollTop;
         let cachedLeft = element.scrollLeft;
         let topChanged = cachedTop !== info.top && info.top !== undefined;
