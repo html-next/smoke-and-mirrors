@@ -1,14 +1,3 @@
-import Ember from 'ember';
-import getImages from 'dummy/lib/get-images';
+import Route from '../infinite-scroll/route';
 
-const {
-  Route
-  } = Ember;
-
-export default Route.extend({
-
-  model() {
-    return { images: getImages(10) };
-  }
-
-});
+export default Route.extend({});

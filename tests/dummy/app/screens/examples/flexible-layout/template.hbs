@@ -4,16 +4,15 @@
           {{!- BEGIN-SNIPPET flexible-layout-example }}
             <div class="table-wrapper">
               {{#vertical-collection
-                content=model.images
-                defaultHeight=300
+                content=model.numbers
+                defaultHeight=270
                 alwaysUseDefaultHeight=false
-                visibleBuffer=2
                 useContentProxy=false
                 lastReached="loadBelow"
-                as |image|
+                as |item index|
               }}
                   <div class="image-slide flexible">
-                    {{async-image src=image.small}}
+                    {{number-slide isDynamic=true item=item index=index}}
                   </div>
               {{/vertical-collection}}
             </div>
