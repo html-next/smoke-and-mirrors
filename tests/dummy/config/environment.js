@@ -1,6 +1,8 @@
 /* jshint node:true */
 // jscs:disable
 /* global module */
+var pkg = require('../../../package.json');
+
 module.exports = function(environment) {
   var DEBUG = false;
 
@@ -15,7 +17,7 @@ module.exports = function(environment) {
       EXTEND_PROTOTYPES: false
     },
 
-    VERSION: '0.4.4',
+    VERSION: pkg.version,
 
     APP: {
       // Here you can pass flags/options to your application instance
