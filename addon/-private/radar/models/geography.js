@@ -8,7 +8,7 @@ export default class Geography {
   }
 
   setState(state) {
-    state = state || this.element.getBoundingClientRect();
+    state = state || this.computeState();
 
     // copying over ensures we preserve shape from outside sources
     // and enables write ops as ClientRect can't be written
@@ -29,6 +29,10 @@ export default class Geography {
       width: this.width,
       height: this.height
     };
+  }
+
+  computeState() {
+    return this.element.getBoundingClientRect();
   }
 
   destroy() {
