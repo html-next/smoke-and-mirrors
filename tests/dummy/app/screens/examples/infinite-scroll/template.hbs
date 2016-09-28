@@ -5,10 +5,13 @@
           {{!- BEGIN-SNIPPET infinite-scroll-example }}
             <div class="table-wrapper dark">
               {{#vertical-collection
+                debug=true
                 content=model.numbers
                 defaultHeight=270
                 alwaysUseDefaultHeight=true
                 useContentProxy=false
+                firstReached="loadAbove"
+                lastReached="loadBelow"
                 as |item index|
               }}
                   <div class="image-slide">

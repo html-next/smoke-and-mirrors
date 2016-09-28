@@ -4,10 +4,10 @@
           {{!- BEGIN-SNIPPET flexible-layout-example }}
             <div class="table-wrapper">
               {{#vertical-collection
+                debug=true
                 content=model.numbers
                 defaultHeight=270
                 alwaysUseDefaultHeight=false
-                useContentProxy=false
                 lastReached="loadBelow"
                 as |item index|
               }}

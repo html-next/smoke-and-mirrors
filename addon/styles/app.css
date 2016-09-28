@@ -1,7 +1,6 @@
 /* includes legacy support for older tagNames */
 occlusion-collection,
-vertical-collection,
-.vertical-collection {
+vertical-collection {
   display: block;
   width: 100%;
   min-height: 100%;
@@ -9,8 +8,7 @@ vertical-collection,
 }
 
 occlusion-item,
-vertical-item,
-.vertical-item {
+vertical-item {
   display: block;
   width: 100%;
   position: relative;
@@ -18,8 +16,7 @@ vertical-item,
 }
 
 occlusion-item::after,
-vertical-item::after,
-.vertical-item::after {
+vertical-item::after {
   display: block;
   content: ' ';
   width: 100%;

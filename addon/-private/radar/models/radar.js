@@ -249,7 +249,6 @@ export default class Radar {
       const dX = scrollX - _scrollX;
 
       this.shiftSatellites(dY, dX);
-
       this.currentOffsets = null;
     }
   }
@@ -264,6 +263,7 @@ export default class Radar {
       this.posY = posY;
       this.posX = posX;
       this.adjustPosition(posY - _posY, posX - _posX);
+      this.currentAdjustOffsets = null;
     }
   }
 
@@ -302,7 +302,9 @@ export default class Radar {
 
         if (this._nextScroll === null) {
           scheduler.schedule('layout', () => {
-            this.filterMovement(this.currentOffsets);
+            if (this.currentOffsets) {
+              this.filterMovement(this.currentOffsets);
+            }
             this._nextScroll = null;
           });
         }
@@ -321,7 +323,9 @@ export default class Radar {
       this.currentAdjustOffsets = offsets;
       if (this._nextAdjustment === null) {
         this._nextAdjustment = scheduler.schedule('layout', () => {
-          this.updateScrollPosition(this.currentAdjustOffsets);
+          if (this.currentAdjustOffsets) {
+            this.updateScrollPosition(this.currentAdjustOffsets);
+          }
           this._nextAdjustment = null;
         });
       }
