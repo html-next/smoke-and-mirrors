@@ -69,6 +69,7 @@ export default Component.extend({
   tagName: 'number-slide',
   attributeBindings: ['style'],
   isDynamic: false,
+  prefixed: false,
   style: computed('isDynamic', 'item', function() {
     let item = this.get('item');
     let isDynamic = this.get('isDynamic');

@@ -5,11 +5,12 @@ import getTagDescendant from '../../utils/get-tag-descendant';
 import proxied from '../../utils/proxied-array';
 import ListRadar from '../../-private/radar/models/list-radar';
 import identity from '../../-private/ember/utils/identity';
+import scheduler from '../../-private/scheduler';
+
 const {
   get,
   computed,
-  Component,
-  run
+  Component
 } = Ember;
 
 function valueForIndex(arr, index) {
@@ -54,16 +55,6 @@ const VerticalCollection = Component.extend({
   _defaultHeight: null,
 
   // –––––––––––––– Optional Settings
-
-  /*
-   * Set this if you need to dynamically change the height of the container
-   * (useful for viewport resizing on mobile apps when the keyboard is open).
-   *
-   * Changes to this property's value will trigger new viewport boundary
-   * calculations.  This works for height or width changes, it's value is
-   * never actually used.
-   */
-  containerSize: null,
 
   /*
    * Classes to add to the `vertical-item`
@@ -245,11 +236,6 @@ const VerticalCollection = Component.extend({
   _container: null,
 
   /*
-   * false until the first full setup has completed
-   */
-  __isInitialized: false,
-
-  /*
    * Set this to false to prevent rendering entirely.
    * Useful for situations in which rendering is
    * expensive enough that it interferes with a
@@ -260,42 +246,14 @@ const VerticalCollection = Component.extend({
    */
   shouldRender: true,
 
-  shouldRenderList: computed('shouldRender', '__smCanRender', function() {
-    const shouldRender = this.get('shouldRender');
-    const canRender = this.get('__smCanRender');
-    const doRender = shouldRender && canRender;
-    const _shouldDidChange = this.get('__shouldRender') !== shouldRender;
-
-    // trigger a cycle
-    if (doRender && _shouldDidChange) {
-      this._nextUpdate = run.scheduleOnce('actions', this, this._updateChildStates, 'shouldRenderList');
-    }
-
-    return doRender;
-  }),
-
-  /*
-   * Internal boolean used to track whether the component
-   * has been inserted into the DOM and DOM related setup
-   * has occurred.
-   *
-   * TODO can we eliminate this?
-   *
-   * @private
-   */
-  __smCanRender: false,
-
-  __shouldRender: true,
-
   /*
    * forward is true, backwards is false
    */
   _scrollIsForward: 0,
   radar: null,
-  minimumMovement: 15,
   _nextUpdate: null,
-  _nextTeardown: null,
-  _nextMaintenance: null,
+  _nextSync: null,
+  _nextScrollSync: null,
   _isPrepending: false,
   _children: null,
 
@@ -337,12 +295,12 @@ const VerticalCollection = Component.extend({
     }
 
     if (name === 'firstReached') {
-      if (this.get('_scrollIsForward')) {
+      if (this._scrollIsForward) {
         return false;
       }
     }
 
-    return !(name === 'lastReached' && !this.get('_scrollIsForward'));
+    return !(name === 'lastReached' && !this._scrollIsForward);
   },
 
   prepareActionContext(name, context) {
@@ -412,7 +370,11 @@ const VerticalCollection = Component.extend({
     };
 
     // this MUST be async or glimmer will freak
-    run.schedule('afterRender', this, this.sendAction, name, context, callback);
+    scheduler.schedule('affect', () => {
+      setTimeout(() => {
+        this.sendAction(name, context, callback);
+      });
+    });
   },
 
   /*
@@ -465,9 +427,7 @@ const VerticalCollection = Component.extend({
   register(child) {
     this.get('_children').addObject(child);
     child.radar = this.radar;
-    if (this.__isInitialized) {
-      this.__smScheduleUpdate('register');
-    }
+    this._scheduleUpdate();
   },
 
   unregister(child) {
@@ -475,8 +435,8 @@ const VerticalCollection = Component.extend({
 
     if (children) {
       children.removeObject(child);
-      if (this.__isInitialized && !this.get('isDestroying') && !this.get('isDestroyed')) {
-        this.__smScheduleUpdate('unregister');
+      if (!this.get('isDestroying') && !this.get('isDestroyed')) {
+        this._scheduleUpdate();
       }
     }
   },
@@ -494,11 +454,11 @@ const VerticalCollection = Component.extend({
    * @private
    */
   _updateChildStates(/* source */) {  // eslint: complexity
-    if (!this.get('shouldRenderList')) {
+    if (!this.get('shouldRender')) {
       return;
     }
 
-    const edges = this.get('_edges');
+    const edges = this._edges;
     const childComponents = this.get('children');
 
     if (!get(childComponents, 'length')) {
@@ -511,22 +471,11 @@ const VerticalCollection = Component.extend({
           i.show();
         });
 
-        // set scroll
-        if (this.get('__isInitializingFromLast')) {
-          this._nextMaintenance = run.schedule('afterRender', this, function() {
-            const last = this.$().get(0).lastElementChild;
-
-            this.set('__isInitializingFromLast', false);
-            if (last) {
-              last.scrollIntoView(false);
-            }
-          });
-        }
+        this._scheduleScrollSync();
 
         this._isFirstRender = false;
         return;
       }
-
     }
 
     const currentViewportBound = this.radar.skyline.top;
@@ -623,17 +572,7 @@ const VerticalCollection = Component.extend({
       toShow[k].show();
     }
 
-    // set scroll
-    if (this.get('__isInitializingFromLast')) {
-      this._nextMaintenance = run.schedule('afterRender', this, function() {
-        const last = this.$().get(0).lastElementChild;
-
-        this.set('__isInitializingFromLast', false);
-        if (last) {
-          last.scrollIntoView(false);
-        }
-      });
-    }
+    this._scheduleScrollSync();
 
     if (this._isFirstRender) {
       this._isFirstRender = false;
@@ -644,22 +583,49 @@ const VerticalCollection = Component.extend({
     }
   },
 
-  __smScheduleUpdate(source) {
+  _scheduleUpdate() {
     if (this._isPrepending) {
       return;
     }
-    this._nextUpdate = run.scheduleOnce('actions', this, this._updateChildStates, source);
+    if (this._nextUpdate === null) {
+      this._nextUpdate = scheduler.schedule('layout', () => {
+        this._updateChildStates();
+        this._nextUpdate = null;
+      });
+    }
+  },
+
+  _scheduleSync() {
+    if (this._nextSync === null) {
+      this._nextSync = scheduler.schedule('sync', () => {
+        this.radar.updateSkyline();
+        this._nextSync = null;
+      });
+    }
+  },
+
+  _scheduleScrollSync() {
+    if (this.get('__isInitializingFromLast')) {
+      if (this._nextScrollSync === null) {
+        this._nextScrollSync = scheduler.schedule('measure', () => {
+          const last = this.element.lastElementChild;
+
+          this.set('__isInitializingFromLast', false);
+          if (last) {
+            last.scrollIntoView(false);
+          }
+
+          this._nextScrollSync = null;
+        });
+      }
+    }
   },
 
   didInsertElement() {
-    this._super();
-    this._nextMaintenance = run.next(() => {
-      this.setupContainer();
-      this.set('__smCanRender', true);
-      // draw initial boundaries
-      this._initializeScrollState();
-      this.notifyPropertyChange('_edges');
-    });
+    this.setupContainer();
+    this._computeEdges();
+    this._initializeScrollState();
+    this._scheduleUpdate();
   },
 
   // –––––––––––––– Setup/Teardown
@@ -688,25 +654,26 @@ const VerticalCollection = Component.extend({
   setupHandlers() {
     const container = this._container;
     const onScrollMethod = (dY) => {
-      if (!this.__isInitialized || this._isPrepending) {
+      if (this._isPrepending) {
         return;
       }
-      this.set('_scrollIsForward', dY > 0);
-      this.__smScheduleUpdate('scroll');
+      this._scrollIsForward = dY > 0;
+
+      this._scheduleUpdate();
     };
 
     const onResizeMethod = () => {
-      this.notifyPropertyChange('_edges');
+      this._computeEdges();
     };
 
     this.radar.setState({
       telescope: container,
       resizeDebounce: this.resizeDebounce,
       sky: this.element,
-      minimumMovement: this.minimumMovement
+      minimumMovement: Math.floor(this.defaultHeight / 2)
     });
     this.radar.didResizeSatellites = onResizeMethod;
-    this.radar.didUpdatePosition = onResizeMethod;
+    this.radar.didAdjustPosition = onResizeMethod;
     this.radar.didShiftSatellites = onScrollMethod;
   },
 
@@ -733,12 +700,6 @@ const VerticalCollection = Component.extend({
       }
       this.radar.telescope.scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
     }
-
-    this._nextMaintenance = run.next(this, () => {
-      this.__isInitialized = true;
-      this._updateChildStates('initializeScrollState');
-    });
-
   },
 
   /*
@@ -763,7 +724,7 @@ const VerticalCollection = Component.extend({
     if (this.radar) {
       this.radar.destroy();
       this.radar.didResizeSatellites = null;
-      this.radar.didUpdatePosition = null;
+      this.radar.didAdjustPosition = null;
       this.radar.didShiftSatellites = null;
       this.radar = null;
     }
@@ -774,21 +735,19 @@ const VerticalCollection = Component.extend({
     this.__smActionCache = null;
 
     // clean up scheduled tasks
-    run.cancel(this._nextUpdate);
-    run.cancel(this._nextTeardown);
-    run.cancel(this._nextMaintenance);
+    scheduler.forget(this._nextUpdate);
+    scheduler.forget(this._nextSync);
+    scheduler.forget(this._nextScrollSync);
   },
 
   __prependComponents() {
-    if (this.get('__smCanRender')) {
-      this._isPrepending = true;
-      run.cancel(this._nextUpdate);
-      this._nextUpdate = run.scheduleOnce('actions', this, function() {
-        this.radar.silentNight();
-        this._updateChildStates('prepend');
-        this._isPrepending = false;
-      });
-    }
+    this._isPrepending = true;
+    scheduler.forget(this._nextUpdate);
+    this._nextUpdate = scheduler.schedule('layout', () => {
+      this.radar.silentNight();
+      this._updateChildStates();
+      this._isPrepending = false;
+    });
   },
 
   __getEstimatedDefaultHeight() {
@@ -837,37 +796,37 @@ const VerticalCollection = Component.extend({
    * and culled content based on the "viewport" height,
    * and the bufferSize.
    *
-   * computes off of `containerSize` although `containerSize`
-   * is never used.  This allows you to force it to recompute
-   * when needed from the outside.
-   *
    * @private
    */
-  _edges: computed('containerSize', function() {
+  _edges: null,
+  _computeEdges() {
+    let edges;
+
     if (!this.radar || !this.radar.planet) {
-      return {};
+      edges = {};
+    } else {
+      // segment top break points
+      this.radar.planet.setState();
+
+      const bufferSize = this.get('bufferSize');
+      const rect = this.radar.planet;
+
+      edges = {
+        viewportTop: rect.top,
+        visibleTop: (-1 * bufferSize * rect.height) + rect.top,
+        viewportBottom: rect.bottom,
+        visibleBottom: (bufferSize * rect.height) + rect.bottom
+      };
     }
 
-    // segment top break points
-    this.radar.planet.setState();
-
-    const bufferSize = this.get('bufferSize');
-    const rect = this.radar.planet;
-
-    return {
-      viewportTop: rect.top,
-      visibleTop: (-1 * bufferSize * rect.height) + rect.top,
-      viewportBottom: rect.bottom,
-      visibleBottom: (bufferSize * rect.height) + rect.bottom
-    };
-  }),
+    this._edges = edges;
+    return edges;
+  },
 
   /*
    * Initialize
    */
   _prepareComponent() {
-    this.set('__shouldRender', this.get('shouldRender'));
-
     this.__smActionCache = {
       firstReached: null,
       lastReached: null,
@@ -897,9 +856,9 @@ const VerticalCollection = Component.extend({
         this.__prependComponents();
       } else {
         if (!removeCount || removeCount < addCount) {
-          this.__smScheduleUpdate('reflect changes');
+          this._scheduleUpdate();
         }
-        run.scheduleOnce('sync', this.radar, this.radar.updateSkyline);
+        this._scheduleSync();
       }
     };
   },
@@ -912,9 +871,10 @@ const VerticalCollection = Component.extend({
       this.__prependComponents();
     } else {
       if (newArray && (!oldArray || get(oldArray, 'length') <= get(newArray, 'length'))) {
-        this.__smScheduleUpdate('didReveiveAttrs');
+        this._scheduleUpdate();
       }
-      run.scheduleOnce('sync', this.radar, this.radar.updateSkyline);
+
+      this._scheduleSync();
     }
   },
 
@@ -938,7 +898,7 @@ const VerticalCollection = Component.extend({
   didReceiveAttrs() {},
 
   init() {
-    this._super(...arguments);
+    this._super();
 
     this._prepareComponent();
     this.set('_children', Ember.A());

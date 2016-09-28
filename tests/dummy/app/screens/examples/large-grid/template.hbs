@@ -18,14 +18,14 @@
             {{#occludable-area class="grid-page"}}
               {{#each page.numbers as |item|}}
                 <div class="grid-item">
-                  {{examples/infinite-scroll/components/number-slide number=item.prefixed index=index}}
+                  {{number-slide item=item prefixed=true index=index}}
                 </div>
               {{/each}}
             {{/occludable-area}}
           {{else}}
             {{#each page.numbers as |item|}}
               {{#occludable-area class="grid-item"}}
-                {{examples/infinite-scroll/components/number-slide number=item.prefixed index=index}}
+                {{number-slide item=item prefixed=true index=index}}
               {{/occludable-area}}
             {{/each}}
           {{/if}}

@@ -108,7 +108,6 @@ export default Component.extend({
   _height: 0,
 
   didInsertElement() {
-    this._super();
     this.radar.register(this);
   },
 
@@ -131,7 +130,7 @@ export default Component.extend({
   },
 
   willDestroyElement() {
-    this._super(...arguments);
+    this._super();
     this.set('contentInserted', false);
     this._contentInserted = false;
 
@@ -153,8 +152,8 @@ export default Component.extend({
   },
 
   init() {
-    this._super(...arguments);
-    this.registry = getOwner(this).lookup('-view-registry:main') || Ember.View.views;
+    this._super();
+    this.registry = getOwner(this).lookup('-view-registry:main');
     let tag = this.get('itemTagName');
 
     this.set('tagName', tag);
@@ -166,5 +165,4 @@ export default Component.extend({
     this.setHeightProp = isTableChild || this.alwaysUseDefaultHeight;
     this.register(this);
   }
-
 });

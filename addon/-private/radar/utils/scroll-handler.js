@@ -1,3 +1,5 @@
+import scheduler from '../../scheduler';
+
 const DEFAULT_ARRAY_SIZE = 10;
 
 export class ScrollHandler {
@@ -65,7 +67,7 @@ export class ScrollHandler {
   poll() {
     this.isPolling = true;
 
-    requestAnimationFrame(() => {
+    scheduler.schedule('sync', () => {
       for (let i = 0; i < this.length; i++) {
         let element = this.elements[i];
         let info = this.handlers[i];

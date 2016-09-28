@@ -1,6 +1,22 @@
 Changelog
 =========
 
+## 0.5.5
+
+### Pull Requests
+
+- [#128](https://github.com/runspired/smoke-and-mirrors/pull/128) **fix**: only update scroll handler length when elements array changes  *by [adamjmcgrath](https://github.com/adamjmcgrath)*
+- [#126](https://github.com/runspired/smoke-and-mirrors/pull/126) **fix**: update height after render when the item is shown  *by [adamjmcgrath](https://github.com/adamjmcgrath)*
+- [#136](https://github.com/runspired/smoke-and-mirrors/pull/136)  New Release  *by [Chris Thoburn](https://github.com/runspired)*
+- [#137](https://github.com/runspired/smoke-and-mirrors/pull/137)  0.5.5  *by [Chris Thoburn](https://github.com/runspired)*
+
+#### Commits
+
+- [dc04f499](https://github.com/runspired/smoke-and-mirrors/commit/dc04f49924e5b3379df4d97692e5405ad8c393a6) **feat(code-stripping)**: remove classCallChecks for perf, strip unused code from builds *by [Chris Thoburn](https://github.com/runspired)*
+- [bf1c02b4](https://github.com/runspired/smoke-and-mirrors/commit/bf1c02b4fa4c5d32c3bad0df9ab3a9e2086184a5) **fix(scroll-handler)**: only update scroll handler length when elements array changes *by [adamjmcgrath](https://github.com/adamjmcgrath)*
+- [c6399038](https://github.com/runspired/smoke-and-mirrors/commit/c6399038759d46b234f585f48b8e52a1434a1b46) **fix(vertical-item)**: update height after render when the item is shown *by [adamjmcgrath](https://github.com/adamjmcgrath)*
+- [441f7635](https://github.com/runspired/smoke-and-mirrors/commit/441f76359695439ce91bae21cc34309409b6e0bc) **fix(readme)**: cleanup style *by [Chris Thoburn](https://github.com/runspired)*
+
 ## 0.5.4
 
 ### Pull Requests

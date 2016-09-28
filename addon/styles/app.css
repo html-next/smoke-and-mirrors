@@ -7,13 +7,15 @@ vertical-collection {
   position: relative;
 }
 
-occlusion-item, vertical-item {
+occlusion-item,
+vertical-item {
   display: block;
   width: 100%;
   position: relative;
   min-height: 1px;
 }
 
+occlusion-item::after,
 vertical-item::after {
   display: block;
   content: ' ';
