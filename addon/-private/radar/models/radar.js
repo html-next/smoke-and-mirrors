@@ -10,8 +10,7 @@ import {
 import scheduler from '../../scheduler';
 
 const {
-  guidFor,
-  run
+  guidFor
   } = Ember;
 
 const DEFAULT_ARRAY_SIZE = 200;
@@ -21,6 +20,7 @@ export default class Radar {
   constructor(state) {
     this.satellites = new Array(DEFAULT_ARRAY_SIZE);
     this.length = 0;
+    this.alwaysRemeasure = false;
     this.maxLength = DEFAULT_ARRAY_SIZE;
     this.setState(state || {});
   }
@@ -65,6 +65,7 @@ export default class Radar {
 
     this.minimumMovement = state.minimumMovement || 15;
     this.resizeDebounce = state.resizeDebounce || 64;
+    this.alwaysRemeasure = state.alwaysRemeasure || false;
     this.isTracking = state.hasOwnProperty('isTracking') ? state.isTracking : true;
     if (this.telescope && this.sky) {
       this._setupHandlers();
@@ -159,6 +160,7 @@ export default class Radar {
   didResizeSatellites() {}
   willAdjustPosition() {}
   didAdjustPosition() {}
+  didRebuild() {}
 
   _resize() {
     for (let i = 0; i < this.length; i++) {
@@ -221,16 +223,29 @@ export default class Radar {
     this.skyline.right -= dX;
     this.skyline.bottom -= dY;
     this.skyline.top -= dY;
-    this.rebuild();
-  }
 
-  rebuild() {
     this.posX = Container.scrollLeft;
     this.posY = Container.scrollTop;
 
     for (let i = 0; i < this.length; i++) {
       this.satellites[i].geography.setState();
     }
+  }
+
+  rebuild() {
+    this.scrollY = this.telescope.scrollTop;
+    this.scrollX = this.telescope.scrollLeft;
+    this.posX = Container.scrollLeft;
+    this.posY = Container.scrollTop;
+
+    this.skyline.setState();
+    this.planet.setState();
+
+    for (let i = 0; i < this.length; i++) {
+      this.satellites[i].geography.setState();
+    }
+
+    this.didRebuild();
   }
 
   filterMovement(offsets) {
@@ -242,6 +257,11 @@ export default class Radar {
     const _scrollX = this.scrollX;
 
     if (this.isEarthquake(_scrollY, scrollY) || this.isEarthquake(_scrollX, scrollX)) {
+      if (this.alwaysRemeasure) {
+        this.rebuild();
+        return;
+      }
+
       this.scrollY = scrollY;
       this.scrollX = scrollX;
 
@@ -260,6 +280,11 @@ export default class Radar {
     const posY = offsets.top;
 
     if (this.isEarthquake(_posY, posY) || this.isEarthquake(_posX, posX)) {
+      if (this.alwaysRemeasure) {
+        this.rebuild();
+        return;
+      }
+
       this.posY = posY;
       this.posX = posX;
       this.adjustPosition(posY - _posY, posX - _posX);

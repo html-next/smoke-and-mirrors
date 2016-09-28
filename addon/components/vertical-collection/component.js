@@ -46,7 +46,8 @@ const VerticalCollection = Component.extend({
    * is rendered for the first time.
    */
   defaultHeight: 75,
-  alwaysUseDefaultHeight: false,
+  alwaysRemeasure: false,
+  alwaysUseDefaultHeight: computed.not('alwaysRemeasure'),
 
   /*
    * Cached value used once default height is
@@ -665,16 +666,25 @@ const VerticalCollection = Component.extend({
     const onResizeMethod = () => {
       this._computeEdges();
     };
+    const onRebuildMethod = () => {
+      if (this._isPrepending) {
+        return;
+      }
+      this._computeEdges();
+      this._scheduleUpdate();
+    };
 
     this.radar.setState({
       telescope: container,
       resizeDebounce: this.resizeDebounce,
       sky: this.element,
-      minimumMovement: Math.floor(this.defaultHeight / 2)
+      minimumMovement: Math.floor(this.defaultHeight / 2),
+      alwaysRemeasure: this.alwaysRemeasure
     });
     this.radar.didResizeSatellites = onResizeMethod;
     this.radar.didAdjustPosition = onResizeMethod;
     this.radar.didShiftSatellites = onScrollMethod;
+    this.radar.didRebuild = onRebuildMethod;
   },
 
   _initializeScrollState() {
@@ -743,10 +753,11 @@ const VerticalCollection = Component.extend({
   __prependComponents() {
     this._isPrepending = true;
     scheduler.forget(this._nextUpdate);
-    this._nextUpdate = scheduler.schedule('layout', () => {
+    this._nextUpdate = scheduler.schedule('sync', () => {
       this.radar.silentNight();
       this._updateChildStates();
       this._isPrepending = false;
+      this._nextUpdate = null;
     });
   },
 
