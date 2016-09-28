@@ -1,10 +1,10 @@
 import Ember from 'ember';
 import layout from './template';
 import getOwner from 'ember-getowner-polyfill';
+import scheduler from '../../-private/scheduler';
 
 const {
-  Component,
-  run
+  Component
   } = Ember;
 
 /*
@@ -20,7 +20,7 @@ export default Component.extend({
   tagName: 'vertical-item',
   itemTagName: 'vertical-item',
 
-  alwaysUseDefaultHeight: false,
+  alwaysRemeasure: false,
 
   classNames: ['vertical-item'],
 
@@ -50,10 +50,12 @@ export default Component.extend({
 
     this._contentInserted = true;
     this.set('contentInserted', true);
-    if (!this.alwaysUseDefaultHeight) {
+    if (this.alwaysRemeasure) {
       this.element.style.height = undefined;
     }
-    run.schedule('afterRender', this, this.updateHeight);
+    scheduler.schedule('measure', () => {
+      // this.updateHeight();
+    });
   },
 
   /*
@@ -69,8 +71,8 @@ export default Component.extend({
       return;
     }
 
-    this.updateHeight();
-    if (!this.alwaysUseDefaultHeight && this.element) {
+    // this.updateHeight();
+    if (this.alwaysRemeasure && this.element) {
       if (this.setHeightProp) {
         this.element.style.height = `${this.satellite.geography.height}px`;
       }
@@ -83,7 +85,7 @@ export default Component.extend({
 
   _hasRealHeight: false,
   updateHeight() {
-    const needsRealHeight = !this.alwaysUseDefaultHeight;
+    const needsRealHeight = this.alwaysRemeasure;
 
     if (needsRealHeight) {
       this.satellite.resize();
@@ -162,7 +164,7 @@ export default Component.extend({
     const isTableChild = tag === 'tr' || tag === 'td' || tag === 'th';
 
     // table children don't respect min-height :'(
-    this.setHeightProp = isTableChild || this.alwaysUseDefaultHeight;
+    this.setHeightProp = isTableChild || !this.alwaysRemeasure;
     this.register(this);
   }
 });

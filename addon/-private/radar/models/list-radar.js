@@ -24,6 +24,10 @@ export default class ListRadar extends Radar {
   }
 
   _resize() {
+    if (this.alwaysRemeasure) {
+      this.rebuild();
+    }
+
     for (let i = 0; i < this.length; i++) {
       let satellite = this.satellites[i];
       const change = satellite.resize();

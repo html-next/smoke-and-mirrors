@@ -50,7 +50,7 @@ module.exports = {
     this._setupBabelOptions(app.env);
 
     if (!/production/.test(app.env)) {
-      console.info(
+      this.ui.write(
         chalk.grey("\n===================================================================\n") +
         chalk.cyan("\tSmoke-and-mirrors\n") +
         chalk.grey("\t:: Including CSS for Visual Debugger\n") +

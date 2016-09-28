@@ -4,6 +4,17 @@ const {
   run
 } = Ember;
 
+function Token() {
+  this.cancelled = false;
+}
+function job(cb, token) {
+  return function execJob() {
+    if (token.cancelled === false) {
+      cb();
+    }
+  };
+}
+
 export class Scheduler {
   constructor() {
     this.sync = [];
@@ -14,15 +25,19 @@ export class Scheduler {
   }
 
   schedule(queueName, cb) {
-    let index = this[queueName].length;
+    let token = new Token();
 
-    this[queueName].push(cb);
+    this[queueName].push(job(cb, token));
     this._flush();
 
-    return index;
+    return token;
   }
 
-  forget(/* token */) {}
+  forget(token) {
+    if (token) {
+      token.cancelled = true;
+    }
+  }
 
   _flush() {
     if (this._nextFlush !== null) {

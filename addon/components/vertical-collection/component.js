@@ -8,6 +8,7 @@ import identity from '../../-private/ember/utils/identity';
 import scheduler from '../../-private/scheduler';
 
 const {
+  K,
   get,
   computed,
   Component
@@ -46,7 +47,8 @@ const VerticalCollection = Component.extend({
    * is rendered for the first time.
    */
   defaultHeight: 75,
-  alwaysUseDefaultHeight: false,
+  alwaysRemeasure: false,
+  alwaysUseDefaultHeight: computed.not('alwaysRemeasure'),
 
   /*
    * Cached value used once default height is
@@ -74,17 +76,6 @@ const VerticalCollection = Component.extend({
    * Set this to "body" to scroll the entire web page.
    */
   containerSelector: null,
-
-  /*
-   * The name of the view to render either above or below the existing content when
-   * more items are being loaded.  For more information about how and when this is
-   * used, see the `Actions` section below.
-   *
-   * This feature will be deprecated quickly when named yields become available in
-   * Ember.
-   */
-  loadBeforeComponent: null,
-  loadAfterComponent: null,
 
   /*
    * Used if you want to explicitly set the tagName of collection's items
@@ -327,8 +318,6 @@ const VerticalCollection = Component.extend({
   },
 
   __smActionCache: null,
-  __smIsLoadingAbove: false,
-  __smIsLoadingBelow: false,
   sendActionOnce(name, context) {
     if (!this.canSendActions(name, context)) {
       return;
@@ -350,29 +339,10 @@ const VerticalCollection = Component.extend({
       contextCache[name] = contextKey;
     }
 
-    const callback = (promise) => {
-      if (name === 'firstReached' && this.loadBeforeComponent) {
-        this.set('__smIsLoadingBefore', true);
-        this.set('__smLoadingBeforePromise', promise);
-        promise.finally(() => {
-          this.set('__smIsLoadingBefore', false);
-          this.set('__smLoadingBeforePromise', null);
-        });
-      }
-      if (name === 'lastReached' && this.loadAfterComponent) {
-        this.set('__smIsLoadingAfter', true);
-        this.set('__smLoadingAfterPromise', promise);
-        promise.finally(() => {
-          this.set('__smIsLoadingAfter', false);
-          this.set('__smLoadingAfterPromise', null);
-        });
-      }
-    };
-
     // this MUST be async or glimmer will freak
     scheduler.schedule('affect', () => {
       setTimeout(() => {
-        this.sendAction(name, context, callback);
+        this.sendAction(name, context, K);
       });
     });
   },
@@ -440,9 +410,6 @@ const VerticalCollection = Component.extend({
       }
     }
   },
-
-  __smSpacerAboveHeight: 0,
-  __smSpacerBelowHeight: 0,
 
   /*
    *
@@ -665,16 +632,25 @@ const VerticalCollection = Component.extend({
     const onResizeMethod = () => {
       this._computeEdges();
     };
+    const onRebuildMethod = () => {
+      if (this._isPrepending) {
+        return;
+      }
+      this._computeEdges();
+      this._scheduleUpdate();
+    };
 
     this.radar.setState({
       telescope: container,
       resizeDebounce: this.resizeDebounce,
       sky: this.element,
-      minimumMovement: Math.floor(this.defaultHeight / 2)
+      minimumMovement: Math.floor(this.defaultHeight / 2),
+      alwaysRemeasure: this.alwaysRemeasure
     });
     this.radar.didResizeSatellites = onResizeMethod;
     this.radar.didAdjustPosition = onResizeMethod;
     this.radar.didShiftSatellites = onScrollMethod;
+    this.radar.didRebuild = onRebuildMethod;
   },
 
   _initializeScrollState() {
@@ -743,10 +719,11 @@ const VerticalCollection = Component.extend({
   __prependComponents() {
     this._isPrepending = true;
     scheduler.forget(this._nextUpdate);
-    this._nextUpdate = scheduler.schedule('layout', () => {
+    this._nextUpdate = scheduler.schedule('sync', () => {
       this.radar.silentNight();
       this._updateChildStates();
       this._isPrepending = false;
+      this._nextUpdate = null;
     });
   },
 
