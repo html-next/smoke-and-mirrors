@@ -1,20 +1,25 @@
 /* includes legacy support for older tagNames */
 occlusion-collection,
-vertical-collection {
+vertical-collection,
+.vertical-collection {
   display: block;
   width: 100%;
   min-height: 100%;
   position: relative;
 }
 
-occlusion-item, vertical-item {
+occlusion-item,
+vertical-item,
+.vertical-item {
   display: block;
   width: 100%;
   position: relative;
   min-height: 1px;
 }
 
-vertical-item::after {
+occlusion-item::after,
+vertical-item::after,
+.vertical-item::after {
   display: block;
   content: ' ';
   width: 100%;

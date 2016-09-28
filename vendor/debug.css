@@ -11,7 +11,8 @@
   display: flex;
   align-items: center;
   justify-content: left;
-  background: rgba(30, 30, 30, 0.95);
+  background: rgba(50, 50, 50, 1);
+  width: 75px;
 }
 
 .sm_visualization-container {
@@ -19,31 +20,40 @@
   zoom: 10%;
   left: 0;
   position: relative;
+  width: 250px;
 }
 
 .sm_visualization-telescope {
   position: absolute;
+  width: 750px;
   background: rgba(100, 230, 100, 0.65);
 }
 
 .sm_visualization-skyline {
   position: absolute;
+  width: 750px;
   background: rgba(255, 255, 255, .15);
 }
 
 .sm_visualization-visible {
   position: absolute;
   background: rgba(100, 230, 100, 0.4);
+  width: 750px;
 }
 
 .sm_visualization-satellite {
   position: absolute;
   box-sizing: border-box;
-  border: 1px solid #bbb;
+  border: 1px dotted #bbb;
   border-top: 0px;
   color: #fff;
   text-align: center;
   font-size: 1.5rem;
+  width: 250px;
+}
+
+.sm_visualization-satellite {
+  border-top: 1px;
 }
 
 .sm_visualization-mirror {
@@ -55,6 +65,22 @@
   color: #fff;
   text-align: center;
   font-size: 1.5rem;
+  width: 250px;
+}
+.sm_visualization-mirror[viewState="culled"] {
+  background: rgba(100, 250, 100, 0.25);
+}
+.sm_visualization-mirror[viewState="culled"][hasErrors=true] {
+  background: rgba(255, 50, 50, 0.5);
+}
+
+.sm_visualization-screen {
+  position: absolute;
+  background: transparent;
+  box-sizing: content-box;
+  border-top: 2px dashed yellow;
+  border-bottom: 2px dashed yellow;
+  width: 750px;
 }
 
 .sm_visualization-mirror[hasErrors=true] {
@@ -62,7 +88,7 @@
 }
 
 .sm_visualization-satellite[viewState="culled"] {
-  background: rgba(230, 230, 230, 0.6);
+  background: transparent;
 }
 
 .sm_visualization-satellite[viewState="visible"] {

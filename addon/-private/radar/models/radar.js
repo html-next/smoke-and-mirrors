@@ -7,6 +7,7 @@ import {
   addScrollHandler,
   removeScrollHandler
 } from '../utils/scroll-handler';
+import scheduler from '../../scheduler';
 
 const {
   guidFor,
@@ -248,6 +249,8 @@ export default class Radar {
       const dX = scrollX - _scrollX;
 
       this.shiftSatellites(dY, dX);
+
+      this.currentOffsets = null;
     }
   }
 
@@ -270,6 +273,11 @@ export default class Radar {
     this.planet.left -= dX;
     this.planet.right -= dX;
 
+    this.skyline.top -= dY;
+    this.skyline.bottom -= dY;
+    this.skyline.left -= dX;
+    this.skyline.right -= dX;
+
     this._shift(dY, dX);
   }
 
@@ -282,21 +290,42 @@ export default class Radar {
   _setupHandlers() {
     this._resizeHandler = undefined;
     this._scrollHandler = undefined;
-    this._nextResize = undefined;
-    this._nextScroll = undefined;
-    this._nextAdjustment = undefined;
+    this._nextResize = null;
+    this._nextScroll = null;
+    this._nextAdjustment = null;
+    this.currentOffsets = null;
+    this.currentAdjustOffsets = null;
 
-    this._scrollHandler = run.bind(this, (offsets) => {
+    this._scrollHandler = (offsets) => {
       if (this.isTracking) {
-        this._nextScroll = run.scheduleOnce('sync', this, this.filterMovement, offsets);
+        this.currentOffsets = offsets;
+
+        if (this._nextScroll === null) {
+          scheduler.schedule('layout', () => {
+            this.filterMovement(this.currentOffsets);
+            this._nextScroll = null;
+          });
+        }
       }
-    });
-    this._resizeHandler = run.bind(this, () => {
-      this._nextResize = run.debounce(this, this.resizeSatellites, this.resizeDebounce);
-    });
-    this._scrollAdjuster = run.bind(this, (offsets) => {
-      this._nextAdjustment = run.scheduleOnce('sync', this, this.updateScrollPosition, offsets);
-    });
+    };
+
+    this._resizeHandler = () => {
+      if (this._nextResize === null) {
+        this._nextResize = scheduler.schedule('sync', () => {
+          this.resizeSatellites();
+          this._nextResize = null;
+        });
+      }
+    };
+    this._scrollAdjuster = (offsets) => {
+      this.currentAdjustOffsets = offsets;
+      if (this._nextAdjustment === null) {
+        this._nextAdjustment = scheduler.schedule('layout', () => {
+          this.updateScrollPosition(this.currentAdjustOffsets);
+          this._nextAdjustment = null;
+        });
+      }
+    };
 
     let handlerOpts = SUPPORTS_PASSIVE ? { capture: true, passive: true } : true;
 
@@ -317,9 +346,9 @@ export default class Radar {
     if (this.telescope !== Container) {
       removeScrollHandler(Container, this._scrollAdjuster);
     }
-    run.cancel(this._nextResize);
-    run.cancel(this._nextScroll);
-    run.cancel(this._nextAdjustment);
+    scheduler.forget(this._nextResize);
+    scheduler.forget(this._nextScroll);
+    scheduler.forget(this._nextAdjustment);
     this._scrollHandler = undefined ;
     this._resizeHandler = undefined;
     this._scrollAdjuster = undefined;
