@@ -88,12 +88,6 @@ const VerticalCollection = Component.extend({
 
   // –––––––––––––– Performance Tuning
   /*
-   * Time (in ms) to debounce layout recalculations when
-   * resizing the window.
-   */
-  resizeDebounce: 64,
-
-  /*
    * how much extra room to keep visible and invisible on
    * either side of the viewport.
    *
@@ -463,9 +457,7 @@ const VerticalCollection = Component.extend({
     const toShow = [];
 
     while (bottomComponentIndex <= lastIndex) {
-
       const component = childComponents[bottomComponentIndex];
-
       const componentTop = component.satellite.geography.top;
       const componentBottom = component.satellite.geography.bottom;
 
@@ -650,7 +642,6 @@ const VerticalCollection = Component.extend({
 
     this.radar.setState({
       telescope: container,
-      resizeDebounce: this.resizeDebounce,
       sky: this.element,
       minimumMovement: Math.floor(this.defaultHeight / 2),
       alwaysRemeasure: this.alwaysRemeasure
