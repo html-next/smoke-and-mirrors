@@ -64,7 +64,6 @@ export default class Radar {
     this.posY = Container.scrollTop;
 
     this.minimumMovement = state.minimumMovement || 15;
-    this.resizeDebounce = state.resizeDebounce || 64;
     this.alwaysRemeasure = state.alwaysRemeasure || false;
     this.isTracking = state.hasOwnProperty('isTracking') ? state.isTracking : true;
     if (this.telescope && this.sky) {

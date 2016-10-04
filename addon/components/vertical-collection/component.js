@@ -11,7 +11,10 @@ const {
   K,
   get,
   computed,
-  Component
+  Component,
+  Logger,
+  isBlank,
+  getOwner
 } = Ember;
 
 function valueForIndex(arr, index) {
@@ -84,12 +87,6 @@ const VerticalCollection = Component.extend({
   key: '@identity',
 
   // –––––––––––––– Performance Tuning
-  /*
-   * Time (in ms) to debounce layout recalculations when
-   * resizing the window.
-   */
-  resizeDebounce: 64,
-
   /*
    * how much extra room to keep visible and invisible on
    * either side of the viewport.
@@ -460,9 +457,7 @@ const VerticalCollection = Component.extend({
     const toShow = [];
 
     while (bottomComponentIndex <= lastIndex) {
-
       const component = childComponents[bottomComponentIndex];
-
       const componentTop = component.satellite.geography.top;
       const componentBottom = component.satellite.geography.bottom;
 
@@ -509,10 +504,6 @@ const VerticalCollection = Component.extend({
             index: bottomComponentIndex
           });
         }
-        this.sendActionOnce('lastVisibleChanged', {
-          item: component,
-          index: bottomComponentIndex
-        });
 
         // above the lower reveal boundary (componentTop < edges.visibleBottom)
       } else {
@@ -527,6 +518,11 @@ const VerticalCollection = Component.extend({
 
       bottomComponentIndex++;
     }
+
+    this.sendActionOnce('lastVisibleChanged', {
+      item: childComponents[bottomComponentIndex - 1],
+      index: bottomComponentIndex - 1
+    });
 
     toCull = toCull
       .concat((childComponents.slice(0, topComponentIndex)))
@@ -593,6 +589,10 @@ const VerticalCollection = Component.extend({
     this._computeEdges();
     this._initializeScrollState();
     this._scheduleUpdate();
+    // Check are we in dev environment
+    if (getOwner(this).resolveRegistration('config:environment').environment === 'development') {
+      this._checkCssRules();
+    }
   },
 
   // –––––––––––––– Setup/Teardown
@@ -642,7 +642,6 @@ const VerticalCollection = Component.extend({
 
     this.radar.setState({
       telescope: container,
-      resizeDebounce: this.resizeDebounce,
       sky: this.element,
       minimumMovement: Math.floor(this.defaultHeight / 2),
       alwaysRemeasure: this.alwaysRemeasure
@@ -870,6 +869,21 @@ const VerticalCollection = Component.extend({
     const newInitialKey = this.keyForItem(newInitialItem, lengthDifference);
 
     return oldInitialKey === newInitialKey;
+  },
+
+  _checkCssRules() {
+    if (this.$().css('display') !== 'block') {
+      Logger.warn('Verical-Collection needs a value of block on display property to function correctly');
+    }
+    if (isBlank(this.$().css('height'))) {
+      Logger.warn('Verical-Collection needs a value on height to function correctly');
+    }
+    if (isBlank(this.$().css('max-height'))) {
+      Logger.warn('Verical-Collection needs a value on max-height to function correctly');
+    }
+    if (this.$().css('position') !== 'relative') {
+      Logger.warn('Vertical-Collection needs a value of relative on position to function correctly');
+    }
   },
 
   didReceiveAttrs() {},

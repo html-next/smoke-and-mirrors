@@ -47,6 +47,15 @@ module.exports = {
   included: function(app) {
     this._super.included.apply(this, arguments);
 
+    while (typeof app.import !== 'function' && app.app) {
+      app = app.app;
+    }
+
+    if (typeof app.import !== 'function') {
+      throw new Error('smoke-and-mirrors is being used within another addon or engine ' +
+        'and is having trouble registering itself to the parent application.');
+    }
+
     this._setupBabelOptions(app.env);
 
     if (!/production/.test(app.env)) {
@@ -58,6 +67,7 @@ module.exports = {
         chalk.grey("\t:: To use, set ") + chalk.yellow("{{vertical-collection debug=true}}") +
         chalk.grey("\n===================================================================\n")
       );
+
       app.import('./vendor/debug.css');
     }
   },
@@ -65,7 +75,7 @@ module.exports = {
   treeForAddon: function() {
     var tree = this._super.treeForAddon.apply(this, arguments);
 
-    if (/production/.test(this.app.env)) {
+    if (/production/.test(this.parent.env)) {
       tree = new Funnel(tree, { exclude: [ /-debug/ ] });
     }
 
@@ -75,7 +85,7 @@ module.exports = {
   treeForApp: function() {
     var tree = this._super.treeForApp.apply(this, arguments);
 
-    if (/production/.test(this.app.env)) {
+    if (/production/.test(this.parent.env)) {
       tree = new Funnel(tree, { exclude: [ /initializers/ ] });
     }
 
