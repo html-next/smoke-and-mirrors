@@ -1,10 +1,11 @@
-/* global Array, parseFloat, Math */
+/* global Array, Math */
 import Ember from 'ember';
 import layout from './template';
 import getTagDescendant from '../../utils/get-tag-descendant';
 import ListRadar from '../../-private/radar/models/list-radar';
 import identity from '../../-private/ember/utils/identity';
 import scheduler from '../../-private/scheduler';
+import estimateElementHeight from '../../utils/element/estimate-element-height';
 
 const {
   A,
@@ -47,12 +48,6 @@ const VerticalCollection = Component.extend({
   defaultHeight: 75,
   alwaysRemeasure: false,
   alwaysUseDefaultHeight: computed.not('alwaysRemeasure'),
-
-  /*
-   * Cached value used once default height is
-   * calculated firmly
-   */
-  _defaultHeight: null,
 
   // –––––––––––––– Optional Settings
 
@@ -621,7 +616,7 @@ const VerticalCollection = Component.extend({
     this.radar.setState({
       telescope: container,
       sky: this.element,
-      minimumMovement: Math.floor(this.defaultHeight / 2),
+      minimumMovement: Math.floor(this.get('_defaultHeight') / 2),
       alwaysRemeasure: this.alwaysRemeasure
     });
     this.radar.didResizeSatellites = onResizeMethod;
@@ -651,7 +646,7 @@ const VerticalCollection = Component.extend({
           firstVisibleIndex = i;
         }
       }
-      this.radar.telescope.scrollTop = (firstVisibleIndex || 0) * this.__getEstimatedDefaultHeight();
+      this.radar.telescope.scrollTop = (firstVisibleIndex || 0) * this.get('_defaultHeight');
     }
   },
 
@@ -703,46 +698,18 @@ const VerticalCollection = Component.extend({
     });
   },
 
-  __getEstimatedDefaultHeight() {
-    let _defaultHeight = this.get('_defaultHeight');
+  _defaultHeight: computed('defaultHeight', function() {
+    let defaultHeight = this.get('defaultHeight');
 
-    if (_defaultHeight) {
-      return _defaultHeight;
+    if (typeof defaultHeight === 'number') {
+      defaultHeight = `${defaultHeight}px`;
     }
 
-    const defaultHeight = `${this.get('defaultHeight')}`;
-
-    if (defaultHeight.indexOf('em') === -1) {
-      _defaultHeight = parseInt(defaultHeight, 10);
-      this.set('_defaultHeight', _defaultHeight);
-      return _defaultHeight;
-    }
-
-    let element;
-
-    // use body if rem
-    if (defaultHeight.indexOf('rem') !== -1) {
-      element = window.document.body;
-      _defaultHeight = 1;
-    } else {
-      element = this.get('element');
-      if (!element || !element.parentNode) {
-        element = window.document.body;
-      } else {
-        _defaultHeight = 1;
-      }
-    }
-
-    const fontSize = window.getComputedStyle(element).getPropertyValue('font-size');
-
-    if (_defaultHeight) {
-      _defaultHeight = parseFloat(defaultHeight) * parseFloat(fontSize);
-      this.set('_defaultHeight', _defaultHeight);
-      return _defaultHeight;
-    }
-
-    return parseFloat(defaultHeight) * parseFloat(fontSize);
-  },
+    return defaultHeight;
+  }),
+  defaultItemPixelHeight: computed('defaultHeight', function() {
+    return estimateElementHeight(this.element, this.get('defaultHeight'));
+  }),
 
   /*
    * Calculates pixel boundaries between visible, invisible,

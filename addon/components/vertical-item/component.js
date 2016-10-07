@@ -107,21 +107,13 @@ export default Component.extend({
     this.satellite = undefined;
   },
 
-  _height: 0,
-
   didInsertElement() {
     this.radar.register(this);
   },
 
   willInsertElement() {
-    this._super();
-    const _height = this.get('_height');
+    let _height = this.satellite ? this.satellite.geography.height : 0;
     let defaultHeight = this.get('defaultHeight');
-
-    if (typeof defaultHeight === 'number') {
-      defaultHeight = `${defaultHeight}px`;
-    }
-
     let height = _height ? `${_height}px` : defaultHeight;
 
     this.element.style.minHeight = height;
@@ -132,10 +124,6 @@ export default Component.extend({
   },
 
   willDestroyElement() {
-    this._super();
-    this.set('contentInserted', false);
-    this._contentInserted = false;
-
     if (this.radar) {
       this.radar.unregister(this);
     }

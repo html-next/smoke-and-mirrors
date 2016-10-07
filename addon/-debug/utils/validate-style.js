@@ -5,7 +5,7 @@ export function hasStyleValue(styles, key, value) {
 
 export function isNonZero(value) {
   let int = parseInt(value, 10);
-  let float = parseFloat(value, 10);
+  let float = parseFloat(value);
 
   return !isNaN(int) && (int !== 0 || float !== 0);
 }
