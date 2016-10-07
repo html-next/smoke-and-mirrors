@@ -11,10 +11,7 @@ const {
   K,
   get,
   computed,
-  Component,
-  Logger,
-  isBlank,
-  getOwner
+  Component
 } = Ember;
 
 function valueForIndex(arr, index) {
@@ -589,10 +586,6 @@ const VerticalCollection = Component.extend({
     this._computeEdges();
     this._initializeScrollState();
     this._scheduleUpdate();
-    // Check are we in dev environment
-    if (getOwner(this).resolveRegistration('config:environment').environment === 'development') {
-      this._checkCssRules();
-    }
   },
 
   // –––––––––––––– Setup/Teardown
@@ -606,12 +599,6 @@ const VerticalCollection = Component.extend({
       const $container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
 
       container = $container.get(0);
-
-      $container.css({
-        '-webkit-overflow-scrolling': 'touch',
-        'overflow-scrolling': 'touch',
-        'overflow-y': 'scroll'
-      });
     }
 
     this._container = container;
@@ -871,21 +858,6 @@ const VerticalCollection = Component.extend({
     const newInitialKey = this.keyForItem(newInitialItem, lengthDifference);
 
     return oldInitialKey === newInitialKey;
-  },
-
-  _checkCssRules() {
-    if (this.$().css('display') !== 'block') {
-      Logger.warn('Verical-Collection needs a value of block on display property to function correctly');
-    }
-    if (isBlank(this.$().css('height'))) {
-      Logger.warn('Verical-Collection needs a value on height to function correctly');
-    }
-    if (isBlank(this.$().css('max-height'))) {
-      Logger.warn('Verical-Collection needs a value on max-height to function correctly');
-    }
-    if (this.$().css('position') !== 'relative') {
-      Logger.warn('Vertical-Collection needs a value of relative on position to function correctly');
-    }
   },
 
   didReceiveAttrs() {},
