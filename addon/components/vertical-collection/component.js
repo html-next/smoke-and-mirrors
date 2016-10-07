@@ -6,6 +6,7 @@ import ListRadar from '../../-private/radar/models/list-radar';
 import identity from '../../-private/ember/utils/identity';
 import scheduler from '../../-private/scheduler';
 import estimateElementHeight from '../../utils/element/estimate-element-height';
+import closestElement from '../../utils/element/closest';
 
 const {
   A,
@@ -21,6 +22,10 @@ function valueForIndex(arr, index) {
 
 function getContent(obj) {
   return get(obj, 'content');
+}
+
+function getArg(args, name) {
+  return (args && args[name]) ? (args[name].value || args[name]) : undefined;
 }
 
 const VerticalCollection = Component.extend({
@@ -343,11 +348,9 @@ const VerticalCollection = Component.extend({
     }
   },
 
-  didReceiveAttrs(attrs) {
-    this._super(...arguments);
-
-    const oldArray = attrs.oldAttrs && attrs.oldAttrs.items ? attrs.oldAttrs.items.value : false;
-    const newArray = attrs.newAttrs && attrs.newAttrs.items ? attrs.newAttrs.items.value : false;
+  didReceiveAttrs(args) {
+    const oldArray = getArg(args.oldAttrs, 'items');
+    const newArray = getArg(args.newAttrs, 'items');
 
     if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
       this._isPrepending = true;
@@ -568,6 +571,9 @@ const VerticalCollection = Component.extend({
     this._computeEdges();
     this._initializeScrollState();
     this._scheduleUpdate();
+    requestAnimationFrame(() => {
+      console.timeEnd('vertical-collection-init');
+    });
   },
 
   setupRadar() {
@@ -577,7 +583,7 @@ const VerticalCollection = Component.extend({
     if (containerSelector === 'body') {
       container = window;
     } else {
-      container = containerSelector ? this.$().closest(containerSelector).get(0) : this.element.parentNode;
+      container = containerSelector ? closestElement(containerSelector) : this.element.parentNode;
     }
 
     const onScrollMethod = (dY) => {
@@ -652,7 +658,7 @@ const VerticalCollection = Component.extend({
     if (this.scrollPosition) {
       this.radar.telescope.scrollTop = this.scrollPosition;
     } else if (this.get('renderFromLast')) {
-      const last = this.$().get(0).lastElementChild;
+      const last = this.element.lastElementChild;
 
       this.set('__isInitializingFromLast', true);
       if (last) {
@@ -686,6 +692,7 @@ const VerticalCollection = Component.extend({
   },
 
   init() {
+    console.time('vertical-collection-init');
     this._super();
 
     this.__smActionCache = {

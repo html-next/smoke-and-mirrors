@@ -6,7 +6,6 @@
             <div class="table-wrapper dark">
               {{#vertical-collection model.numbers
                 defaultHeight=270
-                alwaysRemeasure=false
                 firstReached="loadAbove"
                 lastReached="loadBelow"
                 as |item index|
@@ -33,7 +32,7 @@
               they return.
           </p>
             <h4>Code for Demo</h4>
-          {{code-snippet name="infinite-scroll-example.hbs"}}
+          {{!-- {{code-snippet name="infinite-scroll-example.hbs"}} --}}
         </div>
     </div>
 </div>
