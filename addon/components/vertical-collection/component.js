@@ -32,14 +32,14 @@ const VerticalCollection = Component.extend({
   tagName: 'vertical-collection',
   layout,
 
-  content: computed.alias('items'),
+  content: computed.deprecatingAlias('items'),
   items: undefined,
 
   // –––––––––––––– Required Settings
 
   /*
    * This height is used to give the `vertical-item`s height prior to
-   * it's content being rendered.
+   * their content being rendered.
    *
    * This height is replaced with the actual rendered height once content
    * is rendered for the first time.
@@ -201,8 +201,6 @@ const VerticalCollection = Component.extend({
    * It includes the index and content of the item now visible.
    */
   lastVisibleChanged: null,
-
-  _content: null,
 
   // –––––––––––––– Private Internals
   _firstVisibleIndex: 0,
@@ -645,11 +643,11 @@ const VerticalCollection = Component.extend({
         last.scrollIntoView(false);
       }
     } else if (idForFirstItem) {
-      const content = this.get('content');
+      const items = this.get('items');
       let firstVisibleIndex;
 
-      for (let i = 0; i < get(content, 'length'); i++) {
-        if (idForFirstItem === this.keyForItem(valueForIndex(content, i), i)) {
+      for (let i = 0; i < get(items, 'length'); i++) {
+        if (idForFirstItem === this.keyForItem(valueForIndex(items, i), i)) {
           firstVisibleIndex = i;
         }
       }
@@ -684,7 +682,6 @@ const VerticalCollection = Component.extend({
       this.radar = null;
     }
 
-    this.set('_content', null);
     this.set('_children', null);
     this._container = null;
     this.__smActionCache = null;
@@ -749,7 +746,7 @@ const VerticalCollection = Component.extend({
 
   /*
    * Calculates pixel boundaries between visible, invisible,
-   * and culled content based on the "viewport" height,
+   * and culled items based on the "viewport" height,
    * and the bufferSize.
    *
    * @private
@@ -804,26 +801,11 @@ const VerticalCollection = Component.extend({
     this.radar = new ListRadar({});
   },
 
-  _reflectContentChanges() {
-    const content = this.get('_content');
-
-    content.contentArrayDidChange = (items, offset, removeCount, addCount) => {
-      if (offset <= this.get('_firstVisibleIndex')) {
-        this.__prependComponents();
-      } else {
-        if (!removeCount || removeCount < addCount) {
-          this._scheduleUpdate();
-        }
-        this._scheduleSync();
-      }
-    };
-  },
-
   didReceiveAttrs(attrs) {
     this._super(...arguments);
 
-    const oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
-    const newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
+    const oldArray = attrs.oldAttrs && attrs.oldAttrs.items ? attrs.oldAttrs.items.value : false;
+    const newArray = attrs.newAttrs && attrs.newAttrs.items ? attrs.newAttrs.items.value : false;
 
     if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
       this.__prependComponents();
