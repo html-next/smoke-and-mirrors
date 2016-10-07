@@ -2,12 +2,12 @@
 import Ember from 'ember';
 import layout from './template';
 import getTagDescendant from '../../utils/get-tag-descendant';
-import proxied from '../../utils/proxied-array';
 import ListRadar from '../../-private/radar/models/list-radar';
 import identity from '../../-private/ember/utils/identity';
 import scheduler from '../../-private/scheduler';
 
 const {
+  A,
   K,
   get,
   computed,
@@ -18,10 +18,8 @@ function valueForIndex(arr, index) {
   return arr.objectAt ? arr.objectAt(index) : arr[index];
 }
 
-function getContent(obj, isProxied) {
-  const key = isProxied ? 'content.content' : 'content';
-
-  return get(obj, key);
+function getContent(obj) {
+  return get(obj, 'content');
 }
 
 const VerticalCollection = Component.extend({
@@ -93,11 +91,6 @@ const VerticalCollection = Component.extend({
    * the internal mechanics of the collection to utilize DOM recycling.
    */
   bufferSize: 0.25,
-
-  /*
-   * useContentProxy
-   */
-  useContentProxy: false,
 
   // –––––––––––––– Initial State
   /*
@@ -289,21 +282,19 @@ const VerticalCollection = Component.extend({
   },
 
   prepareActionContext(name, context) {
-    const isProxied = this.get('useContentProxy');
-
     if (name === 'didMountCollection') {
       if (context.firstVisible.item) {
-        context.firstVisible.item = getContent(context.firstVisible.item, isProxied);
+        context.firstVisible.item = getContent(context.firstVisible.item);
       }
 
       if (context.lastVisible.item) {
-        context.lastVisible.item = getContent(context.lastVisible.item, isProxied);
+        context.lastVisible.item = getContent(context.lastVisible.item);
       }
 
       return context;
     }
 
-    context.item = getContent(context.item, isProxied);
+    context.item = getContent(context.item);
     return !context.item ? false : context;
   },
 
@@ -828,7 +819,9 @@ const VerticalCollection = Component.extend({
     };
   },
 
-  _didReceiveAttrs(attrs) {
+  didReceiveAttrs(attrs) {
+    this._super(...arguments);
+
     const oldArray = attrs.oldAttrs && attrs.oldAttrs.content ? attrs.oldAttrs.content.value : false;
     const newArray = attrs.newAttrs && attrs.newAttrs.content ? attrs.newAttrs.content.value : false;
 
@@ -860,21 +853,12 @@ const VerticalCollection = Component.extend({
     return oldInitialKey === newInitialKey;
   },
 
-  didReceiveAttrs() {},
 
   init() {
     this._super();
 
     this._prepareComponent();
-    this.set('_children', Ember.A());
-
-    if (this.get('useContentProxy')) {
-      this.set('_content', proxied.call(this, 'content', this.get('key')));
-      this._reflectContentChanges();
-    } else {
-      this.set('_content', computed.oneWay('content'));
-      this.set('didReceiveAttrs', this._didReceiveAttrs);
-    }
+    this.set('_children',new A());
   }
 });
 
