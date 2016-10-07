@@ -48,6 +48,18 @@ const VerticalCollection = Component.extend({
   defaultHeight: 75,
   alwaysRemeasure: false,
   alwaysUseDefaultHeight: computed.not('alwaysRemeasure'),
+  _defaultHeight: computed('defaultHeight', function() {
+    let defaultHeight = this.get('defaultHeight');
+
+    if (typeof defaultHeight === 'number') {
+      defaultHeight = `${defaultHeight}px`;
+    }
+
+    return defaultHeight;
+  }),
+  defaultItemPixelHeight: computed('defaultHeight', function() {
+    return estimateElementHeight(this.element, this.get('defaultHeight'));
+  }),
 
   // –––––––––––––– Optional Settings
 
@@ -124,87 +136,29 @@ const VerticalCollection = Component.extend({
 
   // –––––––––––––– Actions
   /*
-   * Specify an action to fire when the last item is reached.
+   * Specify an action to fire when the first/last item is reached
+   * or when the first/last visible item has changed.
    *
-   * This action will only fire once per unique last item, and
-   * is fired the moment the last element is visible, it does
-   * not need to be on screen yet.
+   * These action will only fire once per unique item, and
+   * they fired the moment the element becomes visible, which
+   * may be before it actually enters the viewport.
    *
-   * It will include the index and content of the last item,
-   * as well as a promise.
+   * It will include the index and content of the last item.
    *
    * ```
    * {
    *  index: 0,
-   *  item : {},
-   *  promise: fn
+   *  item : {}
    * }
    * ```
-   *
-   * The promise should be resolved once any loading is complete, or
-   * rejected if loading has failed.
-   *
-   * If `loadingComponentClass` is defined, it will be inserted above existing content.
-   *
-   * Rejecting the promise leaves the loadingComponent in place for 5s and set's
-   * it's `loadingFailed` property to true.
-   *
    */
   firstReached: null,
-
-  /*
-   * Specify an action to fire when the first item is reached.
-   *
-   * This action will only fire once per unique first item, and
-   * is fired the moment the first element is visible, it does
-   * not need to be on screen yet.
-   *
-   * It will include the index and content of the first item
-   * as well as a promise.
-   *
-   * ```
-   * {
-   *  index: 0,
-   *  item : {},
-   *  promise: fn
-   * }
-   * ```
-   *
-   * The promise should be resolved once any loading is complete, or
-   * rejected if loading has failed.
-   *
-   * If `loadingViewClass` is defined, it will be inserted above existing content.
-   *
-   * Rejecting the promise leaves the loadingView in place for 5s and set's
-   * it's `loadingFailed` property to true.
-   *
-   */
   lastReached: null,
-
-  /*
-   * Specify an action to fire when the first on-screen item
-   * changes.
-   *
-   * It includes the index and content of the item now visible.
-   */
   firstVisibleChanged: null,
-
-  /*
-   * Specify an action to fire when the last on-screen item
-   * changes.
-   *
-   * It includes the index and content of the item now visible.
-   */
   lastVisibleChanged: null,
 
   // –––––––––––––– Private Internals
   _firstVisibleIndex: 0,
-
-  /*
-   * a cached element reference to the container "viewport" element
-   * this is known as the "telescope" within the Radar class.
-   */
-  _container: null,
 
   /*
    * Set this to false to prevent rendering entirely.
@@ -389,6 +343,87 @@ const VerticalCollection = Component.extend({
     }
   },
 
+  didReceiveAttrs(attrs) {
+    this._super(...arguments);
+
+    const oldArray = attrs.oldAttrs && attrs.oldAttrs.items ? attrs.oldAttrs.items.value : false;
+    const newArray = attrs.newAttrs && attrs.newAttrs.items ? attrs.newAttrs.items.value : false;
+
+    if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
+      this._isPrepending = true;
+      scheduler.forget(this._nextUpdate);
+
+      this._nextUpdate = scheduler.schedule('sync', () => {
+        this.radar.silentNight();
+        this._updateChildStates();
+        this._isPrepending = false;
+        this._nextUpdate = null;
+      });
+
+    } else {
+      if (newArray && (!oldArray || get(oldArray, 'length') <= get(newArray, 'length'))) {
+        this._scheduleUpdate();
+      }
+
+      this._scheduleSync();
+    }
+  },
+
+  _changeIsPrepend(oldArray, newArray) {
+    const lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
+
+    // if either array is empty or the new array is not longer, do not treat as prepend
+    if (!get(newArray, 'length') || !get(oldArray, 'length') || lengthDifference <= 0) {
+      return false;
+    }
+
+    // if the keys at the correct indexes are the same, this is a prepend
+    const oldInitialItem = valueForIndex(oldArray, 0);
+    const oldInitialKey = this.keyForItem(oldInitialItem, 0);
+    const newInitialItem = valueForIndex(newArray, lengthDifference);
+    const newInitialKey = this.keyForItem(newInitialItem, lengthDifference);
+
+    return oldInitialKey === newInitialKey;
+  },
+
+  _scheduleUpdate() {
+    if (this._isPrepending) {
+      return;
+    }
+    if (this._nextUpdate === null) {
+      this._nextUpdate = scheduler.schedule('layout', () => {
+        this._updateChildStates();
+        this._nextUpdate = null;
+      });
+    }
+  },
+
+  _scheduleSync() {
+    if (this._nextSync === null) {
+      this._nextSync = scheduler.schedule('sync', () => {
+        this.radar.updateSkyline();
+        this._nextSync = null;
+      });
+    }
+  },
+
+  _scheduleScrollSync() {
+    if (this.get('__isInitializingFromLast')) {
+      if (this._nextScrollSync === null) {
+        this._nextScrollSync = scheduler.schedule('measure', () => {
+          const last = this.element.lastElementChild;
+
+          this.set('__isInitializingFromLast', false);
+          if (last) {
+            last.scrollIntoView(false);
+          }
+
+          this._nextScrollSync = null;
+        });
+      }
+    }
+  },
+
   /*
    *
    * The big question is can we render from the bottom
@@ -527,70 +562,24 @@ const VerticalCollection = Component.extend({
     }
   },
 
-  _scheduleUpdate() {
-    if (this._isPrepending) {
-      return;
-    }
-    if (this._nextUpdate === null) {
-      this._nextUpdate = scheduler.schedule('layout', () => {
-        this._updateChildStates();
-        this._nextUpdate = null;
-      });
-    }
-  },
-
-  _scheduleSync() {
-    if (this._nextSync === null) {
-      this._nextSync = scheduler.schedule('sync', () => {
-        this.radar.updateSkyline();
-        this._nextSync = null;
-      });
-    }
-  },
-
-  _scheduleScrollSync() {
-    if (this.get('__isInitializingFromLast')) {
-      if (this._nextScrollSync === null) {
-        this._nextScrollSync = scheduler.schedule('measure', () => {
-          const last = this.element.lastElementChild;
-
-          this.set('__isInitializingFromLast', false);
-          if (last) {
-            last.scrollIntoView(false);
-          }
-
-          this._nextScrollSync = null;
-        });
-      }
-    }
-  },
-
+  // –––––––––––––– Setup/Teardown
   didInsertElement() {
-    this.setupContainer();
+    this.setupRadar();
     this._computeEdges();
     this._initializeScrollState();
     this._scheduleUpdate();
   },
 
-  // –––––––––––––– Setup/Teardown
-  setupContainer() {
+  setupRadar() {
     const containerSelector = this.get('containerSelector');
     let container;
 
     if (containerSelector === 'body') {
       container = window;
     } else {
-      const $container = containerSelector ? this.$().closest(containerSelector) : this.$().parent();
-
-      container = $container.get(0);
+      container = containerSelector ? this.$().closest(containerSelector).get(0) : this.element.parentNode;
     }
 
-    this._container = container;
-    this.setupHandlers();
-  },
-
-  setupHandlers() {
-    const container = this._container;
     const onScrollMethod = (dY) => {
       if (this._isPrepending) {
         return;
@@ -625,92 +614,6 @@ const VerticalCollection = Component.extend({
     this.radar.didRebuild = onRebuildMethod;
   },
 
-  _initializeScrollState() {
-    const idForFirstItem = this.get('idForFirstItem');
-
-    if (this.scrollPosition) {
-      this.radar.telescope.scrollTop = this.scrollPosition;
-    } else if (this.get('renderFromLast')) {
-      const last = this.$().get(0).lastElementChild;
-
-      this.set('__isInitializingFromLast', true);
-      if (last) {
-        last.scrollIntoView(false);
-      }
-    } else if (idForFirstItem) {
-      const items = this.get('items');
-      let firstVisibleIndex;
-
-      for (let i = 0; i < get(items, 'length'); i++) {
-        if (idForFirstItem === this.keyForItem(valueForIndex(items, i), i)) {
-          firstVisibleIndex = i;
-        }
-      }
-      this.radar.telescope.scrollTop = (firstVisibleIndex || 0) * this.get('_defaultHeight');
-    }
-  },
-
-  /*
-   * Remove the event handlers for this instance
-   * and teardown any temporarily cached data.
-   *
-   * if storageKey is set, caches much of it's
-   * state in order to quickly reboot to the same
-   * scroll position on relaunch.
-   */
-  willDestroyElement() {
-    this._destroyCollection();
-  },
-
-  willDestroy() {
-    this._super();
-    this._destroyCollection();
-  },
-
-  _destroyCollection() {
-    // cleanup scroll
-    if (this.radar) {
-      this.radar.destroy();
-      this.radar.didResizeSatellites = null;
-      this.radar.didAdjustPosition = null;
-      this.radar.didShiftSatellites = null;
-      this.radar = null;
-    }
-
-    this.set('_children', null);
-    this._container = null;
-    this.__smActionCache = null;
-
-    // clean up scheduled tasks
-    scheduler.forget(this._nextUpdate);
-    scheduler.forget(this._nextSync);
-    scheduler.forget(this._nextScrollSync);
-  },
-
-  __prependComponents() {
-    this._isPrepending = true;
-    scheduler.forget(this._nextUpdate);
-    this._nextUpdate = scheduler.schedule('sync', () => {
-      this.radar.silentNight();
-      this._updateChildStates();
-      this._isPrepending = false;
-      this._nextUpdate = null;
-    });
-  },
-
-  _defaultHeight: computed('defaultHeight', function() {
-    let defaultHeight = this.get('defaultHeight');
-
-    if (typeof defaultHeight === 'number') {
-      defaultHeight = `${defaultHeight}px`;
-    }
-
-    return defaultHeight;
-  }),
-  defaultItemPixelHeight: computed('defaultHeight', function() {
-    return estimateElementHeight(this.element, this.get('defaultHeight'));
-  }),
-
   /*
    * Calculates pixel boundaries between visible, invisible,
    * and culled items based on the "viewport" height,
@@ -743,10 +646,48 @@ const VerticalCollection = Component.extend({
     return edges;
   },
 
-  /*
-   * Initialize
-   */
-  _prepareComponent() {
+  _initializeScrollState() {
+    const idForFirstItem = this.get('idForFirstItem');
+
+    if (this.scrollPosition) {
+      this.radar.telescope.scrollTop = this.scrollPosition;
+    } else if (this.get('renderFromLast')) {
+      const last = this.$().get(0).lastElementChild;
+
+      this.set('__isInitializingFromLast', true);
+      if (last) {
+        last.scrollIntoView(false);
+      }
+    } else if (idForFirstItem) {
+      const items = this.get('items');
+      let firstVisibleIndex;
+
+      for (let i = 0; i < get(items, 'length'); i++) {
+        if (idForFirstItem === this.keyForItem(valueForIndex(items, i), i)) {
+          firstVisibleIndex = i;
+        }
+      }
+      this.radar.telescope.scrollTop = (firstVisibleIndex || 0) * this.get('_defaultHeight');
+    }
+  },
+
+  willDestroyElement() {
+    // cleanup scroll
+    this.radar.destroy();
+    this.radar = null;
+
+    this.set('_children', null);
+    this.__smActionCache = null;
+
+    // clean up scheduled tasks
+    scheduler.forget(this._nextUpdate);
+    scheduler.forget(this._nextSync);
+    scheduler.forget(this._nextScrollSync);
+  },
+
+  init() {
+    this._super();
+
     this.__smActionCache = {
       firstReached: null,
       lastReached: null,
@@ -754,60 +695,13 @@ const VerticalCollection = Component.extend({
       lastVisibleChanged: null
     };
 
-    const collectionTagName = (this.get('tagName') || '').toLowerCase();
-    let itemTagName = this.get('itemTagName');
-
-    if (!itemTagName) {
-      if (collectionTagName === 'occlusion-collection') {
-        itemTagName = 'occlusion-item';
-      } else {
-        itemTagName = getTagDescendant(collectionTagName);
-      }
-    }
-    this.set('itemTagName', itemTagName);
-    this.radar = new ListRadar({});
-  },
-
-  didReceiveAttrs(attrs) {
-    this._super(...arguments);
-
-    const oldArray = attrs.oldAttrs && attrs.oldAttrs.items ? attrs.oldAttrs.items.value : false;
-    const newArray = attrs.newAttrs && attrs.newAttrs.items ? attrs.newAttrs.items.value : false;
-
-    if (oldArray && newArray && this._changeIsPrepend(oldArray, newArray)) {
-      this.__prependComponents();
-    } else {
-      if (newArray && (!oldArray || get(oldArray, 'length') <= get(newArray, 'length'))) {
-        this._scheduleUpdate();
-      }
-
-      this._scheduleSync();
-    }
-  },
-
-  _changeIsPrepend(oldArray, newArray) {
-    const lengthDifference = get(newArray, 'length') - get(oldArray, 'length');
-
-    // if either array is empty or the new array is not longer, do not treat as prepend
-    if (!get(newArray, 'length') || !get(oldArray, 'length') || lengthDifference <= 0) {
-      return false;
+    if (!this.get('itemTagName')) {
+      const collectionTagName = (this.get('tagName') || '').toLowerCase();
+      this.set('itemTagName', getTagDescendant(collectionTagName));
     }
 
-    // if the keys at the correct indexes are the same, this is a prepend
-    const oldInitialItem = valueForIndex(oldArray, 0);
-    const oldInitialKey = this.keyForItem(oldInitialItem, 0);
-    const newInitialItem = valueForIndex(newArray, lengthDifference);
-    const newInitialKey = this.keyForItem(newInitialItem, lengthDifference);
-
-    return oldInitialKey === newInitialKey;
-  },
-
-
-  init() {
-    this._super();
-
-    this._prepareComponent();
     this.set('_children',new A());
+    this.radar = new ListRadar({});
   }
 });
 

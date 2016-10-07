@@ -6,6 +6,8 @@
  */
 export default function getTagDescendant(tag) {
   switch (tag) {
+  case 'occlusion-collection':
+    return 'occlusion-item';
   case 'vertical-collection':
     return 'vertical-item';
   case 'horizontal-collection':

@@ -16,7 +16,6 @@ const {
 const DEFAULT_ARRAY_SIZE = 200;
 
 export default class Radar {
-
   constructor(state) {
     this.satellites = new Array(DEFAULT_ARRAY_SIZE);
     this.length = 0;
