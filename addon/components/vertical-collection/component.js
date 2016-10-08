@@ -707,7 +707,7 @@ const VerticalCollection = Component.extend({
       this.set('itemTagName', getTagDescendant(collectionTagName));
     }
 
-    this.set('_children',new A());
+    this.set('_children', new A());
     this.radar = new ListRadar({});
   }
 });

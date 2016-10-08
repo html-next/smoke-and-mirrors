@@ -10,7 +10,7 @@ export default function(start, total, prefix) {
     height = getDynamicHeight();
     ret.push({
       number: i,
-      height: height,
+      height,
       width: getDynamicWidth(height, booleanToss()),
       prefixed: prefix + i
     });

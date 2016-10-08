@@ -11,7 +11,7 @@ export default class Satellite {
     this.init(options);
   }
 
-  init({ component, dimensions:defaultDimensions, element, key, radar, scalar }) {
+  init({ component, dimensions: defaultDimensions, element, key, radar, scalar }) {
     this.isVirtual = !element;
     this.radar = radar;
     this.element = VirtualElement.create(defaultDimensions, element);

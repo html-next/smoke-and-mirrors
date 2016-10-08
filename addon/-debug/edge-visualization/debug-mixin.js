@@ -24,7 +24,6 @@ import {
   hasDimensionEqual
 } from '../utils/validate-rect';
 
-
 export default Mixin.create({
   debug: false,
   debugCSS: false,
@@ -79,7 +78,7 @@ export default Mixin.create({
     if (radar.telescope !== Container) {
       warn(`Telescope must define -webkit-overflow-scrolling`, hasCSSRule(rules, '-webkit-overflow-scrolling', 'touch'), { id: 'smoke-and-mirrors:debug-css-webkit-scroll' });
       warn(`Telescope must define overflow-scrolling`, hasCSSRule(styles, 'overflow-scrolling', 'touch'), { id: 'smoke-and-mirrors:debug-css-scroll' });
-      assert(`Telescope must define overflow-y`,hasStyleValue(styles, 'overflow-y', 'scroll') || hasStyleValue(styles, 'overflow', 'scroll'));
+      assert(`Telescope must define overflow-y`, hasStyleValue(styles, 'overflow-y', 'scroll') || hasStyleValue(styles, 'overflow', 'scroll'));
     }
 
     // check sky

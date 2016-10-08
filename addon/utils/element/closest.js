@@ -1,4 +1,4 @@
-const VENDOR_MATCH_FNS = ['matches','webkitMatchesSelector','mozMatchesSelector','msMatchesSelector','oMatchesSelector'];
+const VENDOR_MATCH_FNS = ['matches', 'webkitMatchesSelector', 'mozMatchesSelector', 'msMatchesSelector', 'oMatchesSelector'];
 let ELEMENT_MATCH_FN;
 
 VENDOR_MATCH_FNS.some((fn) => {

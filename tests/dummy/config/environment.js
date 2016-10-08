@@ -1,15 +1,15 @@
 /* jshint node:true */
 // jscs:disable
 /* global module */
-var pkg = require('../../../package.json');
+let pkg = require('../../../package.json');
 
 module.exports = function(environment) {
-  var DEBUG = false;
+  let DEBUG = false;
 
-  var ENV = {
+  let ENV = {
     modulePrefix: 'dummy',
     podModulePrefix: 'dummy/screens',
-    environment: environment,
+    environment,
     rootURL: '/',
     locationType: 'hash',
     EmberENV: {

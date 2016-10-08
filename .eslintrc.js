@@ -12,6 +12,7 @@ module.exports = {
     'browser': true
   },
   rules: {
+    'quotes': ['error', 'single', {  "allowTemplateLiterals": true, "avoidEscape": true }],
     'ember-suave/no-const-outside-module-scope': 0,
     'ember-suave/no-direct-property-access': 1
   }
