@@ -1,7 +1,7 @@
 import { module, test } from 'qunit';
-import Radar from 'smoke-and-mirrors/models/radar';
-import Geography from 'smoke-and-mirrors/models/geography'
-import Satellite from 'smoke-and-mirrors/models/satellite'
+import Radar from 'smoke-and-mirrors/-private/radar/models/radar';
+import Geography from 'smoke-and-mirrors/-private/radar/models/geography';
+import Satellite from 'smoke-and-mirrors/-private/radar/models/satellite';
 
 const RELATIVE_UNIT = 100;
 let App = {};

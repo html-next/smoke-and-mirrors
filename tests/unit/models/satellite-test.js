@@ -1,12 +1,12 @@
 import { module, test } from 'qunit';
-import Satellite from 'smoke-and-mirrors/models/satellite';
+import Satellite from 'smoke-and-mirrors/-private/radar/models/satellite';
 
 const RELATIVE_UNIT = 100;
 var App = {};
 
 module('Unit | Model | Satellite', {
 
-  beforeEach(assert) {
+  beforeEach() {
     App.planetADiv = document.createElement('div');
     App.planetADiv.style.width = `${RELATIVE_UNIT}px`;
     App.planetADiv.style.height = `${RELATIVE_UNIT}px`;
@@ -16,7 +16,7 @@ module('Unit | Model | Satellite', {
     document.body.appendChild(App.planetADiv);
   },
 
-  afterEach(assert) {
+  afterEach() {
     App.planetADiv.parentNode.removeChild(App.planetADiv);
     App = {};
   }

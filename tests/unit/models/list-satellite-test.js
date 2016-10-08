@@ -1,12 +1,11 @@
 import { module, test } from 'qunit';
-import ListSatellite from 'smoke-and-mirrors/models/list-satellite';
+import ListSatellite from 'smoke-and-mirrors/-private/radar/models/list-satellite';
 
-const RELATIVE_UNIT = 100;
 let App = {};
 
 module('Unit | Model | ListSatellite', {
 
-  beforeEach(assert) {
+  beforeEach() {
 
     App.planetADiv = document.createElement('div');
     document.body.appendChild(App.planetADiv);
@@ -28,7 +27,7 @@ module('Unit | Model | ListSatellite', {
 
   },
 
-  afterEach(assert) {
+  afterEach() {
     App.planetADiv.parentNode.removeChild(App.planetADiv);
     App.planetBDiv.parentNode.removeChild(App.planetBDiv);
     App = {};

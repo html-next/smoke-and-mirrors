@@ -1,5 +1,5 @@
 import { module, test } from 'qunit';
-import Geography from 'smoke-and-mirrors/models/geography';
+import Geography from 'smoke-and-mirrors/-private/radar/models/geography';
 
 const RELATIVE_UNIT = 100;
 

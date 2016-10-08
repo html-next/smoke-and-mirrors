@@ -1,6 +1,5 @@
 import { module, test } from 'qunit';
-import ListRadar from 'smoke-and-mirrors/models/list-radar';
-import Radar from 'smoke-and-mirrors/models/radar';
+import ListRadar from 'smoke-and-mirrors/-private/radar/models/list-radar';
 
 const RELATIVE_UNIT = 100;
 let App = {};
@@ -53,7 +52,7 @@ test('_resize without change', (assert) => {
 
   App.listRadar.register(App.component);
 
-  App.listRadar.satellites.forEach((c, i) => {
+  App.listRadar.satellites.forEach((c) => {
     c.resize = function() {
       assert.ok(true, "satellite resize hook called");
       return false;

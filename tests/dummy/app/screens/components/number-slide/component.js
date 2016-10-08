@@ -75,7 +75,6 @@ export default Component.extend({
     let isDynamic = this.get('isDynamic');
 
     let {
-      width,
       height,
       number
     } = item;
