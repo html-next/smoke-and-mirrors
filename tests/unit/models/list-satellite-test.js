@@ -63,8 +63,12 @@ test('next and prev work as expected', (assert) => {
 
   assert.expect(4);
 
-  App.componentA.next = function() { return App.componentB; };
-  App.componentB.prev = function() { return App.componentA; };
+  App.componentA.next = function() {
+    return App.componentB;
+  };
+  App.componentB.prev = function() {
+    return App.componentA;
+  };
 
   let testListSatelliteA = new ListSatellite(App.componentA, [App.componentA, App.componentB]);
   let testListSatelliteB = new ListSatellite(App.componentB, [App.componentA, App.componentB]);

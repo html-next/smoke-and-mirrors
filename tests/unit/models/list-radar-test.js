@@ -76,7 +76,9 @@ test('_resize with change', (assert) => {
 
     satellite.shift = function() {
       assert.ok(true, 'shift hook called');
-      satellite.next = function() { return null; };
+      satellite.next = function() {
+        return null;
+      };
     };
 
     satellite.resize = function() {
@@ -101,11 +103,13 @@ test('_adjust', (assert) => {
 
     satellite.shift = function() {
       assert.ok(true, 'shift hook called');
-      satellite.next = function() { return null; };
+      satellite.next = function() {
+        return null;
+      };
     };
   });
 
-  let satellite = App.listRadar.satellites[0];
+  let [satellite] = App.listRadar.satellites;
   let change = { dX: RELATIVE_UNIT, dY: RELATIVE_UNIT };
 
   App.listRadar._adjust(satellite, change);
