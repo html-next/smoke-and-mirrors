@@ -632,10 +632,12 @@ const VerticalCollection = Component.extend({
     const onResizeMethod = () => {
       this._computeEdges();
     };
-    const onRebuildMethod = () => {
+    const onRebuildMethod = (dY, dX) => {
       if (this._isPrepending) {
         return;
       }
+
+      this._scrollIsForward = dY > 0;
       this._computeEdges();
       this._scheduleUpdate();
     };
