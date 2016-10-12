@@ -231,7 +231,7 @@ export default class Radar {
     }
   }
 
-  rebuild() {
+  rebuild(dY, dX) {
     this.scrollY = this.telescope.scrollTop;
     this.scrollX = this.telescope.scrollLeft;
     this.posX = Container.scrollLeft;
@@ -244,7 +244,7 @@ export default class Radar {
       this.satellites[i].geography.setState();
     }
 
-    this.didRebuild();
+    this.didRebuild(dY, dX);
   }
 
   filterMovement(offsets) {
@@ -256,16 +256,16 @@ export default class Radar {
     const _scrollX = this.scrollX;
 
     if (this.isEarthquake(_scrollY, scrollY) || this.isEarthquake(_scrollX, scrollX)) {
-      if (this.alwaysRemeasure) {
-        this.rebuild();
-        return;
-      }
-
       this.scrollY = scrollY;
       this.scrollX = scrollX;
 
       const dY = scrollY - _scrollY;
       const dX = scrollX - _scrollX;
+
+      if (this.alwaysRemeasure) {
+        this.rebuild(dY, dX);
+        return;
+      }
 
       this.shiftSatellites(dY, dX);
       this.currentOffsets = null;
@@ -279,14 +279,15 @@ export default class Radar {
     const posY = offsets.top;
 
     if (this.isEarthquake(_posY, posY) || this.isEarthquake(_posX, posX)) {
-      if (this.alwaysRemeasure) {
-        this.rebuild();
-        return;
-      }
-
       this.posY = posY;
       this.posX = posX;
       this.adjustPosition(posY - _posY, posX - _posX);
+
+      if (this.alwaysRemeasure) {
+        this.rebuild(posY - _posY, posX - _posX);
+        return;
+      }
+
       this.currentAdjustOffsets = null;
     }
   }
