@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## 0.6.2
+
+### Pull Requests
+
+- [#147](https://github.com/runspired/smoke-and-mirrors/pull/147) **fix**: fix bugs with detecting if scrolling forward w…  *by [Sreedhar Veeravalli](https://github.com/sreedhar7)*
+- [#148](https://github.com/runspired/smoke-and-mirrors/pull/148)  New Release  *by [Chris Thoburn](https://github.com/runspired)*
+
+#### Commits
+
+- [6cc489e5](https://github.com/runspired/smoke-and-mirrors/commit/6cc489e592ab4990f6df07fe7a19d85880c7a272) **fix(flexible-layouts)**: fix bugs with detecting if scrolling forward when rebuilding *by [Sreedhar Veeravalli](https://github.com/sreedhar7)*
+
 ## 0.5.5
 
 ### Pull Requests
