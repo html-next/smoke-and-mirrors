@@ -51,31 +51,47 @@ export class Scheduler {
   }
 
   flush() {
-    run.begin();
     let i;
-    for (i = 0; i < this.sync.length; i++) {
-      run.schedule('actions', this.sync[i]);
-      this.sync[i] = undefined;
-    }
-    this.sync.length = 0;
+    let q;
 
-    for (i = 0; i < this.layout.length; i++) {
-      run.schedule('actions', this.layout[i]);
-      this.layout[i] = undefined;
-    }
-    this.layout.length = 0;
+    // run.begin();
+    if (this.sync.length) {
+      q = this.sync;
+      this.sync = [];
 
-    for (i = 0; i < this.affect.length; i++) {
-      run.schedule('afterRender', this.affect[i]);
-      this.affect[i] = undefined;
+      for (i = 0; i < q.length; i++) {
+        q[i]();
+      }
     }
-    this.affect.length = 0;
 
-    for (i = 0; i < this.measure.length; i++) {
-      run.schedule('afterRender', this.measure[i]);
-      this.measure[i] = undefined;
+    if (this.layout.length) {
+      q = this.layout;
+      this.layout = [];
+
+      for (i = 0; i < q.length; i++) {
+        q[i]();
+      }
     }
-    this.measure.length = 0;
+    // run.end();
+
+    // run.begin();
+    if (this.measure.length) {
+      q = this.measure;
+      this.measure = [];
+
+      for (i = 0; i < q.length; i++) {
+        q[i]();
+      }
+    }
+
+    if (this.affect.length) {
+      q = this.affect;
+      this.affect = [];
+
+      for (i = 0; i < q.length; i++) {
+        q[i]();
+      }
+    }
     run.end();
   }
 }

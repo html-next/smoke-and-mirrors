@@ -356,7 +356,7 @@ const VerticalCollection = Component.extend({
       this._isPrepending = true;
       scheduler.forget(this._nextUpdate);
 
-      this._nextUpdate = scheduler.schedule('sync', () => {
+      this._nextUpdate = scheduler.schedule('layout', () => {
         this.radar.silentNight();
         this._updateChildStates();
         this._isPrepending = false;
@@ -403,7 +403,7 @@ const VerticalCollection = Component.extend({
 
   _scheduleSync() {
     if (this._nextSync === null) {
-      this._nextSync = scheduler.schedule('sync', () => {
+      this._nextSync = scheduler.schedule('layout', () => {
         this.radar.updateSkyline();
         this._nextSync = null;
       });
@@ -447,6 +447,7 @@ const VerticalCollection = Component.extend({
     if (!get(childComponents, 'length')) {
       return;
     }
+
 
     if (this._isFirstRender) {
       if (this.get('renderAllInitially')) {

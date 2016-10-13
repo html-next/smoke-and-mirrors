@@ -325,7 +325,7 @@ export default class Radar {
         this.currentOffsets = offsets;
 
         if (this._nextScroll === null) {
-          scheduler.schedule('layout', () => {
+          scheduler.schedule('sync', () => {
             if (this.currentOffsets) {
               this.filterMovement(this.currentOffsets);
             }
@@ -346,7 +346,7 @@ export default class Radar {
     this._scrollAdjuster = (offsets) => {
       this.currentAdjustOffsets = offsets;
       if (this._nextAdjustment === null) {
-        this._nextAdjustment = scheduler.schedule('layout', () => {
+        this._nextAdjustment = scheduler.schedule('sync', () => {
           if (this.currentAdjustOffsets) {
             this.updateScrollPosition(this.currentAdjustOffsets);
           }
