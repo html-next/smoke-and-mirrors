@@ -1,6 +1,5 @@
 import { module, test } from 'qunit';
-import ListRadar from 'smoke-and-mirrors/models/list-radar';
-import Radar from 'smoke-and-mirrors/models/radar';
+import ListRadar from 'smoke-and-mirrors/-private/radar/models/list-radar';
 
 const RELATIVE_UNIT = 100;
 let App = {};
@@ -23,15 +22,15 @@ test('create empty ListRadar', (assert) => {
 
   assert.expect(9);
 
-  assert.ok(App.listRadar.isTracking, "isTracking set");
-  assert.deepEqual(App.listRadar.satellites, [], "satellites set");
-  assert.equal(App.listRadar.planet, null, "planet set");
-  assert.equal(App.listRadar.minimumMovement, 15, "minimumMovement set");
-  assert.equal(App.listRadar.posX, 0, "posX set");
-  assert.equal(App.listRadar.posY, 0, "posY set");
-  assert.equal(App.listRadar.scrollX, 0, "scrollX set");
-  assert.equal(App.listRadar.scrollY, 0, "scrollY set");
-  assert.equal(App.listRadar.resizeDebounce, 64, "resizeDebounce set");
+  assert.ok(App.listRadar.isTracking, 'isTracking set');
+  assert.deepEqual(App.listRadar.satellites, [], 'satellites set');
+  assert.equal(App.listRadar.planet, null, 'planet set');
+  assert.equal(App.listRadar.minimumMovement, 15, 'minimumMovement set');
+  assert.equal(App.listRadar.posX, 0, 'posX set');
+  assert.equal(App.listRadar.posY, 0, 'posY set');
+  assert.equal(App.listRadar.scrollX, 0, 'scrollX set');
+  assert.equal(App.listRadar.scrollY, 0, 'scrollY set');
+  assert.equal(App.listRadar.resizeDebounce, 64, 'resizeDebounce set');
 
 });
 
@@ -39,11 +38,11 @@ test('register', (assert) => {
 
   assert.expect(2);
 
-  assert.equal(App.listRadar.satellites.length, 0, "no satellites registered yet");
+  assert.equal(App.listRadar.satellites.length, 0, 'no satellites registered yet');
 
   App.listRadar.register(App.component);
 
-  assert.equal(App.listRadar.satellites.length, 1, "satellite registered");
+  assert.equal(App.listRadar.satellites.length, 1, 'satellite registered');
 
 });
 
@@ -53,11 +52,11 @@ test('_resize without change', (assert) => {
 
   App.listRadar.register(App.component);
 
-  App.listRadar.satellites.forEach((c, i) => {
+  App.listRadar.satellites.forEach((c) => {
     c.resize = function() {
-      assert.ok(true, "satellite resize hook called");
+      assert.ok(true, 'satellite resize hook called');
       return false;
-    }
+    };
   });
 
   App.listRadar._resize();
@@ -76,8 +75,10 @@ test('_resize with change', (assert) => {
     };
 
     satellite.shift = function() {
-      assert.ok(true, "shift hook called");
-      satellite.next = function() { return null };
+      assert.ok(true, 'shift hook called');
+      satellite.next = function() {
+        return null;
+      };
     };
 
     satellite.resize = function() {
@@ -85,7 +86,7 @@ test('_resize with change', (assert) => {
     };
   });
 
-  App.listRadar._resize()
+  App.listRadar._resize();
 
 });
 
@@ -101,13 +102,15 @@ test('_adjust', (assert) => {
     };
 
     satellite.shift = function() {
-      assert.ok(true, "shift hook called");
-      satellite.next = function() { return null };
+      assert.ok(true, 'shift hook called');
+      satellite.next = function() {
+        return null;
+      };
     };
   });
 
-  let satellite = App.listRadar.satellites[0];
-  let change = {dX: RELATIVE_UNIT, dY: RELATIVE_UNIT};
+  let [satellite] = App.listRadar.satellites;
+  let change = { dX: RELATIVE_UNIT, dY: RELATIVE_UNIT };
 
   App.listRadar._adjust(satellite, change);
 

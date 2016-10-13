@@ -1,8 +1,8 @@
-{{#each _content key='@index' as |item index|}}
+{{#each items key='@index' as |item index|}}
   {{#vertical-item
     itemTagName=itemTagName
     classNames=itemClassNames
-    defaultHeight=defaultHeight
+    defaultHeight=_defaultHeight
     alwaysRemeasure=alwaysRemeasure
     content=item
     index=index
