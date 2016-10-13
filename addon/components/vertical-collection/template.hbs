@@ -1,6 +1,6 @@
 {{#each items key='@index' as |item index|}}
   {{#vertical-item
-    itemTagName=itemTagName
+    tagName=itemTagName
     classNames=itemClassNames
     defaultHeight=_defaultHeight
     alwaysRemeasure=alwaysRemeasure
@@ -9,9 +9,7 @@
     register=(action register)
     unregister=(action unregister)
   }}
-    {{#if shouldRender}}
-      {{yield item index}}
-    {{/if}}
+    {{yield item index}}
   {{/vertical-item}}
 {{else}}
   {{yield to="inverse"}}

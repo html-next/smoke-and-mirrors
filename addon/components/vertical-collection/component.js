@@ -7,6 +7,7 @@ import identity from '../../-private/ember/utils/identity';
 import scheduler from '../../-private/scheduler';
 import estimateElementHeight from '../../utils/element/estimate-element-height';
 import closestElement from '../../utils/element/closest';
+import Token from '../../-private/scheduler/token';
 
 const {
   A,
@@ -166,17 +167,6 @@ const VerticalCollection = Component.extend({
   _firstVisibleIndex: 0,
 
   /*
-   * Set this to false to prevent rendering entirely.
-   * Useful for situations in which rendering is
-   * expensive enough that it interferes with a
-   * transition animation.
-   *
-   * In such cases, set this to false, and switch it
-   * to true once animation has completed.
-   */
-  shouldRender: true,
-
-  /*
    * forward is true, backwards is false
    */
   _scrollIsForward: 0,
@@ -277,11 +267,15 @@ const VerticalCollection = Component.extend({
     }
 
     // this MUST be async or glimmer will freak
-    scheduler.schedule('affect', () => {
+    this.schedule('affect', () => {
       setTimeout(() => {
         this.sendAction(name, context, K);
       });
     });
+  },
+
+  schedule(queueName, job) {
+    return scheduler.schedule(queueName, job, this.token);
   },
 
   /*
@@ -356,7 +350,7 @@ const VerticalCollection = Component.extend({
       this._isPrepending = true;
       scheduler.forget(this._nextUpdate);
 
-      this._nextUpdate = scheduler.schedule('layout', () => {
+      this._nextUpdate = this.schedule('layout', () => {
         this.radar.silentNight();
         this._updateChildStates();
         this._isPrepending = false;
@@ -394,7 +388,7 @@ const VerticalCollection = Component.extend({
       return;
     }
     if (this._nextUpdate === null) {
-      this._nextUpdate = scheduler.schedule('layout', () => {
+      this._nextUpdate = this.schedule('layout', () => {
         this._updateChildStates();
         this._nextUpdate = null;
       });
@@ -403,7 +397,7 @@ const VerticalCollection = Component.extend({
 
   _scheduleSync() {
     if (this._nextSync === null) {
-      this._nextSync = scheduler.schedule('layout', () => {
+      this._nextSync = this.schedule('layout', () => {
         this.radar.updateSkyline();
         this._nextSync = null;
       });
@@ -413,7 +407,7 @@ const VerticalCollection = Component.extend({
   _scheduleScrollSync() {
     if (this.get('__isInitializingFromLast')) {
       if (this._nextScrollSync === null) {
-        this._nextScrollSync = scheduler.schedule('measure', () => {
+        this._nextScrollSync = this.schedule('measure', () => {
           const last = this.element.lastElementChild;
 
           this.set('__isInitializingFromLast', false);
@@ -437,10 +431,6 @@ const VerticalCollection = Component.extend({
    * @private
    */
   _updateChildStates(/* source */) {  // eslint: complexity
-    if (!this.get('shouldRender')) {
-      return;
-    }
-
     const edges = this._edges;
     const childComponents = this.get('children');
 
@@ -680,6 +670,7 @@ const VerticalCollection = Component.extend({
 
   willDestroyElement() {
     // cleanup scroll
+    this.token.cancelled = true;
     this.radar.destroy();
     this.radar = null;
 
@@ -709,7 +700,8 @@ const VerticalCollection = Component.extend({
     }
 
     this.set('_children', new A());
-    this.radar = new ListRadar({});
+    let token = this.token = new Token();
+    this.radar = new ListRadar({ token });
   }
 });
 

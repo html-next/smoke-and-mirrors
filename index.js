@@ -5,6 +5,7 @@
 var chalk = require('chalk');
 var stripClassCallCheck = require('babel5-plugin-strip-class-callcheck');
 var filterImports = require('babel-plugin-filter-imports');
+var removeImports = require('./lib/babel-plugin-remove-imports');
 var Funnel = require('broccoli-funnel');
 
 module.exports = {
@@ -28,8 +29,7 @@ module.exports = {
     babelOptions.plugins.push({ transformer: stripClassCallCheck, position: 'after' });
 
     if (/production/.test(env) || /test/.test(env)) {
-      babelOptions.plugins.push(
-        filterImports({
+      var strippedModules = {
         'smoke-and-mirrors/-debug/helpers': [
           'assert',
           'warn',
@@ -37,7 +37,13 @@ module.exports = {
           'instrument',
           'deprecate',
           'stripInProduction'
-        ]})
+        ]
+      };
+      var importNames = ['smoke-and-mirrors/-debug/helpers'];
+
+      babelOptions.plugins.push(
+        filterImports(strippedModules),
+        removeImports(importNames)
       );
     }
 
@@ -45,7 +51,7 @@ module.exports = {
   },
 
   included: function(app) {
-    this._super.included.apply(this, arguments);
+    // this._super.included.apply(this, arguments);
 
     while (typeof app.import !== 'function' && app.app) {
       app = app.app;
@@ -94,6 +100,6 @@ module.exports = {
   },
 
   isDevelopingAddon: function() {
-    return false;
+    return true;
   }
 };

@@ -1,12 +1,10 @@
 import Ember from 'ember';
+import Token from './token';
 
 const {
   run
 } = Ember;
 
-function Token() {
-  this.cancelled = false;
-}
 function job(cb, token) {
   return function execJob() {
     if (token.cancelled === false) {
@@ -22,10 +20,11 @@ export class Scheduler {
     this.measure = [];
     this.affect = [];
     this._nextFlush = null;
+    this.ticks = 0;
   }
 
-  schedule(queueName, cb) {
-    let token = new Token();
+  schedule(queueName, cb, parent) {
+    let token = new Token(parent);
 
     this[queueName].push(job(cb, token));
     this._flush();
@@ -46,15 +45,17 @@ export class Scheduler {
 
     this._nextFlush = requestAnimationFrame(() => {
       this._nextFlush = null;
+      this.ticks++;
       this.flush();
     });
   }
 
   flush() {
+    // console.time('scheduler-flush-' + this.ticks);
     let i;
     let q;
 
-    // run.begin();
+    run.begin();
     if (this.sync.length) {
       q = this.sync;
       this.sync = [];
@@ -93,6 +94,7 @@ export class Scheduler {
       }
     }
     run.end();
+    // console.timeEnd('scheduler-flush-' + this.ticks);
   }
 }
 

@@ -3,6 +3,7 @@ import Satellite from './satellite';
 import Geography from './geography';
 import Container from './container';
 import SUPPORTS_PASSIVE from '../utils/supports-passive';
+import Token from '../../scheduler/token';
 import {
   addScrollHandler,
   removeScrollHandler
@@ -21,7 +22,12 @@ export default class Radar {
     this.length = 0;
     this.alwaysRemeasure = false;
     this.maxLength = DEFAULT_ARRAY_SIZE;
+    this.token = new Token(state.token);
     this.setState(state || {});
+  }
+
+  schedule(queueName, job) {
+    scheduler.schedule(queueName, job, this.token);
   }
 
   _push(satellite) {
@@ -325,7 +331,7 @@ export default class Radar {
         this.currentOffsets = offsets;
 
         if (this._nextScroll === null) {
-          scheduler.schedule('sync', () => {
+          this._nextScroll = this.schedule('sync', () => {
             if (this.currentOffsets) {
               this.filterMovement(this.currentOffsets);
             }
@@ -337,7 +343,7 @@ export default class Radar {
 
     this._resizeHandler = () => {
       if (this._nextResize === null) {
-        this._nextResize = scheduler.schedule('sync', () => {
+        this._nextResize = this.schedule('sync', () => {
           this.resizeSatellites();
           this._nextResize = null;
         });
@@ -346,7 +352,7 @@ export default class Radar {
     this._scrollAdjuster = (offsets) => {
       this.currentAdjustOffsets = offsets;
       if (this._nextAdjustment === null) {
-        this._nextAdjustment = scheduler.schedule('sync', () => {
+        this._nextAdjustment = this.schedule('sync', () => {
           if (this.currentAdjustOffsets) {
             this.updateScrollPosition(this.currentAdjustOffsets);
           }
@@ -374,9 +380,7 @@ export default class Radar {
     if (this.telescope !== Container) {
       removeScrollHandler(Container, this._scrollAdjuster);
     }
-    scheduler.forget(this._nextResize);
-    scheduler.forget(this._nextScroll);
-    scheduler.forget(this._nextAdjustment);
+    this.token.cancelled = true;
     this._scrollHandler = undefined;
     this._resizeHandler = undefined;
     this._scrollAdjuster = undefined;
@@ -404,6 +408,7 @@ export default class Radar {
     this.satellites = undefined;
     this.telescope = undefined;
     this.sky = undefined;
+    this.token = undefined;
 
     if (this.planet) {
       this.planet.destroy();

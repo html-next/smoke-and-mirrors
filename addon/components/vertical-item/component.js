@@ -1,6 +1,5 @@
 import Ember from 'ember';
 import layout from './template';
-import getOwner from 'ember-getowner-polyfill';
 import scheduler from '../../-private/scheduler';
 
 const {
@@ -138,15 +137,11 @@ export default Component.extend({
       this.radar.unregister(this);
     }
     this.satellite = undefined;
-    this.registry = undefined;
   },
 
   init() {
     this._super();
-    this.registry = getOwner(this).lookup('-view-registry:main');
-    let tag = this.get('itemTagName');
-
-    this.set('tagName', tag);
+    let tag = this.tagName;
     tag = tag.toLowerCase();
 
     const isTableChild = tag === 'tr' || tag === 'td' || tag === 'th';

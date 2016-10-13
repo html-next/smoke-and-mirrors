@@ -5,14 +5,11 @@
               {{!- BEGIN-SNIPPET dbmon-example }}
                 <div class="table-wrapper">
                     <table class="table table-striped latest-data">
-                      {{#vertical-collection
+                      {{#vertical-collection model.databases
                         tagName="tbody"
-                        content=model.databases
                         defaultHeight=37
                         bufferSize=0.5
-                        alwaysUseDefaultHeight=true
                         containerSelector=".table-wrapper"
-                        key="id"
                         as |db|
                       }}
                         {{examples/dbmon/components/dbmon-row tagName="" db=db}}
