@@ -1,6 +1,7 @@
 import scheduler from '../../scheduler';
 
 const DEFAULT_ARRAY_SIZE = 10;
+const UNDEFINED_VALUE = Object.create(null);
 
 export class ScrollHandler {
   constructor() {
@@ -24,7 +25,7 @@ export class ScrollHandler {
       }
 
       this.elements[index] = element;
-      this.handlers[index] =  { top: undefined, left: undefined, handlers: [handler] };
+      this.handlers[index] =  { top: UNDEFINED_VALUE, left: UNDEFINED_VALUE, handlers: [handler] };
     } else {
       let handlers = this.handlers[index].handlers;
 
@@ -44,7 +45,7 @@ export class ScrollHandler {
       let index = elementCache.handlers.indexOf(handler);
 
       if (index === -1) {
-        throw new Error('Attempted to remove an unattached handler');
+        throw new Error('Attempted to remove an unknown handler');
       }
 
       elementCache.handlers.splice(index, 1);
@@ -57,10 +58,14 @@ export class ScrollHandler {
         this.elements.splice(index, 1);
         this.length--;
         this.maxLength--;
+
+        if (this.length === 0) {
+          this.isPolling = false;
+        }
       }
 
     } else {
-      throw new Error('Attempted to remove an unattached handler');
+      throw new Error('Attempted to remove a handler from an unknown element or an element with no handlers');
     }
   }
 
@@ -68,24 +73,25 @@ export class ScrollHandler {
     this.isPolling = true;
 
     scheduler.schedule('sync', () => {
+      if (!this.isPolling) {
+        return;
+      }
+
       for (let i = 0; i < this.length; i++) {
         let element = this.elements[i];
         let info = this.handlers[i];
         let cachedTop = element.scrollTop;
         let cachedLeft = element.scrollLeft;
-        let topChanged = cachedTop !== info.top && info.top !== undefined;
-        let leftChanged = cachedLeft !== info.left && info.left !== undefined;
+        let topChanged = cachedTop !== info.top && info.top !== UNDEFINED_VALUE;
+        let leftChanged = cachedLeft !== info.left && info.left !== UNDEFINED_VALUE;
 
         info.top = cachedTop;
         info.left = cachedLeft;
 
         if (topChanged || leftChanged) {
-          Promise.resolve(info)
-            .then((info) => {
-              for (let j = 0; j < info.handlers.length; j++) {
-                info.handlers[j].call(null, { top: info.top, left: info.left });
-              }
-            });
+          for (let j = 0; j < info.handlers.length; j++) {
+            info.handlers[j].call(null, { top: info.top, left: info.left });
+          }
         }
       }
 
@@ -95,7 +101,6 @@ export class ScrollHandler {
       }
     });
   }
-
 }
 
 const instance = new ScrollHandler();
