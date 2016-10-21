@@ -10,7 +10,7 @@ module.exports = function(environment) {
     modulePrefix: 'dummy',
     podModulePrefix: 'dummy/screens',
     environment,
-    rootURL: '/',
+    rootURL: 'smoke-and-mirrors',
     locationType: 'hash',
     EmberENV: {
       FEATURES: {},
@@ -58,10 +58,6 @@ module.exports = function(environment) {
     ENV.APP.LOG_TRANSITIONS_INTERNAL = false;
     ENV.APP.LOG_VERSION = false;
     ENV.APP.LOG_VIEW_LOOKUPS = false;
-  }
-
-  if (environment === 'production') {
-    ENV.rootURL = 'smoke-and-mirrors';
   }
 
   if (environment === 'test') {

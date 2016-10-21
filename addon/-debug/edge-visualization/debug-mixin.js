@@ -27,7 +27,7 @@ import {
 export default Mixin.create({
   debug: false,
   debugCSS: false,
-  showEdges: computed.alias('debug'),
+  showEdges: computed.deprecatingAlias('debug'),
 
   _nextVisualization: null,
 
@@ -52,7 +52,7 @@ export default Mixin.create({
 
   detectIssuesWithCSS() {
     let defaultHeight = this.get('defaultHeight');
-    let radar = this.radar;
+    let radar = this._tracker.radar;
     let styles;
     let rules;
     let rect;

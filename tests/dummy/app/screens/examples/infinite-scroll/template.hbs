@@ -5,7 +5,9 @@
           {{!- BEGIN-SNIPPET infinite-scroll-example }}
             <div class="table-wrapper dark">
               {{#vertical-collection model.numbers
+                debug=true
                 defaultHeight=270
+                bufferSize=1
                 firstReached="loadAbove"
                 lastReached="loadBelow"
                 as |item index|

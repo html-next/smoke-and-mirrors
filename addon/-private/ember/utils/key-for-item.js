@@ -4,14 +4,15 @@ import identity from './identity';
 
 const {
   get
-  } = Ember;
+} = Ember;
 
 export default function keyForItem(item, keyPath, index) {
   let key;
 
   switch (keyPath) {
     case '@index':
-      if (!index) {
+      // allow 0 index
+      if (!index && index !== 0) {
         throw new Error('No index was supplied to keyForItem');
       }
       key = index;

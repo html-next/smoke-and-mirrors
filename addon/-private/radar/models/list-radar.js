@@ -7,7 +7,6 @@ const {
   } = Ember;
 
 export default class ListRadar extends Radar {
-
   register(component) {
     let sat = ListSatellite.create({
       component,

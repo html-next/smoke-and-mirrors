@@ -1,3 +1,4 @@
+{{!--
 {{#each items key='@index' as |item index|}}
   {{#vertical-item
     tagName=itemTagName
@@ -10,6 +11,18 @@
     unregister=(action unregister)
   }}
     {{yield item index}}
+  {{/vertical-item}}
+{{else}}
+  {{yield to="inverse"}}
+{{/each}}
+--}}
+{{#each activeItems key='id' as |item|}}
+  {{#vertical-item
+    tagName=itemTagName
+    parentToken=token
+    item=item
+  }}
+    {{yield item.content.ref item.content.index}}
   {{/vertical-item}}
 {{else}}
   {{yield to="inverse"}}

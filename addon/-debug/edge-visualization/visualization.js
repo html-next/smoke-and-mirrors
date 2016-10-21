@@ -8,7 +8,8 @@ export default class Visualization {
   constructor(component) {
     this.component = component;
     this.minimumMovement = Math.floor(component.defaultHeight / 2);
-    this.radar = component.radar;
+    this.radar = component._tracker.radar;
+    this._trackedItems = component._tracker;
     this.satellites = [];
     this.cache = [];
     this.setupViewport();
@@ -74,7 +75,7 @@ export default class Visualization {
 
   applySatelliteMirrorStyles(element, componentElement, compare) {
     const adj = this.currentOffsetAdjustment();
-    const geography = new Geography(componentElement);
+    const geography = componentElement ? new Geography(componentElement) : compare;
     const left = 2 * SYS_WIDTH;
     let errorLevel = false;
 
@@ -103,8 +104,8 @@ export default class Visualization {
   }
 
   styleViewport() {
-    const edges = this.component._edges;
     const {
+      edges,
       planet,
       skyline
       } = this.radar;
@@ -116,13 +117,13 @@ export default class Visualization {
     Visualization.applyVerticalStyles(this.screen, new Geography(Container));
 
     Visualization.applyVerticalStyles(this.visAbove, {
-      top: edges.visibleTop,
-      height: edges.viewportTop - edges.visibleTop
+      top: edges.bufferedTop,
+      height: edges.visibleTop - edges.visibleTop
     });
 
     Visualization.applyVerticalStyles(this.visBelow, {
-      top: edges.viewportBottom,
-      height: edges.visibleBottom - edges.viewportBottom
+      top: edges.visibleBottom,
+      height: edges.bufferedBottom - edges.visibleBottom
     });
   }
 
@@ -151,13 +152,15 @@ export default class Visualization {
 
   makeSatellites() {
     const {
-      length
-      } = this.radar.satellites;
-    const isShrinking = this.satellites.length > length;
+      ordered
+    } = this._trackedItems;
+    const { length } = ordered;
+    const { satellites } = this;
+    const isShrinking = satellites.length > length;
 
-    while (this.satellites.length !== length) {
+    while (satellites.length !== length) {
       if (isShrinking) {
-        const satellite = this.satellites.pop();
+        const satellite = satellites.pop();
 
         satellite.parentNode.removeChild(satellite);
         satellite.mirrorSatellite.parentNode.removeChild(satellite.mirrorSatellite);
@@ -170,20 +173,20 @@ export default class Visualization {
   }
 
   styleSatellites() {
-    const sats = this.satellites;
+    const { satellites: sats } = this;
+    const { ordered: satellites } = this._trackedItems;
 
-    this.radar.satellites.forEach((sat, index) => {
+    satellites.forEach((sat, index) => {
       const element = sats[index];
-      const satIndex = sat.component.get('index');
 
       this.applySatelliteStyles(element, sat.geography);
-      element.setAttribute('viewState', sat.component._contentInserted ? 'visible' : 'culled');
-      element.mirrorSatellite.setAttribute('viewState', sat.component._contentInserted ? 'visible' : 'culled');
-      element.setAttribute('index', satIndex);
-      element.mirrorSatellite.setAttribute('index', satIndex);
-      element.innerText = satIndex;
-      this.applySatelliteMirrorStyles(element.mirrorSatellite, sat.component.element, sat.geography);
-      element.mirrorSatellite.innerText = satIndex;
+      element.setAttribute('viewState', sat.geography.element? 'visible' : 'culled');
+      element.mirrorSatellite.setAttribute('viewState', sat.geography.element ? 'visible' : 'culled');
+      element.setAttribute('index', String(index));
+      element.mirrorSatellite.setAttribute('index', String(index));
+      element.innerText = String(index);
+      this.applySatelliteMirrorStyles(element.mirrorSatellite, sat.geography.element, sat.geography);
+      element.mirrorSatellite.innerText = String(index);
     });
   }
 
@@ -197,6 +200,7 @@ export default class Visualization {
     this.wrapper = null;
     this.radar = null;
     this.component = null;
+    /*
     this.satellites.forEach((satellite) => {
       satellite.mirrorSatellite = null;
       satellite.siblingSatellite = null;
@@ -212,6 +216,7 @@ export default class Visualization {
         satellite.parentNode.removeChild(satellite);
       }
     });
+    */
     this.cache = null;
   }
 

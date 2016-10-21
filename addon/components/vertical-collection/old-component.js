@@ -2,15 +2,18 @@
 import Ember from 'ember';
 import layout from './template';
 import getTagDescendant from '../../utils/get-tag-descendant';
+import Radar from './data-view/mini-radar';
+import identity from '../../-private/ember/utils/identity';
 import scheduler from '../../-private/scheduler';
 import estimateElementHeight from '../../utils/element/estimate-element-height';
 import closestElement from '../../utils/element/closest';
 import Token from '../../-private/scheduler/token';
 import List from './data-view/list';
-import RecycleContainer from './data-view/recycle-container';
+import ActiveProxy from './data-view/active-proxy';
 
 const {
   A,
+  K,
   get,
   set,
   computed,
@@ -26,29 +29,36 @@ const VerticalCollection = Component.extend({
   layout,
 
   /*
+   * Defaults to `vertical-collection`.
+   *
    * If itemTagName is blank or null, the `vertical-collection` will [tag match](../addon/utils/get-tag-descendant.js)
    * with the `vertical-item`.
    */
   tagName: 'vertical-collection',
-  itemTagName: null,
+  itemTagName: 'vertical-item',
   itemClassNames: '',
   attributeBindings: ['boxStyle:style'],
   boxStyle: htmlSafe(''),
 
   key: '@identity',
   content: computed.deprecatingAlias('items'),
+  items: null,
 
   // –––––––––––––– Required Settings
 
+  /*
+   * This height is used to give the `vertical-item`s height prior to
+   * their content being rendered.
+   *
+   * This height is replaced with the actual rendered height once content
+   * is rendered for the first time.
+   */
   defaultHeight: 75,
-
-  // usable via {{#vertical-collection <items-array>}}
-  items: null,
-
-  // –––––––––––––– Optional Settings
   alwaysRemeasure: false,
   alwaysUseDefaultHeight: computed.not('alwaysRemeasure'),
 
+
+  // –––––––––––––– Mandatory Settings
   /*
    * A selector string that will select the element from
    * which to calculate the viewable height and needed offsets.
@@ -96,6 +106,29 @@ const VerticalCollection = Component.extend({
    */
   renderFromLast: false,
 
+  // –––––––––––––– Actions
+  /*
+   * Specify an action to fire when the first/last item is reached
+   * or when the first/last visible item has changed.
+   *
+   * These action will only fire once per unique item, and
+   * they fired the moment the element becomes visible, which
+   * may be before it actually enters the viewport.
+   *
+   * It will include the index and content of the last item.
+   *
+   * ```
+   * {
+   *  index: 0,
+   *  item : {}
+   * }
+   * ```
+   */
+  firstReached: null,
+  lastReached: null,
+  firstVisibleChanged: null,
+  lastVisibleChanged: null,
+
   // –––––––––––––– @private
 
   _defaultHeight: computed('defaultHeight', function() {
@@ -114,17 +147,82 @@ const VerticalCollection = Component.extend({
   _isFirstRender: true,
   _isInitializingFromLast: false,
   _firstVisibleIndex: 0,
-  _initialRenderCount: 3,
+  _scrollIsForward: 0,
   _isPrepending: false,
 
+  radar: null,
   token: null,
   _tracker: null,
-
+  _edges: null,
   _proxied: null,
   _nextUpdate: null,
   _nextSync: null,
   _nextScrollSync: null,
 
+  // –––––––––––––– Action Helper Functions
+  canSendActions(name /* context*/) {
+    // don't trigger during a prepend or initial render
+    if (this._isFirstRender || this._isPrepending) {
+      return false;
+    }
+
+    if (name === 'firstReached') {
+      if (this._scrollIsForward) {
+        return false;
+      }
+    }
+
+    return !(name === 'lastReached' && !this._scrollIsForward);
+  },
+/*
+  prepareActionContext(name, context) {
+    if (name === 'didMountCollection') {
+      if (context.firstVisible.item) {
+        context.firstVisible.item = getContent(context.firstVisible.item);
+      }
+
+      if (context.lastVisible.item) {
+        context.lastVisible.item = getContent(context.lastVisible.item);
+      }
+
+      return context;
+    }
+
+    context.item = getContent(context.item);
+    return !context.item ? false : context;
+  },
+*/
+/*
+  __smActionCache: null,
+  sendActionOnce(name, context) {
+    if (!this.canSendActions(name, context)) {
+      return;
+    }
+
+    context = this.prepareActionContext(name, context);
+    if (!context) {
+      return;
+    }
+
+    const contextCache = this.__smActionCache;
+
+    if (contextCache.hasOwnProperty(name)) {
+      const contextKey = this.keyForContext(context);
+
+      if (contextCache[name] === contextKey) {
+        return;
+      }
+      contextCache[name] = contextKey;
+    }
+
+    // this MUST be async or glimmer will freak
+    this.schedule('affect', () => {
+      setTimeout(() => {
+        this.sendAction(name, context, K);
+      });
+    });
+  },
+*/
   schedule(queueName, job) {
     return scheduler.schedule(queueName, job, this.token);
   },
@@ -255,19 +353,19 @@ const VerticalCollection = Component.extend({
   _scheduleSync() {
     if (this._nextSync === null) {
       this._nextSync = this.schedule('layout', () => {
-        this._tracker.radar.updateSkyline();
+        this.radar.updateSkyline();
         this._nextSync = null;
       });
     }
   },
 
   _scheduleScrollSync() {
-    if (this._isInitializingFromLast) {
+    if (this.get('__isInitializingFromLast')) {
       if (this._nextScrollSync === null) {
         this._nextScrollSync = this.schedule('measure', () => {
           const last = this.element.lastElementChild;
 
-          this._isInitializingFromLast = false;
+          this.set('__isInitializingFromLast', false);
           if (last) {
             last.scrollIntoView(false);
           }
@@ -287,14 +385,13 @@ const VerticalCollection = Component.extend({
     }
 
     for (let i = 0; i < inbound.length; i++) {
-      outbound[i] = outbound[i] || new RecycleContainer();
+      outbound[i] = outbound[i] || new ActiveProxy();
       set(outbound[i], 'content', inbound[i]);
       outbound[i].position = i;
     }
     // this.notifyPropertyChange('length');
 
     this.set('activeItems', outbound);
-    this.notifyPropertyChange('activeItems');
   },
 
   /*
@@ -306,8 +403,13 @@ const VerticalCollection = Component.extend({
    *
    * @private
    */
+  _initialRenderCount: 4,
   _updateChildStates() {
-    if (this._isFirstRender) {;
+    if (this._isFirstRender) {
+      console.log(
+        'initial render mode',
+        window.chunk = window.chunk ? window.chunk++ : 1
+      );
 
       this._initialRenderCount -= 1;
       this._tracker._activeCount += 1;
@@ -318,14 +420,11 @@ const VerticalCollection = Component.extend({
       this.set('boxStyle', htmlSafe(`padding-top: ${heightAbove}px; padding-bottom: ${heightBelow}px;`));
 
       this.schedule('affect', () => {
-        window.chunk = window.chunk ? ++window.chunk : 0
-        console.log('appending chunk #' + window.chunk);
-        this._tracker.radar.rebuild();
+        console.log('appending chunk');
+        this.radar.rebuild();
 
         if (this._initialRenderCount === 0) {
-          console.log('bailing!');
           this._isFirstRender = false;
-          return;
         }
 
         this._scheduleUpdate();
@@ -333,43 +432,41 @@ const VerticalCollection = Component.extend({
       return;
     }
 
-    const { edges, _scrollIsForward } = this._tracker.radar;
+    console.log('updating items');
+    const edges = this._edges;
     const { ordered } = this._tracker;
-    const { _proxied } = this;
-    const currentViewportBound = this._tracker.radar.skyline.top;
-    let currentUpperBound = edges.bufferedTop;
+    const { _proxied, _scrollIsForward } = this;
+    const currentViewportBound = this.radar.skyline.top;
+    let currentUpperBound = edges.visibleTop;
 
     if (currentUpperBound < currentViewportBound) {
       currentUpperBound = currentViewportBound;
     }
 
-    const { position, index } = this._findFirstToRender(currentUpperBound, _scrollIsForward);
-    let topItemIndex = index;
-    const maxIndex = ordered.length - 1;
+    const { position, index: topItemIndex } = this._findFirstToRender(currentUpperBound, _scrollIsForward);
+    const lastIndex = ordered.length - 1;
     let bottomItemIndex = topItemIndex;
     let topVisibleSpotted = false;
 
-    // console.log('edges', edges);
-
-    while (bottomItemIndex <= maxIndex) {
+    while (bottomItemIndex <= lastIndex) {
       const ref = ordered[bottomItemIndex];
       const itemTop = ref.geography.top;
       const itemBottom = ref.geography.bottom;
-      // console.log('examining', ref);
+      console.log('examining', ref, itemTop, itemBottom);
 
       // end the loop if we've reached the end of components we care about
-      if (itemTop > edges.bufferedBottom) {
+      if (itemTop > edges.visibleBottom) {
         break;
       }
 
       // above the upper reveal boundary
-      if (itemBottom < edges.bufferedTop) {
+      if (itemBottom < edges.visibleTop) {
         bottomItemIndex++;
         continue;
       }
 
       // above the upper screen boundary
-      if (itemBottom < edges.visibleTop) {
+      if (itemBottom < edges.viewportTop) {
         /*
         if (bottomItemIndex === 0) {
           this.sendActionOnce('firstReached', {
@@ -383,7 +480,7 @@ const VerticalCollection = Component.extend({
       }
 
       // above the lower screen boundary
-      if (itemTop < edges.visibleBottom) {
+      if (itemTop < edges.viewportBottom) {
         /*
         if (bottomItemIndex === 0) {
           this.sendActionOnce('firstReached', {
@@ -415,7 +512,7 @@ const VerticalCollection = Component.extend({
         continue;
       }
 
-      // above the lower reveal boundary (componentTop < edges.bufferedBottom)
+      // above the lower reveal boundary (componentTop < edges.visibleBottom)
         /*
         if (bottomItemIndex === lastIndex) {
           this.sendActionOnce('lastReached', {
@@ -447,6 +544,9 @@ const VerticalCollection = Component.extend({
     }
     */
 
+    console.log('top index', topItemIndex);
+    console.log('bottom index', bottomItemIndex);
+
     let len = bottomItemIndex - topItemIndex;
     let curProxyLen = _proxied.length;
     let lenDiff = len - curProxyLen;
@@ -454,56 +554,43 @@ const VerticalCollection = Component.extend({
 
     if (lenDiff < 0) {
       let absDiff = -1 * lenDiff;
-      let n = len + absDiff;
 
       if (_scrollIsForward) {
-        // console.log('removing ' + absDiff + ' active items from use from the top');
-        // altered = _proxied.splice(0, absDiff);
-        if (topItemIndex - n < 0) {
-          topItemIndex = 0;
-          bottomItemIndex = n;
-        } else {
-          topItemIndex -= absDiff;
-        }
+        console.log('removing ' + absDiff + ' active items from use from the top');
+        altered = _proxied.splice(0, absDiff);
       } else {
-        // console.log('removing ' + absDiff + ' active items from use from the bottom');
-        // altered = _proxied.splice(len, absDiff);
-        if (bottomItemIndex + n > maxIndex) {
-          topItemIndex = maxIndex - n;
-          bottomItemIndex = maxIndex;
-        } else {
-          bottomItemIndex += absDiff;
-        }
+        console.log('removing ' + absDiff + ' active items from use from the bottom');
+        altered = _proxied.splice(len, absDiff);
       }
-      lenDiff = 0;
     } else if (lenDiff > 0) {
       console.log('adding ' + lenDiff + ' active items');
       altered = new Array(lenDiff);
 
       for (let i = 0; i < lenDiff; i++) {
-        altered[i] = new RecycleContainer(null, curProxyLen + i);
+        altered[i] = new ActiveProxy(null, curProxyLen + i);
       }
       if (_scrollIsForward) {
         console.log('adding to bottom');
-        _proxied.splice(_proxied.length, 0, ...altered);
+        _proxied.splice(_proxied.length, 0, altered);
       } else {
         console.log('adding to top');
-        _proxied.splice(0, 0, ...altered);
+        _proxied.splice(0, 0, altered);
       }
     }
 
     if (position < 0) {
       console.log('shifted last to front');
-      _proxied.unshift(_proxied.pop());
+      _proxied.shift(_proxied.pop());
     } else if (position > 0) {
       console.log('shifted front to last');
-      _proxied.push(_proxied.shift());
+      _proxied.push(_proxied.unshift());
     }
 
-    let _slice = this._tracker.slice(topItemIndex, bottomItemIndex);
-
+    let _slice = this._tracker.slice(topItemIndex, len);
+    console.log('updating proxy content');
     for (let i = 0; i < len; i++) {
       if (_proxied[i].content !== _slice[i]) {
+        console.log(_proxied[i], 'set to', _slice[i]);
         set(_proxied[i], 'content', _slice[i]);
       }
     }
@@ -557,6 +644,7 @@ const VerticalCollection = Component.extend({
   // –––––––––––––– Setup/Teardown
   didInsertElement() {
     this.setupRadar();
+    this._computeEdges();
     // this._initializeScrollState();
     // this._scheduleUpdate();
     console.timeEnd('vertical-collection-init');
@@ -572,14 +660,56 @@ const VerticalCollection = Component.extend({
       container = containerSelector ? closestElement(containerSelector) : this.element.parentNode;
     }
 
-    this._tracker.setupRadar({
-      telescope: container,
-      sky: this.element,
-      minimumMovement: Math.floor(this.get('defaultHeight') / 2),
-      bufferSize: this.get('bufferSize')
-    });
+    const onScrollMethod = (dY) => {
+      if (this._isPrepending) {
+        console.log('isPrepending');
+        return;
+      }
+      this._scrollIsForward = dY > 0;
 
-    this._tracker.updateVisibleContent = () => { this._updateChildStates(); };
+      this._scheduleUpdate();
+    };
+
+    const onResizeMethod = () => {
+      this._computeEdges();
+    };
+
+    let radar = this.radar = new Radar(container, this.element);
+    radar.minimumMovement = Math.floor(this.get('defaultHeight') / 2);
+    radar.didResize = onResizeMethod;
+    radar.didScrollOuter = onResizeMethod;
+    radar.didScrollInner = onScrollMethod;
+  },
+
+  /*
+   * Calculates pixel boundaries between visible, invisible,
+   * and culled items based on the "viewport" height,
+   * and the bufferSize.
+   *
+   * @private
+   */
+  _computeEdges() {
+    let edges;
+
+    if (!this.radar || !this.radar.planet) {
+      edges = {};
+    } else {
+      // segment top break points
+      this.radar.planet.setState();
+
+      const bufferSize = this.get('bufferSize');
+      const rect = this.radar.planet;
+
+      edges = {
+        viewportTop: rect.top,
+        visibleTop: (-1 * bufferSize * rect.height) + rect.top,
+        viewportBottom: rect.bottom,
+        visibleBottom: (bufferSize * rect.height) + rect.bottom
+      };
+    }
+
+    this._edges = edges;
+    return edges;
   },
 
   /*
@@ -609,10 +739,23 @@ const VerticalCollection = Component.extend({
   },
 */
 
+  _actionCache: computed(function() {
+    return {
+      firstReached: null,
+      lastReached: null,
+      firstVisibleChanged: null,
+      lastVisibleChanged: null
+    };
+  }),
+
   willDestroyElement() {
+    // cleanup scroll
     this.token.cancelled = true;
-    this._tracker.destroy();
-    this._tracker = null;
+    this.radar.destroy();
+    this.radar = null;
+
+    this.set('_children', null);
+    this.__smActionCache = null;
   },
 
   init() {
@@ -627,7 +770,6 @@ const VerticalCollection = Component.extend({
     this._tracker = new List(null, this.get('key'), this.get('defaultHeight'));
     this._proxied = new A();
     this.token = new Token();
-    window.collection = this;
   }
 });
 

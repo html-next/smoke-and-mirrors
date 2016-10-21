@@ -51,7 +51,9 @@ export class Scheduler {
   }
 
   flush() {
-    // console.time('scheduler-flush-' + this.ticks);
+    // if (this.ticks <= 8) {
+    //  console.time('scheduler-flush-' + this.ticks);
+    // }
     let i;
     let q;
 
@@ -94,7 +96,9 @@ export class Scheduler {
       }
     }
     run.end();
-    // console.timeEnd('scheduler-flush-' + this.ticks);
+    //if (this.ticks <= 8) {
+    //  console.timeEnd('scheduler-flush-' + this.ticks);
+    //}
   }
 }
 

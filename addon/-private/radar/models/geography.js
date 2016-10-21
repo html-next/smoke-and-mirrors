@@ -1,23 +1,34 @@
+import FastArray from 'perf-primitives/fast-array';
+
+const GEOGRAPHY_POOL = new FastArray(200, 'Geography Pool');
 
 export default class Geography {
+  constructor(element, initialState) {
+    this.init(element, initialState);
+  }
 
-  constructor(element, state) {
+  init(element, initialState) {
     this.element = element;
 
-    this.setState(state);
+    this.setState(initialState);
   }
 
   setState(state) {
-    state = state || this.element.getBoundingClientRect();
+    if (!state) {
+      if (!this.element) {
+        return;
+      }
+      state = this.element.getBoundingClientRect();
+    }
 
     // copying over ensures we preserve shape from outside sources
     // and enables write ops as ClientRect can't be written
     this.top = state.top || 0;
-    this.bottom = state.bottom || 0;
-    this.left = state.left || 0;
-    this.right = state.right || 0;
-    this.width = state.width || 0;
     this.height = state.height || 0;
+    this.bottom = state.bottom || this.top + this.height;
+    this.left = state.left || 0;
+    this.width = state.width || 0;
+    this.right = state.right || this.left + this.width;
   }
 
   getState() {
@@ -84,4 +95,20 @@ export default class Geography {
     };
   }
 
+  static create(styles, element) {
+    let po = GEOGRAPHY_POOL.pop();
+
+    if (po) {
+      po.init(styles, element);
+      return po;
+    }
+
+    return new Geography(element, initialState);
+  }
+
+  destroy() {
+    this.element = undefined;
+
+    GEOGRAPHY_POOL.push(this);
+  }
 }

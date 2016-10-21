@@ -1,9 +1,8 @@
 import Satellite from './satellite';
 import FastArray from 'perf-primitives/fast-array';
-const LIST_SAT_POOL = new FastArray(200, 'ListSatellite Pool');
+const LIST_SAT_POOL = new FastArray(50, 'ListSatellite Pool');
 
 export default class ListSatellite extends Satellite {
-
   heightDidChange(dY) {
     this.radar._adjust(this, { dX: 0, dY });
   }

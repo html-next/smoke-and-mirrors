@@ -3,9 +3,7 @@
         <div class="col-sm-7">
           {{!- BEGIN-SNIPPET flexible-layout-example }}
             <div class="table-wrapper">
-              {{#vertical-collection
-                content=model.numbers
-                debug=true
+              {{#vertical-collection model.numbers
                 defaultHeight=270
                 alwaysRemeasure=true
                 firstReached="loadAbove"
