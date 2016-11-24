@@ -1,0 +1,1 @@
+export { default } from 'smoke-and-mirrors/utils/storage-interface';
