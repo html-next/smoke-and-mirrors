@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import scheduler from '../../scheduler';
 
 const DEFAULT_ARRAY_SIZE = 10;
@@ -80,7 +81,7 @@ export class ScrollHandler {
         info.left = cachedLeft;
 
         if (topChanged || leftChanged) {
-          Promise.resolve(info)
+          Ember.RSVP.Promise.resolve(info)
             .then((info) => {
               for (let j = 0; j < info.handlers.length; j++) {
                 info.handlers[j].call(null, { top: info.top, left: info.left });
