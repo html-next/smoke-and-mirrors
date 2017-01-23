@@ -1,8 +1,8 @@
-import { assert } from 'smoke-and-mirrors/-debug/helpers';
+import Ember from 'ember';
 
 export default function estimateElementHeight(element, fallbackHeight) {
-  assert(`You called estimateElement height without a fallbackHeight`, fallbackHeight);
-  assert(`You called estimateElementHeight without an element`, element);
+  Ember.assert(`You called estimateElement height without a fallbackHeight`, fallbackHeight);
+  Ember.assert(`You called estimateElementHeight without an element`, element);
 
   if (fallbackHeight.indexOf('%') !== -1) {
     let parentHeight = element.parentNode.innerHeight;

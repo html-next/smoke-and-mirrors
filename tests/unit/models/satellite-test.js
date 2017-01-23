@@ -33,10 +33,10 @@ test('Satellite should build correctly', (assert) => {
       assert.ok(true, 'The Component registerSatellite hook is called');
     }
   };
-  let satellite = new Satellite(component);
+  let satellite = new Satellite({ component, element: App.planetADiv });
 
   assert.equal(satellite.component, component, 'component set');
-  assert.equal(satellite.element, component.element, 'element set');
+  assert.equal(satellite.element.element, component.element, 'element set');
 
 });
 
@@ -45,7 +45,7 @@ test('resize returns adjustment', (assert) => {
   assert.expect(5);
 
   let component = { element: App.planetADiv };
-  let satellite = new Satellite(component);
+  let satellite = new Satellite({ component, element: App.planetADiv });
   satellite.heightDidChange = function() {
     assert.ok(true, 'heightDidChange hook called');
   };
@@ -72,7 +72,7 @@ test('shift', (assert) => {
   assert.expect(3);
 
   let component = { element: App.planetADiv };
-  let satellite = new Satellite(component);
+  let satellite = new Satellite({ component, element: App.planetADiv });
 
   satellite.willShift = function() {
     assert.ok(true, 'willShift hook called');
@@ -93,7 +93,7 @@ test('_shift', (assert) => {
   assert.expect(4);
 
   let component = { element: App.planetADiv };
-  let satellite = new Satellite(component);
+  let satellite = new Satellite({ component, element: App.planetADiv });
 
   satellite._shift(10, 10);
 
@@ -108,12 +108,13 @@ test('destroy is destructive', (assert) => {
 
   assert.expect(5);
 
-  let component = { element: App.planetADiv,
-                    unregisterSatellite() {
-                      assert.ok(true, 'The Component unregisterSatellite hook is called');
-                    }
-                  };
-  let satellite = new Satellite(component);
+  let component = {
+    element: App.planetADiv,
+    unregisterSatellite() {
+      assert.ok(true, 'The Component unregisterSatellite hook is called');
+    }
+  };
+  let satellite = new Satellite({ component, element: App.planetADiv });
 
   satellite.geography.destroy = function() {
     assert.ok(true, 'geography.destroy called');

@@ -75,14 +75,10 @@ export default Component.extend({
     this._fragmentWrapper.appendChild(clone);
   },
 
-  willInsertElement() {
-    this._super(...arguments);
+  didInsertElement() {
     this._firstNode = this.element.firstChild;
     this._lastNode = this.element.lastChild;
     this.appendToDestination();
-  },
-
-  didInsertElement() {
     this.set('parentElementDidInsert', true);
     if (!this.get('parent')) {
       this.__smUpdateFragmentStyles();

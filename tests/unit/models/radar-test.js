@@ -50,11 +50,11 @@ module('Unit | Model | Radar', {
 
 test('create empty radar', (assert) => {
 
-  assert.expect(13);
+  assert.expect(12);
 
   let testRadar = new Radar();
 
-  assert.deepEqual(testRadar.satellites, [], 'satellites set');
+  assert.deepEqual(testRadar.satellites, new Array(200), 'satellites set');
   assert.equal(testRadar.telescope, null, 'telescope set');
   assert.equal(testRadar.sky, null, 'sky set');
   assert.equal(testRadar.planet, undefined, 'planet set');
@@ -66,12 +66,11 @@ test('create empty radar', (assert) => {
   assert.equal(testRadar.posX, 0, 'posX set');
   assert.equal(testRadar.posY, 0, 'posY set');
   assert.equal(testRadar.minimumMovement, 15, 'minimumMovement set');
-  assert.equal(testRadar.resizeDebounce, 64, 'resizeDebounce set');
 });
 
 test('should build correctly with a state', (assert) => {
 
-  assert.expect(13);
+  assert.expect(12);
 
   let testPlanet = new Geography(App.planetADiv);
   let testSkyline = new Geography(App.planetBDiv);
@@ -84,18 +83,17 @@ test('should build correctly with a state', (assert) => {
   };
   let testRadar = new Radar(state);
 
-  assert.deepEqual(testRadar.satellites, [], 'satellites set');
+  assert.deepEqual(testRadar.satellites.filter((x) => x !== undefined), [], 'satellites set');
   assert.equal(testRadar.telescope, App.planetADiv, 'telescope set');
   assert.equal(testRadar.sky, App.planetBDiv, 'sky set');
   assert.deepEqual(testRadar.planet, testPlanet, 'planet set');
-  assert.deepEqual(testRadar.scrollContainer, App.planetADiv, 'scrollContainer set');
+  assert.deepEqual(testRadar.telescope, App.planetADiv, 'scrollContainer set');
   assert.deepEqual(testRadar.skyline, testSkyline, 'skyline set');
   assert.equal(testRadar.scrollX, 0, 'scrollX set');
   assert.equal(testRadar.scrollY, 0, 'scrollY set');
   assert.equal(testRadar.posX, 0, 'posX set');
   assert.equal(testRadar.posY, 0, 'posY set');
   assert.equal(testRadar.minimumMovement, 30, 'minimumMovement set');
-  assert.equal(testRadar.resizeDebounce, 128, 'resizeDebounce set');
   assert.notOk(testRadar.isTracking, 'isTracking set');
 
 });
@@ -104,10 +102,10 @@ test('Satellite Zones', (assert) => {
 
   assert.expect(6);
 
-  let satelliteA = new Satellite(App.componentA);
+  let satelliteA = new Satellite({ component: App.componentA, element: App.planetADiv });
   let satelliteAZones = App.radar.getSatelliteZones(satelliteA);
 
-  let satelliteB = new Satellite(App.componentB);
+  let satelliteB = new Satellite({ component: App.componentB, element: App.planetBDiv });
   let satelliteBZones = App.radar.getSatelliteZones(satelliteB);
 
   assert.deepEqual(satelliteAZones, { x: 1, y: 1 }, 'getSatelliteZones is set');
@@ -124,7 +122,7 @@ test('register and unregister component', (assert) => {
   assert.expect(5);
 
   assert.deepEqual(App.radar.satellites[0].component, App.componentA, 'component is added to array when registered');
-  assert.equal(App.radar.satellites.length, 2, '2 items are added to satellites array');
+  assert.equal(App.radar.satellites.filter((x) => x !== undefined).length, 2, '2 items are added to satellites array');
 
   App.radar.satellites.forEach(function(satellite) {
     satellite.destroy = function() {
@@ -135,7 +133,7 @@ test('register and unregister component', (assert) => {
   App.radar.unregister(App.componentA);
   App.radar.unregister(App.componentB);
 
-  assert.deepEqual(App.radar.satellites, [], 'component is removed from array when unregistered');
+  assert.deepEqual(App.radar.satellites.filter((x) => x !== undefined), [], 'component is removed from array when unregistered');
 
 });
 
@@ -237,7 +235,7 @@ test('_shift', (assert) => {
 
 test('silentNight', (assert) => {
 
-  assert.expect(7);
+  assert.expect(6);
 
   App.planetBDiv.style.top = `${(RELATIVE_UNIT)}px`;
   App.planetBDiv.style.left = `${(RELATIVE_UNIT)}px`;
@@ -285,7 +283,7 @@ test('filterMovement detects it should shift', (assert) => {
     assert.ok(true, 'shiftSatellites called in filterMovement');
   };
 
-  App.radar.filterMovement();
+  App.radar.filterMovement({ top: 0, left: 0 });
 
   assert.equal(App.radar.scrollX, 0, 'scroll X correctly set');
   assert.equal(App.radar.scrollY, 0, 'scroll Y correctly set');
@@ -302,7 +300,7 @@ test('filterMovement detects it should not shift', (assert) => {
     assert.ok(false, 'shiftSatellites unnecessarily called in filterMovement');
   };
 
-  App.radar.filterMovement();
+  App.radar.filterMovement({ top: 0, left: 0 });
 
   assert.equal(App.radar.scrollX, 10, 'scroll X not change');
   assert.equal(App.radar.scrollY, 10, 'scroll Y not change');
@@ -319,7 +317,7 @@ test('updateScrollPosition detects it should adjust', (assert) => {
     assert.ok(true, 'adjustPosition called in updateScrollPosition');
   };
 
-  App.radar.updateScrollPosition();
+  App.radar.updateScrollPosition({ top: 0, left: 0 });
   assert.equal(App.radar.posX, 0, 'pos X correctly set');
   assert.equal(App.radar.posY, 0, 'pos Y correctly set');
 
@@ -335,7 +333,7 @@ test('updateScrollPosition detects it should not adjust', (assert) => {
     assert.ok(false, 'adjustPosition should not be called in updateScrollPosition');
   };
 
-  App.radar.updateScrollPosition();
+  App.radar.updateScrollPosition({ top: 0, left: 0 });
   assert.equal(App.radar.posX, 10, 'pos X correctly set');
   assert.equal(App.radar.posY, 10, 'pos Y correctly set');
 

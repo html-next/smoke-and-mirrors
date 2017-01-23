@@ -38,15 +38,8 @@ module('Unit | Model | Geography', {
   }
 });
 
-test('Geography should work with `window`', (assert) => {
-  const geography = new Geography(window);
-  const state = geography.getState();
-
-  assert.ok(state.top === 0 && state.bottom > 0);
-});
-
 test('Geography.destroy() properly tears down the instance.', (assert) => {
-  const geography = new Geography(window);
+  const geography = new Geography(window.document.body);
 
   geography.destroy();
   assert.notOk(geography.element);
@@ -82,7 +75,7 @@ test('geography sets the state for an element on the page', (assert) => {
 });
 
 test('setState updates the elements of a geography class', (assert) => {
-  const geography = new Geography(window);
+  const geography = new Geography(window.document.body);
   const planetA = new Geography(assert.planetADiv);
   geography.setState(planetA);
 

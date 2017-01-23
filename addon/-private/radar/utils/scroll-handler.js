@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import scheduler from '../../scheduler';
 import run from 'ember-runloop';
 
