@@ -128,6 +128,39 @@ test('Sends the last visible changed action', function(assert) {
   wait().then(() => this.$('.scrollable').scrollTop(this.$('.scrollable').prop('scrollHeight')));
 });
 
+test('Renders multiple collections', function(assert) {
+  this.set('itemsA', [{ text: 'a' }]);
+  this.set('itemsB', [{ text: 'b' }]);
+  this.set('showA', false);
+  this.set('showB', false);
+
+  this.render(hbs`
+  <div>
+    {{#if showA}}
+      <div>
+      {{#vertical-collection content=itemsA as |item|}}
+        {{item.text}}
+      {{/vertical-collection}}
+      </div>
+    {{/if}}
+    {{#if showB}}
+      <div>
+      {{#vertical-collection content=itemsB as |item|}}
+        {{item.text}}
+      {{/vertical-collection}}
+      </div>
+    {{/if}}
+  </div>
+  `);
+
+  Ember.run(() => this.set('showA', true));
+  Ember.run(() => this.set('showB', true));
+  Ember.run(() => this.set('showA', false));
+  Ember.run(() => this.set('showB', false));
+
+  assert.ok(true, 'Showing/hiding multiple collections does not raise an exception');
+});
+
 /*
 test("The Collection Reveals it's children when `renderAllInitially` is true.", function(assert) {
   assert.expect(1);
