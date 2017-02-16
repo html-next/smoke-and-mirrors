@@ -539,9 +539,10 @@ const VerticalCollection = Component.extend({
       bottomComponentIndex++;
     }
 
+    const lastVisibleIndex = bottomComponentIndex === 0 ? 0 : bottomComponentIndex - 1;
     this.sendActionOnce('lastVisibleChanged', {
-      item: childComponents[bottomComponentIndex - 1],
-      index: bottomComponentIndex - 1
+      item: childComponents[lastVisibleIndex],
+      index: lastVisibleIndex
     });
 
     toCull = toCull
