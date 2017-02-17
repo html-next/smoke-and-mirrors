@@ -100,12 +100,6 @@ export default class Satellite {
     this.geography.destroy();
     this.geography = undefined;
     this.radar = undefined;
-
-    // teardown hooks
-    this.willShift = noop;
-    this.didShift = noop;
-    this.heightDidChange = noop;
-    this.widthDidChange = noop;
   }
 
   static create(options) {
