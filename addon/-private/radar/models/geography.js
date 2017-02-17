@@ -8,16 +8,26 @@ export default class Geography {
   }
 
   setState(state) {
-    state = state || this.element.getBoundingClientRect();
+    if (this.element === window){
+      this.top = 0;
+      this.bottom = $(window).height();
+      this.left = 0;
+      this.right = $(window).width();
+      this.width = $(window).width();
+      this.height = $(window).height();
 
-    // copying over ensures we preserve shape from outside sources
-    // and enables write ops as ClientRect can't be written
-    this.top = state.top || 0;
-    this.bottom = state.bottom || 0;
-    this.left = state.left || 0;
-    this.right = state.right || 0;
-    this.width = state.width || 0;
-    this.height = state.height || 0;
+    }
+    else {
+      state = state || this.element.getBoundingClientRect();
+      // copying over ensures we preserve shape from outside sources
+      // and enables write ops as ClientRect can't be written
+      this.top = state.top || 0;
+      this.bottom = state.bottom || 0;
+      this.left = state.left || 0;
+      this.right = state.right || 0;
+      this.width = state.width || 0;
+      this.height = state.height || 0;
+    }
   }
 
   getState() {
