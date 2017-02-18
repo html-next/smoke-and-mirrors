@@ -37,14 +37,16 @@ module('Unit | Model | ListSatellite', {
 
 test('should build correctly', (assert) => {
 
-  assert.expect(4);
+  assert.expect(3);
 
-  let testListSatellite = new ListSatellite(App.componentA, [App.componentA, App.componentB]);
+  let testListSatellite = new ListSatellite({
+    component: App.componentA,
+    element: App.planetADiv
+  });
 
   assert.equal(testListSatellite.component, App.componentA, 'compenent set');
-  assert.equal(testListSatellite.element, App.planetADiv, 'element set');
+  assert.equal(testListSatellite.element.element, App.planetADiv, 'element set');
   assert.equal(testListSatellite.radar, undefined, 'radar initialized and not set');
-  assert.deepEqual(testListSatellite.list, [App.componentA, App.componentB], 'list set');
 
 });
 
@@ -52,7 +54,9 @@ test('next and prev return null when only one component', (assert) => {
 
   assert.expect(2);
 
-  let testListSatellite = new ListSatellite(App.componentA, [App.componentA]);
+  let testListSatellite = new ListSatellite({
+    component: App.componentA
+  });
 
   assert.equal(testListSatellite.next(), null, 'no next element');
   assert.equal(testListSatellite.prev(), null, 'no prev element');
@@ -70,8 +74,8 @@ test('next and prev work as expected', (assert) => {
     return App.componentA;
   };
 
-  let testListSatelliteA = new ListSatellite(App.componentA, [App.componentA, App.componentB]);
-  let testListSatelliteB = new ListSatellite(App.componentB, [App.componentA, App.componentB]);
+  let testListSatelliteA = new ListSatellite({ component: App.componentA });
+  let testListSatelliteB = new ListSatellite({ component: App.componentB });
 
   assert.equal(testListSatelliteA.next(), true, 'Component B is after Component A');
   assert.equal(testListSatelliteB.next(), null, 'Nothing is after Component B');
@@ -82,12 +86,12 @@ test('next and prev work as expected', (assert) => {
 
 test('destroy works properly', (assert) => {
 
-  assert.expect(7);
+  assert.expect(6);
 
   App.componentA.unregisterSatellite = function() {
     assert.ok(true, 'The Component unregisterSatellite hook is called');
   };
-  let testListSatellite = new ListSatellite(App.componentA, [App.componentA, App.componentB]);
+  let testListSatellite = new ListSatellite({ component: App.componentA });
 
   testListSatellite.geography.destroy = function() {
     assert.ok(true, 'geography.destroy hook called');
@@ -99,6 +103,5 @@ test('destroy works properly', (assert) => {
   assert.equal(testListSatellite.satellite, null, 'satellite destroyed');
   assert.equal(testListSatellite.element, null, 'element destroyed');
   assert.equal(testListSatellite.geography, null, 'geography destroyed');
-  assert.equal(testListSatellite.list, null, 'list destroyed');
 
 });

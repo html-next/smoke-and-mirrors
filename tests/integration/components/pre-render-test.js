@@ -13,7 +13,7 @@ test('it renders', function(assert) {
 
   this.render(hbs`{{pre-render}}`);
 
-  assert.equal(this.$().text(), '');
+  assert.equal(this.$().text().trim(), '');
 
   // Template block usage:
   this.render(hbs`

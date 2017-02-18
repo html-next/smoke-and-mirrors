@@ -20,17 +20,16 @@ module('Unit | Model | ListRadar', {
 
 test('create empty ListRadar', (assert) => {
 
-  assert.expect(9);
+  assert.expect(8);
 
   assert.ok(App.listRadar.isTracking, 'isTracking set');
-  assert.deepEqual(App.listRadar.satellites, [], 'satellites set');
+  assert.deepEqual(App.listRadar.satellites, new Array(200), 'satellites set');
   assert.equal(App.listRadar.planet, null, 'planet set');
   assert.equal(App.listRadar.minimumMovement, 15, 'minimumMovement set');
   assert.equal(App.listRadar.posX, 0, 'posX set');
   assert.equal(App.listRadar.posY, 0, 'posY set');
   assert.equal(App.listRadar.scrollX, 0, 'scrollX set');
   assert.equal(App.listRadar.scrollY, 0, 'scrollY set');
-  assert.equal(App.listRadar.resizeDebounce, 64, 'resizeDebounce set');
 
 });
 
@@ -38,11 +37,11 @@ test('register', (assert) => {
 
   assert.expect(2);
 
-  assert.equal(App.listRadar.satellites.length, 0, 'no satellites registered yet');
+  assert.equal(App.listRadar.satellites.filter((x) => x !== undefined).length, 0, 'no satellites registered yet');
 
   App.listRadar.register(App.component);
 
-  assert.equal(App.listRadar.satellites.length, 1, 'satellite registered');
+  assert.equal(App.listRadar.satellites.filter((x) => x !== undefined).length, 1, 'satellite registered');
 
 });
 

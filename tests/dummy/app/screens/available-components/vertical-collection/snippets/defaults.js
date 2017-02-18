@@ -1,3 +1,4 @@
+/* eslint-disable */
 export default
   /* !- BEGIN-SNIPPET vertical-collection-defaults-example */
   {

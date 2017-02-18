@@ -72,48 +72,50 @@ test('Adds classes to vertical-items', function(assert) {
 });
 
 test('Scroll to last item when actual item sizes are significantly larger than default item size.', function(assert) {
-  assert.expect(1);
+  const done = assert.async();
 
-  this.set('items', new Array(50).fill({ text: 'b' }));
+  this.on('lastVisibleChanged', (item) => {
+    this.on('lastVisibleChanged', () => {});
+    assert.equal(item.index, 49, 'the last visible changed should be item 49');
+    assert.equal(this.$('.scrollable').find('div:last').html(), 'b 49', 'the last item in the list should be rendered');
+    done();
+  });
+
+  this.set('items', new Array(...new Array(50)).map(() => ({ text: 'b' })));
 
   this.render(hbs`
-  <div style="height: 200px; width: 100px;" class="scrollable">
+  <div style="height: 200px; width: 100px; overflow: hidden;" class="scrollable">
     {{#vertical-collection
       defaultHeight=10
-      alwaysUseDefaultHeight=false
+      alwaysRemeasure=true
       bufferSize=0
-      content=items as |item i|}}
+      content=items
+      lastVisibleChanged='lastVisibleChanged' as |item i|}}
       <div style="height: 100px;">{{item.text}} {{i}}</div>
     {{/vertical-collection}}
   </div>
   `);
 
   const scrollable = this.$('.scrollable');
-  const waitForScroll = new Ember.RSVP.Promise((resolve) => scrollable.scroll(resolve));
 
-  return wait()
+  wait()
     .then(() => {
       // Jump to bottom.
-      scrollable.scrollTop(scrollable.get(0).scrollHeight);
-    })
-    .then(waitForScroll)
-    .then(wait)
-    .then(() => {
-      assert.equal(scrollable.find('div:last').html(), 'b 49', 'the last item in the list should be rendered');
+      scrollable.scrollTop(this.$('.scrollable').prop('scrollHeight'));
     });
 });
 
 test('Sends the last visible changed action', function(assert) {
   const done = assert.async();
 
-  this.set('items', Array(50).fill({ text: 'b' }));
+  this.set('items', new Array(...new Array(50)).map(() => ({ text: 'b' })));
   this.on('lastVisibleChanged', (item) => {
-    assert.equal(item.index, 30, 'the last visible changed should be item 30');
+    assert.equal(item.index, 49, 'the last visible changed should be item 30');
     done();
   });
 
   this.render(hbs`
-  <div style="height: 200px; width: 100px;" class="scrollable">
+  <div style="height: 200px; width: 100px; overflow: hidden;" class="scrollable">
     {{#vertical-collection
       defaultHeight=10
       bufferSize=0
@@ -124,7 +126,40 @@ test('Sends the last visible changed action', function(assert) {
   </div>
   `);
 
-  wait().then(() => this.$('.scrollable').scrollTop(100));
+  wait().then(() => this.$('.scrollable').scrollTop(this.$('.scrollable').prop('scrollHeight')));
+});
+
+test('Renders multiple collections', function(assert) {
+  this.set('itemsA', [{ text: 'a' }]);
+  this.set('itemsB', [{ text: 'b' }]);
+  this.set('showA', false);
+  this.set('showB', false);
+
+  this.render(hbs`
+  <div>
+    {{#if showA}}
+      <div>
+      {{#vertical-collection content=itemsA as |item|}}
+        {{item.text}}
+      {{/vertical-collection}}
+      </div>
+    {{/if}}
+    {{#if showB}}
+      <div>
+      {{#vertical-collection content=itemsB as |item|}}
+        {{item.text}}
+      {{/vertical-collection}}
+      </div>
+    {{/if}}
+  </div>
+  `);
+
+  Ember.run(() => this.set('showA', true));
+  Ember.run(() => this.set('showB', true));
+  Ember.run(() => this.set('showA', false));
+  Ember.run(() => this.set('showB', false));
+
+  assert.ok(true, 'Showing/hiding multiple collections does not raise an exception');
 });
 
 /*

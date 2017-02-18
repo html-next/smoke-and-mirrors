@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import scheduler from '../../scheduler';
 import run from 'ember-runloop';
 
@@ -52,9 +53,8 @@ export class ScrollHandler {
 
       // cleanup element entirely if needed
       if (!elementCache.handlers.length) {
-        this.handlers.splice(index, 1);
-
         index = this.elements.indexOf(element);
+        this.handlers.splice(index, 1);
         this.elements.splice(index, 1);
         this.length--;
         this.maxLength--;
