@@ -75,6 +75,7 @@ test('Scroll to last item when actual item sizes are significantly larger than d
   const done = assert.async();
 
   this.on('lastVisibleChanged', (item) => {
+    this.on('lastVisibleChanged', () => {});
     assert.equal(item.index, 49, 'the last visible changed should be item 49');
     assert.equal(this.$('.scrollable').find('div:last').html(), 'b 49', 'the last item in the list should be rendered');
     done();
