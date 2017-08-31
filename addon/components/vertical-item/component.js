@@ -1,10 +1,10 @@
 import Ember from 'ember';
 import layout from './template';
-import getOwner from 'ember-getowner-polyfill';
 import scheduler from '../../-private/scheduler';
 
 const {
-  Component
+  Component,
+  getOwner
   } = Ember;
 
 /*
