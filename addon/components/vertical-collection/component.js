@@ -10,7 +10,6 @@ import closestElement from '../../utils/element/closest';
 
 const {
   A,
-  K,
   get,
   computed,
   Component
@@ -279,7 +278,7 @@ const VerticalCollection = Component.extend({
     // this MUST be async or glimmer will freak
     scheduler.schedule('affect', () => {
       setTimeout(() => {
-        this.sendAction(name, context, K);
+        this.sendAction(name, context, function() { return this; });
       });
     });
   },
