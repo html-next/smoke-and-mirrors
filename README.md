@@ -19,6 +19,11 @@ content it needs to focus on for layout is the content the user can see.
 `Smoke-and-mirrors` augments your existing app, it doesn't ask you to rewrite layouts or logic in order to use it.
 It will try its best to allow you to keep the conventions, structures, and layouts you want.
 
+## vertical-collection
+
+Smoke-and-mirrors uses [`@html-next/vertical-collection`](https://github.com/html-next/vertical-collection)
+under the hood. If you are only using the `vertical-collection`, you should use that component directly instead.
+
 
 ## Install
 
@@ -26,43 +31,45 @@ It will try its best to allow you to keep the conventions, structures, and layou
 ember install smoke-and-mirrors
 ```
 
+
+## Usage
+
+```htmlbars
+{{#vertical-collection
+    items
+    tagName='ul'
+    estimateHeight=50
+    staticHeight=false
+    bufferSize=1
+    renderAll=false
+    renderFromLast=false
+    idForFirstItem=idForFirstItem
+    firstReached=firstReached
+    lastReached=lastReached
+    firstVisibleChanged=firstVisibleChanged
+    lastVisibleChanged=lastVisibleChanged
+     as |item i|}}
+    <li>
+      {{item.number}} {{i}}
+    </li>
+{{/vertical-collection}}
+```
+
+### Actions
+
+`firstReached` - Triggered when scroll reaches the first element in the collection
+
+`lastReached`- Triggered when scroll reaches the last element in the collection
+
+`firstVisibleChanged` - Triggered when the first element in the viewport changes
+ 
+`lastVisibleChanged` - Triggered when the last element in the viewport changes
+
 ## Support, Questions, Collaboration
 
 Join the [smoke-and-mirrors](https://embercommunity.slack.com/messages/smoke-and-mirrors/) channel on Slack.
 
 [![Slack Status](https://ember-community-slackin.herokuapp.com/badge.svg)](https://ember-community-slackin.herokuapp.com/)
-
-
-## Features
-
-### Infinite Scroll (bi-directional)
-
-Infinite scroll that remains performant even for very long lists is easily achievable 
-with the [`vertical-collection`](http://runspired.github.io/smoke-and-mirrors/#/available-components/vertical-collection).
-It works via a scrollable div or scrollable body.
-
- - [bi-directional scrollable div](http://runspired.github.io/smoke-and-mirrors/#/examples/infinite-scroll)
- - [scrollable body](http://runspired.github.io/smoke-and-mirrors/#/examples/scrollable-body)
- - [dynamic content sizes](http://runspired.github.io/smoke-and-mirrors/#/examples/flexible-layout)
- - [as a table](http://runspired.github.io/smoke-and-mirrors/#/examples/dbmon)
-
-### Svelte Everything
-
-If it can be trimmer, smoke-and-mirrors likes to trim it.
-
-### Scroll Performance
-
-Under the hood, smoke-and-mirrors is using a powerful scroll-tracking 
-abstraction for each of the components above. That abstraction is made
-available as a service and will soon become it's own addon: [ember-radar](https://github.com/runspired/ember-radar)
-
-## Dependencies
-
-`smoke-and-mirrors` is dependent on and installs `ember-run-raf`, which helps
- you budget and schedule the work in your app more intelligently.
- 
- This dependency will soon be deprecated in favor of [igniter](https://github.com/runspired/igniter).
-
 
 ## Status
 
@@ -73,46 +80,13 @@ available as a service and will soon become it's own addon: [ember-radar](https:
 [![devDependency Status](https://david-dm.org/runspired/smoke-and-mirrors/dev-status.svg)](https://david-dm.org/runspired/smoke-and-mirrors#info=devDependencies)
 [![Coverage Status](https://coveralls.io/repos/runspired/smoke-and-mirrors/badge.svg?branch=master&service=github)](https://coveralls.io/github/runspired/smoke-and-mirrors?branch=master)
 
-
 ## Documentation
 
-For updated documentation and demos see [http://runspired.github.io/smoke-and-mirrors/](http://runspired.github.io/smoke-and-mirrors/)
+We're rebuilding the docs for smoke-and-mirrors; however, in the meantime docs for the
+`vertical-collection` are [available here](http://html-next.github.io/vertical-collection/).
 
 ## Contributing
 
- - Open an Issue for discussion first if you're unsure a feature/fix is wanted.
- - Branch off of `develop` (default branch)
- - Use descriptive branch names (e.g. `<type>/<short-description>`)
- - Use [Angular Style Commits](https://github.com/angular/angular.js/blob/v1.4.8/CONTRIBUTING.md#commit)
- - PR against `develop` (default branch).
-
-### Commits 
-
-Angular Style commit messages have the full form:
- 
- ```
- <type>(<scope>): <title>
- 
- <body>
- 
- <footer>
- ```
- 
- But the abbreviated form (below) is acceptable and often preferred.
- 
- ```
- <type>(<scope>): <title>
- ```
- 
- Examples:
- 
- - chore(deps): bump deps in package.json and bower.json
- - docs(component): document the `fast-action` component
-
-
-
-## Funding
-
-OSS is often a labor of love. Smoke And Mirrors is largely built with that love.
-
-<a href='https://pledgie.com/campaigns/30822'><img alt='Click here to lend your support to: Smoke-and-mirrors: Ambitious infinite-scroll and svelte rendering for Ember applications and make a donation at pledgie.com !' src='https://pledgie.com/campaigns/30822.png?skin_name=chrome' border='0' ></a>
+ PRs are always welcome and loved! It's usually a good idea to open an issue
+ and chat with one of the maintainers beforehand. We hang out in the [`#dev-html-next`](https://embercommunity.slack.com/messages/dev-html-next/)
+ channel on the Ember Community Slack.
