@@ -1,48 +1,12 @@
-import Ember from 'ember';
+import EmberRouter from '@ember/routing/router';
 import config from './config/environment';
 
-const Router = Ember.Router.extend({
+const Router = EmberRouter.extend({
   location: config.locationType,
   rootURL: config.rootURL
 });
 
 Router.map(function() {
-
-  this.route('examples', function() {
-    this.route('dbmon');
-    this.route('infinite-scroll');
-    this.route('flexible-layout');
-    this.route('scrollable-body');
-    this.route('html-gl');
-    this.route('large-grid');
-    this.route('reduce-debug');
-  });
-
-  this.route('mixins', function() {
-    this.route('queues');
-    this.route('photo-loader');
-    this.route('scroller');
-    this.route('in-viewport');
-    this.route('occlusion');
-    this.route('local-storage');
-    this.route('session');
-    this.route('extended-router');
-    this.route('stack');
-    this.route('html-gl');
-  });
-
-  this.route('services', function() {
-    this.route('in-viewport');
-    this.route('photo-loader');
-  });
-
-  this.route('available-components', function() {
-    this.route('vertical-collection');
-    this.route('async-image');
-    this.route('pre-render');
-    this.route('html-gl');
-  });
-
 });
 
 export default Router;

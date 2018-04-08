@@ -1,23 +1,21 @@
-/* jshint node:true */
-// jscs:disable
-/* global module */
-let pkg = require('../../../package.json');
+'use strict';
 
 module.exports = function(environment) {
-  let DEBUG = false;
-
   let ENV = {
     modulePrefix: 'dummy',
-    podModulePrefix: 'dummy/screens',
     environment,
     rootURL: '/',
-    locationType: 'hash',
+    locationType: 'auto',
     EmberENV: {
-      FEATURES: {},
-      EXTEND_PROTOTYPES: false
+      FEATURES: {
+        // Here you can enable experimental features on an ember canary build
+        // e.g. 'with-controller': true
+      },
+      EXTEND_PROTOTYPES: {
+        // Prevent Ember Data from overriding Date.parse.
+        Date: false
+      }
     },
-
-    VERSION: pkg.version,
 
     APP: {
       // Here you can pass flags/options to your application instance
@@ -25,49 +23,28 @@ module.exports = function(environment) {
     }
   };
 
-  ENV.contentSecurityPolicy = {
-    'default-src': "'self'",
-    'script-src': "'self' 'unsafe-inline' 'unsafe-eval'",
-    'font-src': "'self'",
-    'connect-src': "'self'",
-    'img-src': "'self' data: http://lorempixel.com",
-    'style-src': "'self' 'unsafe-inline'",
-    'media-src': "'self' data: http://lorempixel.com"
-  };
-
-  // debugging
-  if (DEBUG) {
-    ENV.APP.LOG_LFANIMATION_RESOLUTION = true;
-    ENV.APP.debugMode = true;
-    ENV.APP.LOG_ACTIVE_GENERATION = true;
-    ENV.APP.LOG_BINDINGS = true;
-    ENV.APP.LOG_RESOLVER = true;
-    ENV.APP.LOG_STACKTRACE_ON_DEPRECATION = true;
-    ENV.APP.LOG_TRANSITIONS = true;
-    ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
-    ENV.APP.LOG_VERSION = true;
-    ENV.APP.LOG_VIEW_LOOKUPS = true;
-  } else {
-    ENV.APP.LOG_LFANIMATION_RESOLUTION = false;
-    ENV.APP.debugMode = false;
-    ENV.APP.LOG_ACTIVE_GENERATION = false;
-    ENV.APP.LOG_BINDINGS = false;
-    ENV.APP.LOG_RESOLVER = false;
-    ENV.APP.LOG_STACKTRACE_ON_DEPRECATION = false;
-    ENV.APP.LOG_TRANSITIONS = false;
-    ENV.APP.LOG_TRANSITIONS_INTERNAL = false;
-    ENV.APP.LOG_VERSION = false;
-    ENV.APP.LOG_VIEW_LOOKUPS = false;
-  }
-
-  if (environment === 'production') {
-    ENV.rootURL = 'smoke-and-mirrors';
+  if (environment === 'development') {
+    // ENV.APP.LOG_RESOLVER = true;
+    // ENV.APP.LOG_ACTIVE_GENERATION = true;
+    // ENV.APP.LOG_TRANSITIONS = true;
+    // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
+    // ENV.APP.LOG_VIEW_LOOKUPS = true;
   }
 
   if (environment === 'test') {
     // Testem prefers this...
     ENV.locationType = 'none';
+
+    // keep test console output quieter
+    ENV.APP.LOG_ACTIVE_GENERATION = false;
+    ENV.APP.LOG_VIEW_LOOKUPS = false;
+
     ENV.APP.rootElement = '#ember-testing';
+    ENV.APP.autoboot = false;
+  }
+
+  if (environment === 'production') {
+    // here you can enable a production-specific feature
   }
 
   return ENV;
