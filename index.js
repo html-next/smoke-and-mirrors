@@ -27,7 +27,7 @@ module.exports = {
     babelOptions.plugins = babelOptions.plugins || [];
     babelOptions.plugins.push({ transformer: stripClassCallCheck, position: 'after' });
 
-    if (/production/.test(env)) {
+    if (/production/.test(env) || /test/.test(env)) {
       babelOptions.plugins.push(
         filterImports({
         'smoke-and-mirrors/-debug/helpers': [
@@ -56,9 +56,10 @@ module.exports = {
         'and is having trouble registering itself to the parent application.');
     }
 
+    this._env = app.env;
     this._setupBabelOptions(app.env);
 
-    if (!/production/.test(app.env)) {
+    if (!/production/.test(app.env) && !/test/.test(app.env)) {
       this.ui.write(
         chalk.grey("\n===================================================================\n") +
         chalk.cyan("\tSmoke-and-mirrors\n") +
@@ -75,7 +76,7 @@ module.exports = {
   treeForAddon: function() {
     var tree = this._super.treeForAddon.apply(this, arguments);
 
-    if (/production/.test(this.parent.env)) {
+    if (/production/.test(this._env) || /test/.test(this._env)) {
       tree = new Funnel(tree, { exclude: [ /-debug/ ] });
     }
 
@@ -85,7 +86,7 @@ module.exports = {
   treeForApp: function() {
     var tree = this._super.treeForApp.apply(this, arguments);
 
-    if (/production/.test(this.parent.env)) {
+    if (/production/.test(this._env) || /test/.test(this._env)) {
       tree = new Funnel(tree, { exclude: [ /initializers/ ] });
     }
 

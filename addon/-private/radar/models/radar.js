@@ -16,7 +16,6 @@ const {
 const DEFAULT_ARRAY_SIZE = 200;
 
 export default class Radar {
-
   constructor(state) {
     this.satellites = new Array(DEFAULT_ARRAY_SIZE);
     this.length = 0;
@@ -326,7 +325,7 @@ export default class Radar {
         this.currentOffsets = offsets;
 
         if (this._nextScroll === null) {
-          scheduler.schedule('layout', () => {
+          scheduler.schedule('sync', () => {
             if (this.currentOffsets) {
               this.filterMovement(this.currentOffsets);
             }
@@ -347,7 +346,7 @@ export default class Radar {
     this._scrollAdjuster = (offsets) => {
       this.currentAdjustOffsets = offsets;
       if (this._nextAdjustment === null) {
-        this._nextAdjustment = scheduler.schedule('layout', () => {
+        this._nextAdjustment = scheduler.schedule('sync', () => {
           if (this.currentAdjustOffsets) {
             this.updateScrollPosition(this.currentAdjustOffsets);
           }
@@ -378,7 +377,7 @@ export default class Radar {
     scheduler.forget(this._nextResize);
     scheduler.forget(this._nextScroll);
     scheduler.forget(this._nextAdjustment);
-    this._scrollHandler = undefined ;
+    this._scrollHandler = undefined;
     this._resizeHandler = undefined;
     this._scrollAdjuster = undefined;
   }
@@ -397,7 +396,7 @@ export default class Radar {
   destroy() {
     this._teardownHandlers();
     this._teardownHooks();
-    if(this.satellites) {
+    if (this.satellites) {
       for (let i = 0; i < this.length; i++) {
         this.satellites[i].destroy();
       }

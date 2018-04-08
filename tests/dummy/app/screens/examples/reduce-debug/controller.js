@@ -1,17 +1,14 @@
 import Ember from 'ember';
-import getNumbers from 'dummy/lib/get-numbers';
 
 const {
   Controller
-  } = Ember;
+} = Ember;
 
 export default Controller.extend({
-
   numImages: 50,
   isFiltered: false,
 
   actions: {
-
     filter() {
       let model = this.get('model.numbers');
       let isFiltered = this.toggleProperty('isFiltered');
@@ -25,7 +22,5 @@ export default Controller.extend({
         this.set('model.filtered', filtered);
       }
     }
-
   }
-
 });

@@ -1,4 +1,5 @@
 import scheduler from '../../scheduler';
+import run from 'ember-runloop';
 
 const DEFAULT_ARRAY_SIZE = 10;
 
@@ -80,12 +81,11 @@ export class ScrollHandler {
         info.left = cachedLeft;
 
         if (topChanged || leftChanged) {
-          Promise.resolve(info)
-            .then((info) => {
-              for (let j = 0; j < info.handlers.length; j++) {
-                info.handlers[j].call(null, { top: info.top, left: info.left });
-              }
-            });
+          run.join(() => {
+            for (let j = 0; j < info.handlers.length; j++) {
+              info.handlers[j].call(null, info);
+            }
+          });
         }
       }
 

@@ -1,9 +1,8 @@
+/* eslint camelcase: 0 */
+
 const DEFAULT_ROWS = 20;
 
-// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
-
 export default function getData(ROWS) {
-
   ROWS = ROWS || DEFAULT_ROWS;
 
   // generate some dummy data
@@ -27,8 +26,8 @@ export default function getData(ROWS) {
   }
 
   data.databases.forEach(function(info) {
-
     const r = Math.floor((Math.random() * 10) + 1);
+
     for (let i = 0; i < r; i++) {
       const q = {
         canvas_action: null,

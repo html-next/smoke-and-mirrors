@@ -43,6 +43,8 @@ nav a {
   height: 500px;
   max-height: 500px;
   overflow: scroll;
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
   position: relative;
   background: #fff;
 }

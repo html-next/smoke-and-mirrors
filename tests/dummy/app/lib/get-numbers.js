@@ -1,19 +1,18 @@
 import { getDynamicHeight, booleanToss, getDynamicWidth } from './get-images';
 
-export default function(start, total, prefix) {
-  prefix = prefix || '';
-  let i;
+export default function(start, total, prefix = '') {
   let ret = [];
   let height;
 
-  for (i = start; i < start + total; i++) {
+  for (let i = start; i < start + total; i++) {
     height = getDynamicHeight();
     ret.push({
       number: i,
-      height: height,
+      height,
       width: getDynamicWidth(height, booleanToss()),
       prefixed: prefix + i
     });
   }
+
   return ret;
 }
